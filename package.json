@@ -1,6 +1,6 @@
 {
   "name": "@testtubemammoth/dclu-liveteach",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Decentraland University shared library",
   "main": "index.js",
   "typings": "index.d.ts",
