@@ -1,6 +1,6 @@
 {
   "name": "@dclu/dclu-library",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Decentraland University shared library",
   "main": "index.js",
   "typings": "index.d.ts",
