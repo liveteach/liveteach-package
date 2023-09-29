@@ -23,6 +23,9 @@
   "dependencies": {
     "@dcl-sdk/utils": "^1.1.2",
     "dcl-ui-toolkit": "^0.9.1",
-    "sdk7-npc-utils": "^1.0.0"
+    "sdk7-npc-utils": "^1.0.0",
+    "core-js": "^3.32.0",
+    "eth-connect": "^6.2.1",
+    "text-encoding": "^0.7.0"
   }
 }
