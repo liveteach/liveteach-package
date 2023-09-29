@@ -1,0 +1,27 @@
+{
+  "name": "@dclu/dclu-liveteach",
+  "version": "1.0.9",
+  "description": "Decentraland University shared library",
+  "main": "index.js",
+  "typings": "index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "author": "Decentraland University",
+  "license": "ISC",
+  "devDependencies": {
+    "@dcl/sdk": "^7.3.1",
+    "typescript": "^5.1.6"
+  },
+  "files": [
+    "dist",
+    "index.ts",
+    "src/setup",
+    "src/dclutils"
+  ],
+  "dependencies": {
+    "@dcl-sdk/utils": "^1.1.2",
+    "dcl-ui-toolkit": "^0.9.1",
+    "sdk7-npc-utils": "^1.0.0"
+  }
+}
