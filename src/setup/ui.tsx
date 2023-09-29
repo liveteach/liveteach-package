@@ -1,4 +1,4 @@
-import { classroomExampleComponent } from "../classExample/ui/ui";
+import { classroomExampleComponent } from "../classroom/ui/ui";
 import { seatingUIComponent } from "../seating/ui";
 
 export const Render = () => (
