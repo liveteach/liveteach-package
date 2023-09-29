@@ -9,9 +9,12 @@ export class GlobalData {
   static GltfContainer: any
   static Animator: any
   static PointerEvents: any
+  static PointerEventsSystem: any
   static inputSystem: any
   static Logger: any
   static executeTask: any
+  static AvatarModifierArea: any
+  static AvatarModifierType: any
 }
 
 type GlobalDataConfig = {
@@ -29,8 +32,12 @@ export function setup(data: GlobalDataConfig): void {
   GlobalData.GltfContainer = data.ecs.GltfContainer
   GlobalData.Animator = data.ecs.Animator
   GlobalData.PointerEvents = data.ecs.PointerEvents
+  GlobalData.PointerEventsSystem = data.ecs.pointerEventsSystem
   GlobalData.inputSystem = data.ecs.inputSystem
   GlobalData.Logger = data.Logger
   GlobalData.executeTask = data.ecs.executeTask
+  GlobalData.AvatarModifierArea = data.ecs.AvatarModifierArea
+  GlobalData.AvatarModifierType = data.ecs.AvatarModifierType
+
 
 }
