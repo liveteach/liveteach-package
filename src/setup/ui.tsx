@@ -1,8 +1,8 @@
-import { classroomExampleComponent } from "../classExample/ui/ui";
 
 export const Render = () => (
   [
-    classroomExampleComponent(),
+    seatingUIComponent
+    classroomExampleComponent()
     // Add extra UI here
   ]
 )
