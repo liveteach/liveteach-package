@@ -2,7 +2,7 @@ import { classroomExampleComponent } from "../classExample/ui/ui";
 
 export const Render = () => (
   [
-    classroomExampleComponent()
+    classroomExampleComponent(),
     // Add extra UI here
   ]
 )
