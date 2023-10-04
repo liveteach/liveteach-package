@@ -126,7 +126,7 @@ export class ControllerUI {
 
     private static GetSelectedClass(): string {
         if (ClassroomManager.classController && ClassroomManager.classController.classList.length > 0) {
-            return ClassroomManager.classController.classList[ClassroomManager.classController.selectedClassIndex].className
+            return ClassroomManager.classController.classList[ClassroomManager.classController.selectedClassIndex].name
         }
         return ""
     }
