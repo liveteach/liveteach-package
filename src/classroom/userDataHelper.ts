@@ -1,6 +1,6 @@
 import { SmartContractManager } from "./smartContractManager";
 
-export abstract class ClassMemberData {
+export abstract class UserDataHelper {
     static GetUserId() : string {
         if(SmartContractManager.blockchain && SmartContractManager.blockchain.userData) {
             return SmartContractManager.blockchain.userData.userId

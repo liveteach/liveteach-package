@@ -1,0 +1,24 @@
+{
+    "content": {
+        "id": "PHY_301",
+        "name": "Introduction to Physics",
+        "description": "Introductory class to physics",
+        "images": [
+            {
+                "src": "https://docs.decentraland.org/images/media/avocado.jpg",
+                "caption": "My caption"
+            }
+        ],
+        "videos": [
+            {
+                "src": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+                "caption": "My caption"
+            }
+        ],
+        "models": [
+            {
+                "key": "test.glb"
+            }
+        ]
+    }
+}

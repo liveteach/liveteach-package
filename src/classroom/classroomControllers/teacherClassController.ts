@@ -1,10 +1,7 @@
-import { executeTask } from "@dcl/sdk/ecs";
 import { ClassController } from "./classController";
 import { ControllerUI } from "../ui/controllerUI";
-import { SmartContractManager } from "../smartContractManager";
-import { CommunicationManager } from "../communicationManager";
 import { ClassroomManager } from "../classroomManager";
-import { TeacherClassroom } from "../classroom";
+import { ClassPacket } from "../classroomObjects";
 
 export class TeacherClassController extends ClassController {
     activated: boolean = false
@@ -30,7 +27,7 @@ export class TeacherClassController extends ClassController {
         ClassroomManager.ActivateClassroom()
             .then(function (classList) {
                 self.activated = true
-                self.classList = classList as TeacherClassroom[]
+                self.classList = classList as ClassPacket[]
                 self.setClassroom()
                 ControllerUI.activationMessage = "activated"
             })
@@ -52,7 +49,7 @@ export class TeacherClassController extends ClassController {
     }
 
     override setClassroom(): void {
-        ClassroomManager.SetTeacherClassroom(this.classList[this.selectedClassIndex] as TeacherClassroom)
+        ClassroomManager.SetTeacherClassContent(this.classList[this.selectedClassIndex].id)
     }
 
     override startClass(): void {

@@ -1,8 +1,8 @@
-import { TeacherClassroom, StudentClassroom } from "../classroom"
+import { ClassPacket } from "../classroomObjects"
 
 export abstract class ClassController {
     inSession: boolean = false
-    classList: (TeacherClassroom | StudentClassroom)[] = []
+    classList: ClassPacket[] = []
     selectedClassIndex: number = 0
 
     constructor() {

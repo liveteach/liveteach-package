@@ -1,0 +1,24 @@
+{
+    "content": {
+        "id": "HIS_101",
+        "name": "History For Beginners",
+        "description": "Introductory class to history",
+        "images": [
+            {
+                "src": "https://docs.decentraland.org/images/media/avocado.jpg",
+                "caption": "My caption"
+            }
+        ],
+        "videos": [
+            {
+                "src": "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+                "caption": "My caption"
+            }
+        ],
+        "models": [
+            {
+                "key": "test.glb"
+            }
+        ]
+    }
+}
