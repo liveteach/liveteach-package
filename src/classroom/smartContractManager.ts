@@ -1,11 +1,12 @@
-import { ClassroomFactory } from "./factories/classroomFactory"
-import { TeacherClassroom } from "./classroom"
+import { ClassContent, ClassPacket, Classroom } from "./classroomObjects"
 import { BlockChain } from "./blockchain"
-import * as biologyConfig from "./classroomConfigs/biologyConfig.json"
-import * as frenchConfig from "./classroomConfigs/frenchConfig.json"
-import * as historyConfig from "./classroomConfigs/historyConfig.json"
-import * as mathConfig from "./classroomConfigs/mathConfig.json"
-import * as physicsConfig from "./classroomConfigs/physicsConfig.json"
+import * as classroomConfig from "./classroomConfigs/classroomConfig.json"
+import * as biologyConfig from "./liveTeachConfigs/biologyConfig.json"
+import * as frenchConfig from "./liveTeachConfigs/frenchConfig.json"
+import * as historyConfig from "./liveTeachConfigs/historyConfig.json"
+import * as mathConfig from "./liveTeachConfigs/mathConfig.json"
+import * as physicsConfig from "./liveTeachConfigs/physicsConfig.json"
+import { ClassContentFactory } from "./factories/classContentFactory"
 
 export class SmartContractManager {
     private static readonly USE_LOCAL_DATA: boolean = true
@@ -17,19 +18,26 @@ export class SmartContractManager {
         }
     }
 
-    static async ActivateClassroom(_location: string): Promise<string> {
+    static ValidateClassroomGuid(_guid: string): boolean {
+        return classroomConfig.classroom.guid === _guid
+    }
+
+    static async ActivateClassroom(): Promise<string> {
         if (!SmartContractManager.blockchain.userData || !SmartContractManager.blockchain.userData.userId) return ""
 
         if (SmartContractManager.USE_LOCAL_DATA) {
-            return SmartContractManager.blockchain.userData.userId // Use the teacher's userId as the classroom guid
+            switch (classroomConfig.classroom.location) {
+                case "classroom_1": return "382c74c3-721d-4f34-80e5-57657b6cbc27"
+                default: return ""
+            }
         }
         else {
-            //TODO
+            //TODO: send teacher wallet address and class location
             return "NOT_IMPLEMENTED"
         }
     }
 
-    static async DectivateClassroom(_location: string): Promise<void> {
+    static async DectivateClassroom(): Promise<void> {
         if (SmartContractManager.USE_LOCAL_DATA) {
 
         }
@@ -38,18 +46,67 @@ export class SmartContractManager {
         }
     }
 
-    static async FetchClassContent(_guid: string): Promise<TeacherClassroom[]> {
+    static async FetchClassList(): Promise<ClassPacket[]> {
         if (SmartContractManager.USE_LOCAL_DATA) {
-            const biologyContent = ClassroomFactory.CreateTeacherClassrom(JSON.stringify(biologyConfig.classroom), _guid)
-            const frenchContent = ClassroomFactory.CreateTeacherClassrom(JSON.stringify(frenchConfig.classroom), _guid)
-            const historyContent = ClassroomFactory.CreateTeacherClassrom(JSON.stringify(historyConfig.classroom), _guid)
-            const mathContent = ClassroomFactory.CreateTeacherClassrom(JSON.stringify(mathConfig.classroom), _guid)
-            const physicsContent = ClassroomFactory.CreateTeacherClassrom(JSON.stringify(physicsConfig.classroom), _guid)
-            return [biologyContent, frenchContent, historyContent, mathContent, physicsContent]
+            switch (classroomConfig.classroom.location) {
+                case "classroom_1": {
+                    let classList: ClassPacket[] = []
+                    classList.push({
+                        id: biologyConfig.content.id,
+                        name: biologyConfig.content.name,
+                        description: biologyConfig.content.description
+                    })
+                    classList.push({
+                        id: frenchConfig.content.id,
+                        name: frenchConfig.content.name,
+                        description: frenchConfig.content.description
+                    })
+                    classList.push({
+                        id: historyConfig.content.id,
+                        name: historyConfig.content.name,
+                        description: historyConfig.content.description
+                    })
+                    classList.push({
+                        id: mathConfig.content.id,
+                        name: mathConfig.content.name,
+                        description: mathConfig.content.description
+                    })
+                    classList.push({
+                        id: physicsConfig.content.id,
+                        name: physicsConfig.content.name,
+                        description: physicsConfig.content.description
+                    })
+                    return classList
+                }
+                default: return []
+            }
         }
         else {
             //TODO
             return []
+        }
+    }
+
+    static async FetchClassContent(_id: string): Promise<ClassContent> {
+        if (SmartContractManager.USE_LOCAL_DATA) {
+            let contentJson: string = ""
+            switch (_id) {
+                case biologyConfig.content.id: contentJson = JSON.stringify(biologyConfig.content)
+                    break
+                case frenchConfig.content.id: contentJson = JSON.stringify(frenchConfig.content)
+                    break
+                case historyConfig.content.id: contentJson = JSON.stringify(historyConfig.content)
+                    break
+                case mathConfig.content.id: contentJson = JSON.stringify(mathConfig.content)
+                    break
+                case physicsConfig.content.id: contentJson = JSON.stringify(physicsConfig.content)
+                    break
+            }
+            return ClassContentFactory.Create(contentJson)
+        }
+        else {
+            //TODO
+            return new ClassContent()
         }
     }
 

@@ -1,0 +1,25 @@
+{
+    "classroom": {
+        "guid": "382c74c3-721d-4f34-80e5-57657b6cbc27",
+        "teacherID": "",
+        "teacherName": "",
+        "className": "",
+        "classDescription": "",
+        "location": "classroom_1",
+        "capacity": "20",
+        "duration": "60",
+        "seatingEnabled": true,
+        "videoPlaying": false,
+        "skybox": "default",
+        "displayedImage": {
+            "src": "",
+            "caption": ""
+        },
+        "displayedVideo": {
+            "src": "",
+            "caption": ""
+        },
+        "displayedModels": [],
+        "students": []
+    }
+}

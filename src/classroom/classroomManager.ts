@@ -1,14 +1,17 @@
 import { ClassController } from "./classroomControllers/classController";
 import { ClassControllerFactory, ClassControllerType } from "./factories/classControllerFactory";
 import { SmartContractManager } from "./smartContractManager";
-import { CommunicationManager } from "./communicationManager";
-import { TeacherClassroom, StudentClassroom } from "./classroom";
-import { ClassMemberData } from "./classMemberData";
-import { executeTask } from "@dcl/sdk/ecs";
+import { CommunicationManager } from "./comms/communicationManager";
+import { Classroom, ClassContent, ClassPacket } from "./classroomObjects";
+import { ClassroomFactory } from "./factories/classroomFactory";
+import * as classroomConfig from "./classroomConfigs/classroomConfig.json"
+import { UserDataHelper } from "./userDataHelper";
 
 export abstract class ClassroomManager {
     static classController: ClassController
-    static activeClassroom: TeacherClassroom | StudentClassroom = null
+    static activeClassroom: Classroom = null
+    static activeContent: ClassContent = null
+    static requestingJoinClass: boolean = false
 
     static Initialise(): void {
         SmartContractManager.Initialise()
@@ -37,37 +40,44 @@ export abstract class ClassroomManager {
         ClassroomManager.classController = ClassControllerFactory.Create(type)
     }
 
-    static SetTeacherClassroom(_info: TeacherClassroom): void {
-        ClassroomManager.activeClassroom = _info
+    static async SetTeacherClassContent(_id: string): Promise<void> {
+        SmartContractManager.FetchClassContent(_id)
+        .then(function (classContent) {
+            ClassroomManager.activeContent = classContent
+            ClassroomManager.activeClassroom = ClassroomFactory.CreateTeacherClassroom(JSON.stringify(classroomConfig.classroom), ClassroomManager.activeContent.name, ClassroomManager.activeContent.description)
 
-        CommunicationManager.EmitClassActivation({
-            guid: ClassroomManager.activeClassroom.guid,
-            teacherID: ClassroomManager.activeClassroom.teacherID,
-            teacherName: ClassroomManager.activeClassroom.teacherName,
-            classID: ClassroomManager.activeClassroom.classID,
-            className: ClassroomManager.activeClassroom.className
+            CommunicationManager.EmitClassActivation({
+                id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
+                name: ClassroomManager.activeContent.name,
+                description: ClassroomManager.activeContent.description
+            })
         })
     }
 
-    static async ActivateClassroom(): Promise<void | TeacherClassroom[]> {
-        return SmartContractManager.ActivateClassroom("location") //TODO: use actual location
+    static async ActivateClassroom(): Promise<void | ClassPacket[]> {
+        return SmartContractManager.ActivateClassroom()
             .then(function (classroomGuid) {
-                //TODO: Validate ID
-                return SmartContractManager.FetchClassContent(classroomGuid)
+                const valid = SmartContractManager.ValidateClassroomGuid(classroomGuid)
+                if(valid) {
+                    return SmartContractManager.FetchClassList()
+                }
+                else {
+                    return []
+                }
             })
     }
 
     static async DeactivateClassroom(): Promise<void> {
-        return SmartContractManager.DectivateClassroom("location") //TODO: use actual location
+        return SmartContractManager.DectivateClassroom()
             .then(function () {
-                CommunicationManager.EmitClassDeactivation({
-                    guid: ClassroomManager.activeClassroom.guid,
-                    teacherID: ClassroomManager.activeClassroom.teacherID,
-                    teacherName: ClassroomManager.activeClassroom.teacherName,
-                    classID: ClassroomManager.activeClassroom.classID,
-                    className: ClassroomManager.activeClassroom.className
-                })
-                ClassroomManager.activeClassroom = null
+                if(ClassroomManager.activeContent) {
+                    CommunicationManager.EmitClassDeactivation({
+                        id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
+                        name: ClassroomManager.activeContent.name,
+                        description: ClassroomManager.activeContent.description
+                    })
+                    ClassroomManager.activeClassroom = null
+                }
             })
     }
 
@@ -75,11 +85,9 @@ export abstract class ClassroomManager {
         return SmartContractManager.StartClass()
             .then(function () {
                 CommunicationManager.EmitClassStart({
-                    guid: ClassroomManager.activeClassroom.guid,
-                    teacherID: ClassroomManager.activeClassroom.teacherID,
-                    teacherName: ClassroomManager.activeClassroom.teacherName,
-                    classID: ClassroomManager.activeClassroom.classID,
-                    className: ClassroomManager.activeClassroom.className
+                    id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
+                    name: ClassroomManager.activeContent.name,
+                    description: ClassroomManager.activeContent.description
                 })
             })
     }
@@ -88,39 +96,33 @@ export abstract class ClassroomManager {
         return SmartContractManager.EndClass()
             .then(function () {
                 CommunicationManager.EmitClassEnd({
-                    guid: ClassroomManager.activeClassroom.guid,
-                    teacherID: ClassroomManager.activeClassroom.teacherID,
-                    teacherName: ClassroomManager.activeClassroom.teacherName,
-                    classID: ClassroomManager.activeClassroom.classID,
-                    className: ClassroomManager.activeClassroom.className
+                    id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
+                    name: ClassroomManager.activeContent.name,
+                    description: ClassroomManager.activeContent.description
                 })
             })
     }
 
-    static JoinClass(_info: StudentClassroom): void {
-        ClassroomManager.activeClassroom = _info
+    static JoinClass(_guid: string): void {
+        ClassroomManager.requestingJoinClass = true
 
         CommunicationManager.EmitClassJoin({
-            guid: ClassroomManager.activeClassroom.guid,
-            teacherID: ClassroomManager.activeClassroom.teacherID,
-            teacherName: ClassroomManager.activeClassroom.teacherName,
-            classID: ClassroomManager.activeClassroom.classID,
-            className: ClassroomManager.activeClassroom.className,
-            studentID: ClassMemberData.GetUserId(),
-            studentName: ClassMemberData.GetDisplayName()
+            id: ClassroomManager.classController.classList[ClassroomManager.classController.selectedClassIndex].id,
+            name: ClassroomManager.classController.classList[ClassroomManager.classController.selectedClassIndex].name,
+            description: ClassroomManager.classController.classList[ClassroomManager.classController.selectedClassIndex].description,
+            studentID: UserDataHelper.GetUserId(),
+            studentName: UserDataHelper.GetDisplayName()
         })
     }
 
     static ExitClass(): void {
         if (ClassroomManager.activeClassroom) {
             CommunicationManager.EmitClassExit({
-                guid: ClassroomManager.activeClassroom.guid,
-                teacherID: ClassroomManager.activeClassroom.teacherID,
-                teacherName: ClassroomManager.activeClassroom.teacherName,
-                classID: ClassroomManager.activeClassroom.classID,
-                className: ClassroomManager.activeClassroom.className,
-                studentID: ClassMemberData.GetUserId(),
-                studentName: ClassMemberData.GetDisplayName()
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription,
+                studentID: UserDataHelper.GetUserId(),
+                studentName: UserDataHelper.GetDisplayName()
             })
             ClassroomManager.activeClassroom = null
         }

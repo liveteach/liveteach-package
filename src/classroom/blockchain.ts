@@ -3,11 +3,11 @@ import { GetUserDataResponse, UserData, getUserData } from "~system/UserIdentity
 import { RequestManager, ContractFactory } from 'eth-connect'
 import { createEthereumProvider } from '@dcl/sdk/ethereum-provider'
 import { Entity, InputAction, MeshCollider, MeshRenderer, Transform, executeTask, pointerEventsSystem, } from '@dcl/sdk/ecs'
-import { updateEthBalance, updateEthGasPrice, updateUserData } from "./ui/ui"
 import landABI from "./contracts/LANDRegistry.json"
 import estateABI from "./contracts/EstateRegistry.json"
 import { Vector3 } from "@dcl/sdk/math"
 import { TextEncoder } from 'text-encoding'
+import { InfoUI } from "./ui/infoUI"
 
 export class BlockChain {
     userData: UserData
@@ -52,7 +52,7 @@ export class BlockChain {
                         this.userData = userData.data
                         if (userData.data.hasConnectedWeb3) {
                             console.log(userData.data.publicKey)
-                            updateUserData(userData.data)
+                            InfoUI.updateUserData(userData.data)
                             this.getEthBalance()
                             this.createSphere()
                         } else {
@@ -73,7 +73,7 @@ export class BlockChain {
             // Check the current gas price on the Ethereum network
             const gasPrice = await requestManager.eth_gasPrice()
             // log response
-            updateEthGasPrice(gasPrice.toString())
+            InfoUI.updateEthGasPrice(gasPrice.toString())
             console.log({ gasPrice })
         })
     }
@@ -87,7 +87,7 @@ export class BlockChain {
 
             requestManager.eth_getBalance(this.userData.publicKey, await requestManager.eth_blockNumber()).then((data) => {
                 let number = data.toNumber() / 1000000000000000000
-                updateEthBalance(number.toString())
+                InfoUI.updateEthBalance(number.toString())
             })
         })
     }
