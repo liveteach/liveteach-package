@@ -18,7 +18,9 @@
     "dist",
     "index.ts",
     "src/setup",
-    "src/dclutils"
+    "src/dclutils",
+    "src/seating",
+    "src/classroom"
   ],
   "dependencies": {
     "@dcl-sdk/utils": "^1.1.2",
