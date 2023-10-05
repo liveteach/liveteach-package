@@ -1,11 +1,12 @@
 import { ClassController } from "./classroomControllers/classController";
-import { ClassControllerFactory, ClassControllerType } from "./factories/classControllerFactory";
+import { ClassControllerFactory } from "./factories/classControllerFactory";
 import { SmartContractManager } from "./smartContractManager";
 import { CommunicationManager } from "./comms/communicationManager";
 import { Classroom, ClassContent, ClassPacket } from "./classroomObjects";
 import { ClassroomFactory } from "./factories/classroomFactory";
-import * as classroomConfig from "./classroomConfigs/classroomConfig.json"
 import { UserDataHelper } from "./userDataHelper";
+import { UserType } from "../enums";
+import * as classroomConfig from "./classroomConfigs/classroomConfig.json"
 
 export abstract class ClassroomManager {
     static classController: ClassController
@@ -18,22 +19,22 @@ export abstract class ClassroomManager {
         CommunicationManager.Initialise()
     }
 
-    static SetClassController(type: ClassControllerType): void {
-        if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && type === ClassControllerType.TEACHER) {
+    static SetClassController(type: UserType): void {
+        if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && type === UserType.teacher) {
             ClassroomManager.classController = null
             return
         }
 
-        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && type === ClassControllerType.STUDENT) {
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && type === UserType.student) {
             ClassroomManager.classController = null
             return
         }
 
-        if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && type === ClassControllerType.STUDENT) {
+        if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && type === UserType.student) {
             ClassroomManager.classController.deactivateClassroom()
         }
 
-        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && type === ClassControllerType.TEACHER) {
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && type === UserType.teacher) {
             ClassroomManager.classController.exitClass()
         }
 

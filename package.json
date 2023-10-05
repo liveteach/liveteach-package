@@ -20,7 +20,8 @@
     "src/setup",
     "src/dclutils",
     "src/seating",
-    "src/classroom"
+    "src/classroom",
+    "src/enums.ts"
   ],
   "dependencies": {
     "@dcl-sdk/utils": "^1.1.2",

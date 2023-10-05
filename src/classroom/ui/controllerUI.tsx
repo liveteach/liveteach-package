@@ -1,7 +1,7 @@
 import { Color4 } from "@dcl/sdk/math"
 import ReactEcs, { Button, Label, UiEntity } from "@dcl/sdk/react-ecs"
 import { ClassroomManager } from "../classroomManager";
-import { ClassControllerType } from "../factories/classControllerFactory";
+import { UserType } from "../../enums";
 
 export class ControllerUI {
     private static visibility: boolean = false
@@ -180,11 +180,11 @@ export class ControllerUI {
     }
 
     private static SetTeacher(): void {
-        ClassroomManager.SetClassController(ClassControllerType.TEACHER)
+        ClassroomManager.SetClassController(UserType.teacher)
     }
 
     private static SetStudent(): void {
-        ClassroomManager.SetClassController(ClassControllerType.STUDENT)
+        ClassroomManager.SetClassController(UserType.student)
     }
 
     private static ToggleActivateClass(): void {
