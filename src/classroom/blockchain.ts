@@ -17,7 +17,7 @@ export class BlockChain {
             TextEncoder: TextEncoder
         })
         this.getUserData()
-        this.getGasPrice()
+        //this.getGasPrice()
     }
 
     createSphere() {
@@ -53,8 +53,8 @@ export class BlockChain {
                         if (userData.data.hasConnectedWeb3) {
                             console.log(userData.data.publicKey)
                             InfoUI.updateUserData(userData.data)
-                            this.getEthBalance()
-                            this.createSphere()
+                            //this.getEthBalance()
+                            //this.createSphere()
                         } else {
                             console.log("Player is not connected with Web3")
                         }
