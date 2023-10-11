@@ -6,15 +6,19 @@ import { Entity, InputAction, MeshCollider, MeshRenderer, Transform, executeTask
 import landABI from "./contracts/LANDRegistry.json"
 import estateABI from "./contracts/EstateRegistry.json"
 import { Vector3 } from "@dcl/sdk/math"
-import { TextEncoder } from 'text-encoding'
+import { TextEncoder, TextDecoder } from 'text-encoding'
 import { InfoUI } from "./ui/infoUI"
+import teachAbi from "./contracts/TeachContractABI.json"
 
 export class BlockChain {
+    public readonly UAT_SMART_CONTRACT_ADDRESS: string = "0x31Cd6F96EFf5256aFBe1F66E846D04016A35C615";
+
     userData: UserData
 
     constructor() {
         Object.assign(globalThis, {
-            TextEncoder: TextEncoder
+            TextEncoder: TextEncoder,
+            TextDecoder: TextDecoder
         })
         this.getUserData()
         //this.getGasPrice()
@@ -40,6 +44,12 @@ export class BlockChain {
                 //this.startClass()
                 //this.decodeTokenId()
                 this.setLandUpdateOperator()
+                /* In order to call getClassroomGuid you will need to be
+                   be using a wallet address that is registered as a teacher 
+                   and has access to the landids specified.
+                */
+                // this.getClassroomGuid(-55, 1) 
+
             }
         )
     }
@@ -145,4 +155,17 @@ export class BlockChain {
         })
     }
 
+    getClassroomGuid(x: number, y: number) {
+        executeTask(async () => {
+            const provider = createEthereumProvider()
+            const requestManager = new RequestManager(provider)
+            const factory = new ContractFactory(requestManager, teachAbi)
+            const contract = (await factory.at(this.UAT_SMART_CONTRACT_ADDRESS)) as any
+
+            let result = await contract.getClassroomGuid(x, y, {
+                from: this.userData.publicKey
+            })
+            console.log("classroom guid", result);
+        })
+    }
 }
