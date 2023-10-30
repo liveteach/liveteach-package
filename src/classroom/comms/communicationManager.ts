@@ -2,9 +2,10 @@ import { MessageBus } from "@dcl/sdk/message-bus"
 import { ClassroomManager } from "../classroomManager"
 import { DebugPanel } from "../ui/debugPanel"
 import { Classroom, StudentCommInfo, ClassPacket, ClassContentPacket } from "../classroomObjects"
-import { Color4 } from "@dcl/sdk/math"
+import { Color3, Color4 } from "@dcl/sdk/math"
 import { IClassroomChannel } from "./IClassroomChannel"
 import { UserDataHelper } from "../userDataHelper"
+import { Material, VideoPlayer } from "@dcl/sdk/ecs"
 
 export class CommunicationManager {
     static messageBus: MessageBus
@@ -23,6 +24,8 @@ export class CommunicationManager {
             CommunicationManager.messageBus.on('join_class', CommunicationManager.OnJoinClass)
             CommunicationManager.messageBus.on('exit_class', CommunicationManager.OnExitClass)
             CommunicationManager.messageBus.on('share_classroom_config', CommunicationManager.OnShareClassroomConfig)
+            CommunicationManager.messageBus.on('display_image', CommunicationManager.OnImageDisplay)
+            CommunicationManager.messageBus.on('display_video', CommunicationManager.OnImageDisplay)
 
             CommunicationManager.messageBus.on('log', (info: any) => {
                 const logColor = info.studentEvent ? (info.highPriority ? Color4.Blue() : Color4.Green()) : (info.highPriority ? Color4.Red() : Color4.Yellow())
@@ -73,6 +76,11 @@ export class CommunicationManager {
 
     static EmitImageDisplay(_info: ClassContentPacket): void {
         CommunicationManager.channel.emitImageDisplay(_info)
+        //TODO: Add log
+    }
+
+    static EmitVideoDisplay(_info: ClassContentPacket): void {
+        CommunicationManager.channel.emitVideoDisplay(_info)
         //TODO: Add log
     }
 
@@ -160,6 +168,34 @@ export class CommunicationManager {
 
     static OnImageDisplay(_info: ClassContentPacket) {
         if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
+            ClassroomManager.screens.forEach(screen => {
+                Material.setPbrMaterial(screen, {
+                    texture: Material.Texture.Common({
+                        src: _info.image.src
+                    }),
+                    emissiveTexture: Material.Texture.Common({
+                        src: _info.image.src
+                    }),
+                    emissiveColor: Color3.White(),
+                    emissiveIntensity: 1,
+                    metallic: 0,
+                    roughness: 1
+                })
+            });
+            //TODO: Add log
+        }
+    }
+
+    static OnVideoDisplay(_info: ClassContentPacket) {
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
+            ClassroomManager.screens.forEach(screen => {
+                const videoPlayer = VideoPlayer.getMutableOrNull(screen)
+                if (videoPlayer) {
+                    videoPlayer.src = _info.video.src
+                    videoPlayer.position = 0
+                    videoPlayer.playing = true
+                }
+            });
             //TODO: Add log
         }
     }
