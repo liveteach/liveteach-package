@@ -4,17 +4,14 @@ import { DebugPanel } from "../ui/debugPanel"
 import { Classroom, StudentCommInfo, ClassPacket } from "../classroomObjects"
 import { Color4 } from "@dcl/sdk/math"
 import { IClassroomChannel } from "./IClassroomChannel"
-import { PeerToPeerChannel } from "./peerToPeerChannel"
 import { UserDataHelper } from "../userDataHelper"
 
 export class CommunicationManager {
     static messageBus: MessageBus
     static channel: IClassroomChannel
 
-    static Initialise(): void {
-        if (CommunicationManager.channel === undefined || CommunicationManager.channel === null) {
-            CommunicationManager.channel = new PeerToPeerChannel()
-        }
+    static Initialise(_channel: IClassroomChannel): void {
+        CommunicationManager.channel = _channel
 
         if (CommunicationManager.messageBus === undefined || CommunicationManager.messageBus === null) {
             CommunicationManager.messageBus = new MessageBus()
