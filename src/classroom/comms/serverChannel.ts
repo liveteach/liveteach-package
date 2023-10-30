@@ -1,26 +1,35 @@
 import { ClassPacket, Classroom, StudentCommInfo } from "../classroomObjects";
 import { IClassroomChannel } from "./IClassroomChannel";
+import { ReferenceServerWebsocketManager} from "../websocket/ReferenceServerWebsocketManager";
+import {UserData} from "~system/UserIdentity";
 
 export class ServerChannel implements IClassroomChannel{
+
+    private static referenceServer:ReferenceServerWebsocketManager
+
+    constructor(_userData: UserData, role:string,serverUrl: string) {
+        ServerChannel.referenceServer = new ReferenceServerWebsocketManager(_userData, role, serverUrl);
+    }
+
     emitClassActivation(_info: ClassPacket) {
-        throw new Error("Method not implemented.");
+        ServerChannel.referenceServer.sendCommand("message","student",_info.toString(), "teacher")
     }
     emitClassDeactivation(_info: ClassPacket) {
-        throw new Error("Method not implemented.");
+        ServerChannel.referenceServer.sendCommand("message","student",_info.toString(), "teacher")
     }
     emitClassStart(_info: ClassPacket) {
-        throw new Error("Method not implemented.");
+        ServerChannel.referenceServer.sendCommand("message","student",_info.toString(), "teacher")
     }
     emitClassEnd(_info: ClassPacket) {
-        throw new Error("Method not implemented.");
+        ServerChannel.referenceServer.sendCommand("message","student",_info.toString(), "teacher")
     }
     emitClassJoin(_info: StudentCommInfo) {
-        throw new Error("Method not implemented.");
+        ServerChannel.referenceServer.sendCommand("message","teacher",_info.toString(),"student")
     }
     emitClassExit(_info: StudentCommInfo) {
-        throw new Error("Method not implemented.");
+        ServerChannel.referenceServer.sendCommand("message","teacher",_info.toString(),"student")
     }
     emitClassroomConfig(_info: Classroom) {
-        throw new Error("Method not implemented.");
+        ServerChannel.referenceServer.sendCommand("message","teacher",_info.toString(),"student")
     }
 }
