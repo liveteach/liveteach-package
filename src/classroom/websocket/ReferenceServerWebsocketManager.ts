@@ -1,8 +1,9 @@
-import { UserData } from "~system/UserIdentity"
-import { GetCurrentRealmResponse } from "~system/EnvironmentApi";
+import {UserData} from "~system/UserIdentity"
+import {GetCurrentRealmResponse} from "~system/EnvironmentApi";
 import * as ui from 'dcl-ui-toolkit'
 import * as utils from '@dcl-sdk/utils'
 import {CommunicationManager} from "../comms/communicationManager";
+import {ClassPacket, StudentCommInfo, StudentInfo} from "../classroomObjects";
 
 export class ReferenceServerWebsocketManager {
 
@@ -66,22 +67,22 @@ export class ReferenceServerWebsocketManager {
                 this.subscribeToTopic(message.data) // this will error with the java implementation best to comment out
                 break;
             case "activate_class":
-                CommunicationManager.OnActivateClass(message)
+                CommunicationManager.OnActivateClass(this.classPacket(message))
                 break;
             case "deactivate_class":
-                CommunicationManager.OnDeactivateClass(message)
+                CommunicationManager.OnDeactivateClass(this.classPacket(message))
                 break;
             case "start_class":
-                CommunicationManager.OnStartClass(message)
+                CommunicationManager.OnStartClass(this.classPacket(message))
                 break;
             case "end_class":
-                CommunicationManager.OnEndClass(message)
+                CommunicationManager.OnEndClass(this.classPacket(message))
                 break;
             case "join_class":
-                CommunicationManager.OnJoinClass(message)
+                CommunicationManager.OnJoinClass(this.studentInfo(message))
                 break;
             case "exit_class":
-                CommunicationManager.OnExitClass(message)
+                CommunicationManager.OnExitClass(this.studentInfo(message))
                 break;
             case "sync":
                 console.log(message)
@@ -127,6 +128,24 @@ export class ReferenceServerWebsocketManager {
                 "wallet": this.wallet
             }
         }))
+    }
+
+    classPacket(message): ClassPacket{
+        return {
+            id: message.data.id,
+            name: message.data.name,
+            description: message.data.description,
+        }
+    }
+
+    studentInfo(message): StudentCommInfo{
+        return {
+            id: message.data.id,
+            name: message.data.name,
+            description: message.data.description,
+            studentID: message.data.studentID,
+            studentName: message.data.name
+        }
     }
 
 }
