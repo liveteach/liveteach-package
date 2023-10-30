@@ -2,6 +2,7 @@ import { UserData } from "~system/UserIdentity"
 import { GetCurrentRealmResponse } from "~system/EnvironmentApi";
 import * as ui from 'dcl-ui-toolkit'
 import * as utils from '@dcl-sdk/utils'
+import {CommunicationManager} from "../comms/communicationManager";
 
 export class ReferenceServerWebsocketManager {
 
@@ -65,25 +66,22 @@ export class ReferenceServerWebsocketManager {
                 this.subscribeToTopic(message.data) // this will error with the java implementation best to comment out
                 break;
             case "activate_class":
-                this.showMessage(message)
+                CommunicationManager.OnActivateClass(message)
                 break;
             case "deactivate_class":
-                this.showMessage(message)
+                CommunicationManager.OnDeactivateClass(message)
                 break;
             case "start_class":
-                this.showMessage(message)
+                CommunicationManager.OnStartClass(message)
                 break;
             case "end_class":
-                this.showMessage(message)
+                CommunicationManager.OnEndClass(message)
                 break;
             case "join_class":
-                this.showMessage(message)
+                CommunicationManager.OnJoinClass(message)
                 break;
             case "exit_class":
-                this.showMessage(message)
-                break;
-            case "log":
-                this.showMessage(message)
+                CommunicationManager.OnExitClass(message)
                 break;
             case "sync":
                 console.log(message)
