@@ -7,6 +7,7 @@ import { ClassroomFactory } from "./factories/classroomFactory";
 import { UserDataHelper } from "./userDataHelper";
 import { UserType } from "../enums";
 import * as classroomConfig from "./classroomConfigs/classroomConfig.json"
+import { IClassroomChannel } from "./comms/IClassroomChannel";
 
 export abstract class ClassroomManager {
     static classController: ClassController
@@ -14,9 +15,9 @@ export abstract class ClassroomManager {
     static activeContent: ClassContent = null
     static requestingJoinClass: boolean = false
 
-    static Initialise(): void {
+    static Initialise(_channel: IClassroomChannel): void {
         SmartContractManager.Initialise()
-        CommunicationManager.Initialise()
+        CommunicationManager.Initialise(_channel)
     }
 
     static SetClassController(type: UserType): void {
