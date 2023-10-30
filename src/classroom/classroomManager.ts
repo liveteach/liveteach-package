@@ -6,17 +6,20 @@ import { Classroom, ClassContent, ClassPacket } from "./classroomObjects";
 import { ClassroomFactory } from "./factories/classroomFactory";
 import { UserDataHelper } from "./userDataHelper";
 import { UserType } from "../enums";
-import * as classroomConfig from "./classroomConfigs/classroomConfig.json"
+import { IClassroomChannel } from "./comms/IClassroomChannel";
 
 export abstract class ClassroomManager {
     static classController: ClassController
     static activeClassroom: Classroom = null
     static activeContent: ClassContent = null
     static requestingJoinClass: boolean = false
+    static classroomConfig: any
 
-    static Initialise(): void {
+    static Initialise(_classroomConfig: any, _channel: IClassroomChannel): void {
+        ClassroomManager.classroomConfig = _classroomConfig
+
         SmartContractManager.Initialise()
-        CommunicationManager.Initialise()
+        CommunicationManager.Initialise(_channel)
     }
 
     static SetClassController(type: UserType): void {
@@ -45,7 +48,7 @@ export abstract class ClassroomManager {
         SmartContractManager.FetchClassContent(_id)
         .then(function (classContent) {
             ClassroomManager.activeContent = classContent
-            ClassroomManager.activeClassroom = ClassroomFactory.CreateTeacherClassroom(JSON.stringify(classroomConfig.classroom), ClassroomManager.activeContent.name, ClassroomManager.activeContent.description)
+            ClassroomManager.activeClassroom = ClassroomFactory.CreateTeacherClassroom(JSON.stringify(ClassroomManager.classroomConfig.classroom), ClassroomManager.activeContent.name, ClassroomManager.activeContent.description)
 
             CommunicationManager.EmitClassActivation({
                 id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
