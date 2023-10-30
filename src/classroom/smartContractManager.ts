@@ -1,5 +1,6 @@
 import { ClassContent, ClassPacket } from "./classroomObjects"
 import { BlockChain } from "./blockchain"
+import * as exampleConfig from "./liveTeachConfigs/exampleConfig.json"
 import * as biologyConfig from "./liveTeachConfigs/biologyConfig.json"
 import * as frenchConfig from "./liveTeachConfigs/frenchConfig.json"
 import * as historyConfig from "./liveTeachConfigs/historyConfig.json"
@@ -52,6 +53,11 @@ export class SmartContractManager {
                 case "classroom_1": {
                     let classList: ClassPacket[] = []
                     classList.push({
+                        id: exampleConfig.content.id,
+                        name: exampleConfig.content.name,
+                        description: exampleConfig.content.description
+                    })
+                    classList.push({
                         id: biologyConfig.content.id,
                         name: biologyConfig.content.name,
                         description: biologyConfig.content.description
@@ -91,6 +97,8 @@ export class SmartContractManager {
         if (SmartContractManager.USE_LOCAL_DATA) {
             let contentJson: string = ""
             switch (_id) {
+                case exampleConfig.content.id: contentJson = JSON.stringify(exampleConfig.content)
+                    break
                 case biologyConfig.content.id: contentJson = JSON.stringify(biologyConfig.content)
                     break
                 case frenchConfig.content.id: contentJson = JSON.stringify(frenchConfig.content)
