@@ -1,0 +1,61 @@
+{
+    "content": {
+        "id": "EXAMPLE01",
+        "name": "Example Class",
+        "description": "Example class for the UniversityTeacher scene",
+        "images": [
+            {
+                "src": "images/1.jpg",
+                "caption": "Image Caption 1"
+            },
+            {
+                "src": "images/2.jpg",
+                "caption": "Image Caption 2"
+            },
+            {
+                "src": "images/3.jpg",
+                "caption": "Image Caption 3"
+            },
+            {
+                "src": "images/4.jpg",
+                "caption": "Image Caption 4"
+            },
+            {
+                "src": "images/5.jpg",
+                "caption": "Image Caption 5"
+            },
+            {
+                "src": "images/6.jpg",
+                "caption": "Image Caption 6"
+            }
+        ],
+        "videos": [
+            {
+                "src": "video/pexels-artem-podrez.mp4",
+                "caption": "Video Caption 1"
+            },
+            {
+                "src": "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8",
+                "caption": "Video Caption 2"
+            }
+        ],
+        "models": [
+            {
+                "src": "models/LessonModels/model1.glb",
+                "animations": []
+            },
+            {
+                "src": "models/LessonModels/model2.glb",
+                "animations": []
+            },
+            {
+                "src": "models/LessonModels/model3.glb",
+                "animations": []
+            },
+            {
+                "src": "models/LessonModels/model4.glb",
+                "animations": []
+            }
+        ]
+    }
+}
