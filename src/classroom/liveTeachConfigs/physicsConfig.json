@@ -17,7 +17,17 @@
         ],
         "models": [
             {
-                "key": "test.glb"
+                "src": "test.glb",
+                "animations": [
+                    {
+                        "clip": "Idle",
+                        "loop": true
+                    },
+                    {
+                        "clip": "Sit",
+                        "loop": true
+                    }
+                ]
             }
         ]
     }
