@@ -66,22 +66,22 @@ export class ReferenceServerWebsocketManager {
                 this.subscribeToTopic(message.data) // this will error with the java implementation best to comment out
                 break;
             case "activate_class":
-                CommunicationManager.EmitClassActivation(message)
+                CommunicationManager.OnActivateClass(message)
                 break;
             case "deactivate_class":
-                CommunicationManager.EmitClassDeactivation(message)
+                CommunicationManager.OnDeactivateClass(message)
                 break;
             case "start_class":
-                CommunicationManager.EmitClassStart(message)
+                CommunicationManager.OnStartClass(message)
                 break;
             case "end_class":
-                CommunicationManager.EmitClassEnd(message)
+                CommunicationManager.OnEndClass(message)
                 break;
             case "join_class":
-                CommunicationManager.EmitClassJoin(message)
+                CommunicationManager.OnJoinClass(message)
                 break;
             case "exit_class":
-                CommunicationManager.EmitClassExit(message)
+                CommunicationManager.OnExitClass(message)
                 break;
             case "sync":
                 console.log(message)
