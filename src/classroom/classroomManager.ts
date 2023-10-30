@@ -2,7 +2,7 @@ import { ClassController } from "./classroomControllers/classController";
 import { ClassControllerFactory } from "./factories/classControllerFactory";
 import { SmartContractManager } from "./smartContractManager";
 import { CommunicationManager } from "./comms/communicationManager";
-import { Classroom, ClassContent, ClassPacket } from "./classroomObjects";
+import { Classroom, ClassContent, ClassPacket, ContentImage } from "./classroomObjects";
 import { ClassroomFactory } from "./factories/classroomFactory";
 import { UserDataHelper } from "./userDataHelper";
 import { UserType } from "../enums";
@@ -129,6 +129,17 @@ export abstract class ClassroomManager {
                 studentName: UserDataHelper.GetDisplayName()
             })
             ClassroomManager.activeClassroom = null
+        }
+    }
+
+    static DisplayImage(_image: ContentImage): void {
+        if (ClassroomManager.activeClassroom) {
+            CommunicationManager.EmitImageDisplay({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription,
+                image: _image
+            })
         }
     }
 }

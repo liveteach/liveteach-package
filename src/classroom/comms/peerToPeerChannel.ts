@@ -1,4 +1,4 @@
-import { ClassPacket, Classroom, StudentCommInfo } from "../classroomObjects";
+import { ClassContentPacket, ClassPacket, Classroom, StudentCommInfo } from "../classroomObjects";
 import { IClassroomChannel } from "./IClassroomChannel";
 import { CommunicationManager } from "./communicationManager";
 
@@ -23,5 +23,14 @@ export class PeerToPeerChannel implements IClassroomChannel{
     }
     emitClassroomConfig(_info: Classroom) {
         CommunicationManager.messageBus.emit('share_classroom_config', _info)
+    }
+    emitImageDisplay(_info: ClassContentPacket) {
+        CommunicationManager.messageBus.emit('display_image', _info)
+    }
+    emitVideoDisplay(_info: ClassContentPacket) {
+        CommunicationManager.messageBus.emit('display_video', _info)
+    }
+    emitModelDisplay(_info: ClassContentPacket) {
+        CommunicationManager.messageBus.emit('display_model', _info)
     }
 }

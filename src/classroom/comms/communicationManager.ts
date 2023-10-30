@@ -1,7 +1,7 @@
 import { MessageBus } from "@dcl/sdk/message-bus"
 import { ClassroomManager } from "../classroomManager"
 import { DebugPanel } from "../ui/debugPanel"
-import { Classroom, StudentCommInfo, ClassPacket } from "../classroomObjects"
+import { Classroom, StudentCommInfo, ClassPacket, ClassContentPacket } from "../classroomObjects"
 import { Color4 } from "@dcl/sdk/math"
 import { IClassroomChannel } from "./IClassroomChannel"
 import { UserDataHelper } from "../userDataHelper"
@@ -69,6 +69,11 @@ export class CommunicationManager {
     static EmitClassroomConfig(_info: Classroom): void {
         CommunicationManager.channel.emitClassroomConfig(_info)
         CommunicationManager.EmitLog(_info.teacherName + " is sharing classroom config for class " + _info.className, _info.guid, false, false)
+    }
+
+    static EmitImageDisplay(_info: ClassContentPacket): void {
+        CommunicationManager.channel.emitImageDisplay(_info)
+        //TODO: Add log
     }
 
     static EmitLog(_message: string, _classroomGuid: string, _studentEvent: boolean, _highPriority: boolean, _global: boolean = false): void {
@@ -150,6 +155,12 @@ export class CommunicationManager {
                     break
                 }
             }
+        }
+    }
+
+    static OnImageDisplay(_info: ClassContentPacket) {
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
+            //TODO: Add log
         }
     }
 
