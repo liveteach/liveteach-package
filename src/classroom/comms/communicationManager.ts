@@ -16,83 +16,13 @@ export class CommunicationManager {
         if (CommunicationManager.messageBus === undefined || CommunicationManager.messageBus === null) {
             CommunicationManager.messageBus = new MessageBus()
 
-            CommunicationManager.messageBus.on('activate_class', (info: ClassPacket) => {
-                if (ClassroomManager.classController && ClassroomManager.classController.isStudent()) {
-                    let classFound: boolean = false
-                    for (let i = 0; i < ClassroomManager.classController.classList.length; i++) {
-                        if (ClassroomManager.classController.classList[i].id == info.id) {
-                            ClassroomManager.classController.classList[i].name = info.name
-                            ClassroomManager.classController.classList[i].description = info.description
-                            classFound = true
-                            break
-                        }
-                    }
-                    if (!classFound) {
-                        ClassroomManager.classController.classList.push({
-                            id: info.id,
-                            name: info.name,
-                            description: info.description,
-                        })
-                    }
-                }
-            })
-
-            CommunicationManager.messageBus.on('deactivate_class', (info: ClassPacket) => {
-                if (ClassroomManager.classController && ClassroomManager.classController.isStudent()) {
-                    for (let i = 0; i < ClassroomManager.classController.classList.length; i++) {
-                        if (ClassroomManager.classController.classList[i].id == info.id) {
-                            ClassroomManager.classController.classList.splice(i, 1)
-                            if (ClassroomManager.classController.selectedClassIndex == i) {
-                                ClassroomManager.classController.selectedClassIndex = Math.max(0, i - 1)
-                            }
-                            break
-                        }
-                    }
-                }
-            })
-
-            CommunicationManager.messageBus.on('start_class', (info: ClassPacket) => {
-                if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == info.id) {
-                    //TODO
-                }
-            })
-
-            CommunicationManager.messageBus.on('end_class', (info: ClassPacket) => {
-                if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == info.id) {
-                    //TODO
-                }
-            })
-
-            CommunicationManager.messageBus.on('join_class', (info: StudentCommInfo) => {
-                if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == info.id) {
-                    (ClassroomManager.activeClassroom as Classroom).students.push({
-                        studentID: info.studentID,
-                        studentName: info.studentName
-                    })
-                    CommunicationManager.EmitClassroomConfig(ClassroomManager.activeClassroom)
-                    CommunicationManager.EmitLog(info.studentName + " joined class " + ClassroomManager.activeClassroom.className, info.id, false, true)
-                }
-            })
-
-            CommunicationManager.messageBus.on('exit_class', (info: StudentCommInfo) => {
-                if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == info.id) {
-                    for (let i = 0; i < (ClassroomManager.activeClassroom as Classroom).students.length; i++) {
-                        if ((ClassroomManager.activeClassroom as Classroom).students[i].studentID == info.studentID) {
-                            (ClassroomManager.activeClassroom as Classroom).students.splice(i, 1)
-                            CommunicationManager.EmitLog(info.studentName + " left class " + ClassroomManager.activeClassroom.className, info.id, false, true)
-                            break
-                        }
-                    }
-                }
-            })
-
-            CommunicationManager.messageBus.on('share_classroom_config', (info: Classroom) => {
-                if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.requestingJoinClass && ClassroomManager.classController.classList[ClassroomManager.classController.selectedClassIndex].id == info.guid) {
-                    ClassroomManager.requestingJoinClass = false
-                    ClassroomManager.activeClassroom = info
-                    CommunicationManager.EmitLog(UserDataHelper.GetDisplayName() + " joined class " + info.className, info.guid, true, false)
-                }
-            })
+            CommunicationManager.messageBus.on('activate_class', CommunicationManager.OnActivateClass)
+            CommunicationManager.messageBus.on('deactivate_class', CommunicationManager.OnDeactivateClass)
+            CommunicationManager.messageBus.on('start_class', CommunicationManager.OnStartClass)
+            CommunicationManager.messageBus.on('end_class', CommunicationManager.OnEndClass)
+            CommunicationManager.messageBus.on('join_class', CommunicationManager.OnJoinClass)
+            CommunicationManager.messageBus.on('exit_class', CommunicationManager.OnExitClass)
+            CommunicationManager.messageBus.on('share_classroom_config', CommunicationManager.OnShareClassroomConfig)
 
             CommunicationManager.messageBus.on('log', (info: any) => {
                 const logColor = info.studentEvent ? (info.highPriority ? Color4.Blue() : Color4.Green()) : (info.highPriority ? Color4.Red() : Color4.Yellow())
@@ -100,6 +30,8 @@ export class CommunicationManager {
             })
         }
     }
+
+    ////////////// SEND //////////////
 
     static EmitClassActivation(_info: ClassPacket): void {
         CommunicationManager.channel.emitClassActivation(_info)
@@ -147,5 +79,85 @@ export class CommunicationManager {
             highPriority: _highPriority,
             global: _global
         })
+    }
+
+    ////////////// RECEIVE //////////////
+
+    static OnActivateClass(_info: ClassPacket): void {
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent()) {
+            let classFound: boolean = false
+            for (let i = 0; i < ClassroomManager.classController.classList.length; i++) {
+                if (ClassroomManager.classController.classList[i].id == _info.id) {
+                    ClassroomManager.classController.classList[i].name = _info.name
+                    ClassroomManager.classController.classList[i].description = _info.description
+                    classFound = true
+                    break
+                }
+            }
+            if (!classFound) {
+                ClassroomManager.classController.classList.push({
+                    id: _info.id,
+                    name: _info.name,
+                    description: _info.description,
+                })
+            }
+        }
+    }
+
+    static OnDeactivateClass(_info: ClassPacket): void {
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent()) {
+            for (let i = 0; i < ClassroomManager.classController.classList.length; i++) {
+                if (ClassroomManager.classController.classList[i].id == _info.id) {
+                    ClassroomManager.classController.classList.splice(i, 1)
+                    if (ClassroomManager.classController.selectedClassIndex == i) {
+                        ClassroomManager.classController.selectedClassIndex = Math.max(0, i - 1)
+                    }
+                    break
+                }
+            }
+        }
+    }
+
+    static OnStartClass(_info: ClassPacket): void {
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
+            //TODO
+        }
+    }
+
+    static OnEndClass(_info: ClassPacket): void {
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
+            //TODO
+        }
+    }
+
+    static OnJoinClass(_info: StudentCommInfo) {
+        if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
+            (ClassroomManager.activeClassroom as Classroom).students.push({
+                studentID: _info.studentID,
+                studentName: _info.studentName
+            })
+            CommunicationManager.EmitClassroomConfig(ClassroomManager.activeClassroom)
+            CommunicationManager.EmitLog(_info.studentName + " joined class " + ClassroomManager.activeClassroom.className, _info.id, false, true)
+        }
+    }
+
+    static OnExitClass(_info: StudentCommInfo) {
+        if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
+            for (let i = 0; i < (ClassroomManager.activeClassroom as Classroom).students.length; i++) {
+                if ((ClassroomManager.activeClassroom as Classroom).students[i].studentID == _info.studentID) {
+                    (ClassroomManager.activeClassroom as Classroom).students.splice(i, 1)
+                    CommunicationManager.EmitLog(_info.studentName + " left class " + ClassroomManager.activeClassroom.className, _info.id, false, true)
+                    break
+                }
+            }
+        }
+    }
+
+    static OnShareClassroomConfig(_info: Classroom) {
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.requestingJoinClass && ClassroomManager.classController.classList[ClassroomManager.classController.selectedClassIndex].id == _info.guid) {
+            ClassroomManager.requestingJoinClass = false
+            ClassroomManager.activeClassroom = _info
+            CommunicationManager.EmitLog(UserDataHelper.GetDisplayName() + " joined class " + _info.className, _info.guid, true, false)
+        }
     }
 }
