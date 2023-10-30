@@ -2,11 +2,12 @@ import { ClassController } from "./classroomControllers/classController";
 import { ClassControllerFactory } from "./factories/classControllerFactory";
 import { SmartContractManager } from "./smartContractManager";
 import { CommunicationManager } from "./comms/communicationManager";
-import { Classroom, ClassContent, ClassPacket } from "./classroomObjects";
+import { Classroom, ClassContent, ClassPacket, ContentImage, ContentVideo } from "./classroomObjects";
 import { ClassroomFactory } from "./factories/classroomFactory";
 import { UserDataHelper } from "./userDataHelper";
 import { UserType } from "../enums";
 import { IClassroomChannel } from "./comms/IClassroomChannel";
+import { Entity } from "@dcl/sdk/ecs";
 
 export abstract class ClassroomManager {
     static classController: ClassController
@@ -14,9 +15,11 @@ export abstract class ClassroomManager {
     static activeContent: ClassContent = null
     static requestingJoinClass: boolean = false
     static classroomConfig: any
+    static screens: Entity[] = []
 
-    static Initialise(_classroomConfig: any, _channel: IClassroomChannel): void {
+    static Initialise(_classroomConfig: any, _channel: IClassroomChannel, _screens: Entity[]): void {
         ClassroomManager.classroomConfig = _classroomConfig
+        ClassroomManager.screens = _screens
 
         SmartContractManager.Initialise()
         CommunicationManager.Initialise(_channel)
@@ -129,6 +132,32 @@ export abstract class ClassroomManager {
                 studentName: UserDataHelper.GetDisplayName()
             })
             ClassroomManager.activeClassroom = null
+        }
+    }
+
+    static DisplayImage(_image: ContentImage): void {
+        if(!ClassroomManager.classController.isTeacher()) return
+
+        if (ClassroomManager.activeClassroom) {
+            CommunicationManager.EmitImageDisplay({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription,
+                image: _image
+            })
+        }
+    }
+
+    static DisplayVideo(_video: ContentVideo): void {
+        if(!ClassroomManager.classController.isTeacher()) return
+        
+        if (ClassroomManager.activeClassroom) {
+            CommunicationManager.EmitVideoDisplay({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription,
+                video: _video
+            })
         }
     }
 }
