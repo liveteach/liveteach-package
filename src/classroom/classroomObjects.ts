@@ -1,15 +1,15 @@
-export type contentImage = {
+export type ContentImage = {
     src: string
     caption: string
 }
 
-export type contentVideo = {
+export type ContentVideo = {
     src: string
     caption: string
 }
 
-export type contentModel = {
-    key: string
+export type ContentModel = {
+    src: string
 }
 
 export type StudentInfo = {
@@ -21,6 +21,12 @@ export type ClassPacket = {
     id: string,
     name: string,
     description: string
+}
+
+export type ClassContentPacket = ClassPacket & {
+    image?: ContentImage,
+    video?: ContentVideo,
+    model?: ContentModel
 }
 
 export type StudentCommInfo = ClassPacket & StudentInfo
@@ -47,7 +53,7 @@ export class ClassContent {
     id: string
     name: string
     description: string
-    images: contentImage[]
-    videos: contentVideo[]
-    models: contentModel[]
+    images: ContentImage[]
+    videos: ContentVideo[]
+    models: ContentModel[]
 }
