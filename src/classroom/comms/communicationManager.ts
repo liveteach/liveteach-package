@@ -2,10 +2,10 @@ import { MessageBus } from "@dcl/sdk/message-bus"
 import { ClassroomManager } from "../classroomManager"
 import { DebugPanel } from "../ui/debugPanel"
 import { Classroom, StudentCommInfo, ClassPacket, ClassContentPacket } from "../classroomTypes"
-import { Color3, Color4 } from "@dcl/sdk/math"
+import { Color3, Color4, Vector3 } from "@dcl/sdk/math"
 import { IClassroomChannel } from "./IClassroomChannel"
 import { UserDataHelper } from "../userDataHelper"
-import { Material, Transform, VideoPlayer } from "@dcl/sdk/ecs"
+import { Entity, Material, Transform, VideoPlayer } from "@dcl/sdk/ecs"
 
 export class CommunicationManager {
     static messageBus: MessageBus
@@ -180,6 +180,10 @@ export class CommunicationManager {
 
     static OnImageDisplay(_info: ClassContentPacket) {
         if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
+
+            //pause all videos
+            CommunicationManager.pauseAllVideos()
+
             ClassroomManager.screens.forEach(screen => {
                 Material.setPbrMaterial(screen, {
                     texture: Material.Texture.Common({
@@ -206,33 +210,36 @@ export class CommunicationManager {
 
     static OnVideoDisplay(_info: ClassContentPacket) {
         if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
+            const videoPlayerEntity = CommunicationManager.getVideoPlayerEntity(_info.video.src)
+            if (videoPlayerEntity === undefined || videoPlayerEntity === null) return
+
+            const videoPlayer = VideoPlayer.getMutableOrNull(videoPlayerEntity)
+            if (videoPlayer === undefined || videoPlayer === null) return
+
             ClassroomManager.screens.forEach(screen => {
-                const videoPlayer = VideoPlayer.getMutableOrNull(screen)
-                if (videoPlayer) {
-                    videoPlayer.src = _info.video.src
-                    videoPlayer.position = _info.video.position
-                    videoPlayer.playing = _info.video.playing
-                    videoPlayer.volume = _info.video.volume
+                videoPlayer.src = _info.video.src
+                videoPlayer.playing = _info.video.playing
+                videoPlayer.volume = _info.video.volume
+                if (_info.video.position) videoPlayer.position = _info.video.position
 
-                    Material.setPbrMaterial(screen, {
-                        texture: Material.Texture.Video({
-                            videoPlayerEntity: screen
-                        }),
-                        emissiveTexture: Material.Texture.Video({
-                            videoPlayerEntity: screen
-                        }),
-                        emissiveColor: Color3.White(),
-                        emissiveIntensity: 1,
-                        specularIntensity: 0,
-                        metallic: 0,
-                        roughness: 1
-                    })
+                Material.setPbrMaterial(screen, {
+                    texture: Material.Texture.Video({
+                        videoPlayerEntity: videoPlayerEntity
+                    }),
+                    emissiveTexture: Material.Texture.Video({
+                        videoPlayerEntity: videoPlayerEntity
+                    }),
+                    emissiveColor: Color3.White(),
+                    emissiveIntensity: 1,
+                    specularIntensity: 0,
+                    metallic: 0,
+                    roughness: 1
+                })
 
-                    if (_info.video.ratio != undefined) {
-                        Transform.getMutable(screen).scale.x = Transform.getMutable(screen).scale.y * _info.video.ratio
-                    } else {
-                        Transform.getMutable(screen).scale.x = Transform.getMutable(screen).scale.y
-                    }
+                if (_info.video.ratio != undefined) {
+                    Transform.getMutable(screen).scale.x = Transform.getMutable(screen).scale.y * _info.video.ratio
+                } else {
+                    Transform.getMutable(screen).scale.x = Transform.getMutable(screen).scale.y
                 }
             });
             //TODO: Add log
@@ -244,6 +251,26 @@ export class CommunicationManager {
             ClassroomManager.requestingJoinClass = false
             ClassroomManager.activeClassroom = _info
             CommunicationManager.EmitLog(UserDataHelper.GetDisplayName() + " joined class " + _info.className, _info.guid, true, false)
+        }
+    }
+
+    ////////////// HELPERS //////////////
+
+    private static getVideoPlayerEntity(_src: string): Entity | null {
+        for (let videoPlayerEntity of ClassroomManager.videoPlayerEntities) {
+            if (videoPlayerEntity.src == _src) {
+                return videoPlayerEntity.entity
+            }
+        }
+        return null
+    }
+
+    private static pauseAllVideos(): void {
+        for (let videoPlayerEntity of ClassroomManager.videoPlayerEntities) {
+            const videoPlayer = VideoPlayer.getMutableOrNull(videoPlayerEntity.entity)
+            if (videoPlayer === undefined || videoPlayer === null) continue
+    
+            videoPlayer.playing = false
         }
     }
 }

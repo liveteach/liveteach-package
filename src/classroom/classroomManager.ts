@@ -16,10 +16,12 @@ export abstract class ClassroomManager {
     static requestingJoinClass: boolean = false
     static classroomConfig: any
     static screens: Entity[] = []
+    static videoPlayerEntities: { src: string, entity: Entity }[] = []
 
-    static Initialise(_classroomConfig: any, _channel: IClassroomChannel, _screens: Entity[]): void {
+    static Initialise(_classroomConfig: any, _channel: IClassroomChannel, _screens: Entity[], _videoPlayerEntities: { src: string, entity: Entity }[]): void {
         ClassroomManager.classroomConfig = _classroomConfig
         ClassroomManager.screens = _screens
+        ClassroomManager.videoPlayerEntities = _videoPlayerEntities
 
         SmartContractManager.Initialise()
         CommunicationManager.Initialise(_channel)
@@ -160,7 +162,7 @@ export abstract class ClassroomManager {
                     src: _video.src,
                     caption: _video.caption,
                     playing: true,
-                    position: _video.position ?? 0,
+                    position: _video.position,
                     volume: _video.volume ?? 1,
                     ratio: _video.ratio
                 }
