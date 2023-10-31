@@ -4,9 +4,9 @@ export type ContentImage = {
 }
 
 export type VideoSettings = {
-    playing: boolean
-    position: number
-    volume: number
+    playing?: boolean
+    position?: number
+    volume?: number
 }
 export type ContentVideo = {
     src: string
