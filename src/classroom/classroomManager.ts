@@ -2,7 +2,7 @@ import { ClassController } from "./classroomControllers/classController";
 import { ClassControllerFactory } from "./factories/classControllerFactory";
 import { SmartContractManager } from "./smartContractManager";
 import { CommunicationManager } from "./comms/communicationManager";
-import { Classroom, ClassContent, ClassPacket, ContentImage, ContentVideo } from "./classroomObjects";
+import { Classroom, ClassContent, ClassPacket, ContentImage, ContentVideo } from "./classroomTypes";
 import { ClassroomFactory } from "./factories/classroomFactory";
 import { UserDataHelper } from "./userDataHelper";
 import { UserType } from "../enums";

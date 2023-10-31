@@ -1,4 +1,4 @@
-import { ClassContentPacket, ClassPacket, Classroom, StudentCommInfo } from "../classroomObjects";
+import { ClassContentPacket, ClassPacket, Classroom, StudentCommInfo } from "../classroomTypes";
 import { IClassroomChannel } from "./IClassroomChannel";
 import { CommunicationManager } from "./communicationManager";
 

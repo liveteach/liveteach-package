@@ -1,7 +1,7 @@
 import { MessageBus } from "@dcl/sdk/message-bus"
 import { ClassroomManager } from "../classroomManager"
 import { DebugPanel } from "../ui/debugPanel"
-import { Classroom, StudentCommInfo, ClassPacket, ClassContentPacket } from "../classroomObjects"
+import { Classroom, StudentCommInfo, ClassPacket, ClassContentPacket } from "../classroomTypes"
 import { Color3, Color4 } from "@dcl/sdk/math"
 import { IClassroomChannel } from "./IClassroomChannel"
 import { UserDataHelper } from "../userDataHelper"
