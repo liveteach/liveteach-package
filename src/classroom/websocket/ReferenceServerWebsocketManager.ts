@@ -54,7 +54,7 @@ export class ReferenceServerWebsocketManager {
     }
 
 
-    public sendCommand(_type: string, topic: string, message: string, payload: string, from:string) {
+    public sendCommand(_type: string, topic: string, message: string, payload: object, from:string) {
         this.webSocket.send(this.getWebSocketMessage(_type, topic, message, payload,from))
     }
 
@@ -100,7 +100,7 @@ export class ReferenceServerWebsocketManager {
         }, 3000);
     }
 
-    getWebSocketMessage(_type: string, topic: string, message: string, payload: string, from:string): string {
+    getWebSocketMessage(_type: string, topic: string, message: string, payload: object, from:string): string {
 
         let msg = {
             "header": {
