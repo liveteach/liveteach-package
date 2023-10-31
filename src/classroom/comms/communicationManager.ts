@@ -1,7 +1,7 @@
 import { MessageBus } from "@dcl/sdk/message-bus"
 import { ClassroomManager } from "../classroomManager"
 import { DebugPanel } from "../ui/debugPanel"
-import { Classroom, StudentCommInfo, ClassPacket, ClassContentPacket } from "../classroomObjects"
+import { Classroom, StudentCommInfo, ClassPacket, ClassContentPacket } from "../classroomTypes"
 import { Color3, Color4 } from "@dcl/sdk/math"
 import { IClassroomChannel } from "./IClassroomChannel"
 import { UserDataHelper } from "../userDataHelper"
@@ -25,7 +25,9 @@ export class CommunicationManager {
             CommunicationManager.messageBus.on('exit_class', CommunicationManager.OnExitClass)
             CommunicationManager.messageBus.on('share_classroom_config', CommunicationManager.OnShareClassroomConfig)
             CommunicationManager.messageBus.on('display_image', CommunicationManager.OnImageDisplay)
-            CommunicationManager.messageBus.on('display_video', CommunicationManager.OnImageDisplay)
+            CommunicationManager.messageBus.on('play_video', CommunicationManager.OnVideoDisplay)
+            CommunicationManager.messageBus.on('pause_video', CommunicationManager.OnVideoDisplay)
+            CommunicationManager.messageBus.on('set_video_volume', CommunicationManager.OnVideoDisplay)
 
             CommunicationManager.messageBus.on('log', (info: any) => {
                 const logColor = info.studentEvent ? (info.highPriority ? Color4.Blue() : Color4.Green()) : (info.highPriority ? Color4.Red() : Color4.Yellow())
@@ -79,8 +81,18 @@ export class CommunicationManager {
         //TODO: Add log
     }
 
-    static EmitVideoDisplay(_info: ClassContentPacket): void {
-        CommunicationManager.channel.emitVideoDisplay(_info)
+    static EmitVideoPlay(_info: ClassContentPacket): void {
+        CommunicationManager.channel.emitVideoPlay(_info)
+        //TODO: Add log
+    }
+
+    static EmitVideoPause(_info: ClassContentPacket): void {
+        CommunicationManager.channel.emitVideoPlay(_info)
+        //TODO: Add log
+    }
+
+    static EmitVideoVolume(_info: ClassContentPacket): void {
+        CommunicationManager.channel.emitVideoPlay(_info)
         //TODO: Add log
     }
 
@@ -192,8 +204,9 @@ export class CommunicationManager {
                 const videoPlayer = VideoPlayer.getMutableOrNull(screen)
                 if (videoPlayer) {
                     videoPlayer.src = _info.video.src
-                    videoPlayer.position = 0
-                    videoPlayer.playing = true
+                    videoPlayer.position = _info.video.position
+                    videoPlayer.playing = _info.video.playing
+                    videoPlayer.volume = _info.video.volume
                 }
             });
             //TODO: Add log

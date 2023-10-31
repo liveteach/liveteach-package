@@ -1,4 +1,4 @@
-import { ClassContent, ClassPacket } from "./classroomObjects"
+import { ClassContent, ClassPacket } from "./classroomTypes"
 import { BlockChain } from "./blockchain"
 import * as exampleConfig from "./liveTeachConfigs/exampleConfig.json"
 import * as biologyConfig from "./liveTeachConfigs/biologyConfig.json"

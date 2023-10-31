@@ -1,4 +1,4 @@
-import { ClassContentPacket, ClassPacket, Classroom, StudentCommInfo } from "../classroomObjects";
+import { ClassContentPacket, ClassPacket, Classroom, StudentCommInfo } from "../classroomTypes";
 import { IClassroomChannel } from "./IClassroomChannel";
 import { ReferenceServerWebsocketManager} from "../websocket/ReferenceServerWebsocketManager";
 import {UserData} from "~system/UserIdentity";
@@ -35,7 +35,13 @@ export class ServerChannel implements IClassroomChannel{
     emitImageDisplay(_info: ClassContentPacket) {
         throw new Error("Method not implemented.");
     }
-    emitVideoDisplay(_info: ClassContentPacket) {
+    emitVideoPlay(_info: ClassContentPacket) {
+        throw new Error("Method not implemented.");
+    }
+    emitVideoPause(_info: ClassContentPacket) {
+        throw new Error("Method not implemented.");
+    }
+    emitVideoVolume(_info: ClassContentPacket) {
         throw new Error("Method not implemented.");
     }
     emitModelDisplay(_info: ClassContentPacket) {

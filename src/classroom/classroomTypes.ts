@@ -3,13 +3,24 @@ export type ContentImage = {
     caption: string
 }
 
+export type VideoSettings = {
+    playing?: boolean
+    position?: number
+    volume?: number
+}
 export type ContentVideo = {
     src: string
     caption: string
+} & VideoSettings
+
+export type ModelAnimation = {
+    clip: string
+    loop: boolean
 }
 
 export type ContentModel = {
     src: string
+    animations: ModelAnimation[]
 }
 
 export type StudentInfo = {
