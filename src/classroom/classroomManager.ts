@@ -49,23 +49,23 @@ export abstract class ClassroomManager {
 
     static async SetTeacherClassContent(_id: string): Promise<void> {
         SmartContractManager.FetchClassContent(_id)
-        .then(function (classContent) {
-            ClassroomManager.activeContent = classContent
-            ClassroomManager.activeClassroom = ClassroomFactory.CreateTeacherClassroom(JSON.stringify(ClassroomManager.classroomConfig.classroom), ClassroomManager.activeContent.name, ClassroomManager.activeContent.description)
+            .then(function (classContent) {
+                ClassroomManager.activeContent = classContent
+                ClassroomManager.activeClassroom = ClassroomFactory.CreateTeacherClassroom(JSON.stringify(ClassroomManager.classroomConfig.classroom), ClassroomManager.activeContent.name, ClassroomManager.activeContent.description)
 
-            CommunicationManager.EmitClassActivation({
-                id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
-                name: ClassroomManager.activeContent.name,
-                description: ClassroomManager.activeContent.description
+                CommunicationManager.EmitClassActivation({
+                    id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
+                    name: ClassroomManager.activeContent.name,
+                    description: ClassroomManager.activeContent.description
+                })
             })
-        })
     }
 
     static async ActivateClassroom(): Promise<void | ClassPacket[]> {
         return SmartContractManager.ActivateClassroom()
             .then(function (classroomGuid) {
                 const valid = SmartContractManager.ValidateClassroomGuid(classroomGuid)
-                if(valid) {
+                if (valid) {
                     return SmartContractManager.FetchClassList()
                 }
                 else {
@@ -77,7 +77,7 @@ export abstract class ClassroomManager {
     static async DeactivateClassroom(): Promise<void> {
         return SmartContractManager.DectivateClassroom()
             .then(function () {
-                if(ClassroomManager.activeContent) {
+                if (ClassroomManager.activeContent) {
                     CommunicationManager.EmitClassDeactivation({
                         id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
                         name: ClassroomManager.activeContent.name,
@@ -136,7 +136,7 @@ export abstract class ClassroomManager {
     }
 
     static DisplayImage(_image: ContentImage): void {
-        if(!ClassroomManager.classController?.isTeacher()) return
+        if (!ClassroomManager.classController?.isTeacher()) return
 
         if (ClassroomManager.activeClassroom) {
             CommunicationManager.EmitImageDisplay({
@@ -149,40 +149,58 @@ export abstract class ClassroomManager {
     }
 
     static PlayVideo(_video: ContentVideo): void {
-        if(!ClassroomManager.classController?.isTeacher()) return
-        
+        if (!ClassroomManager.classController?.isTeacher()) return
+
         if (ClassroomManager.activeClassroom) {
             CommunicationManager.EmitVideoPlay({
                 id: ClassroomManager.activeClassroom.guid,
                 name: ClassroomManager.activeClassroom.className,
                 description: ClassroomManager.activeClassroom.classDescription,
-                video: _video
+                video: {
+                    src: _video.src,
+                    caption: _video.caption,
+                    playing: true,
+                    position: _video.position ?? 0,
+                    volume: _video.volume ?? 1,
+                }
             })
         }
     }
 
     static PauseVideo(_video: ContentVideo): void {
-        if(!ClassroomManager.classController?.isTeacher()) return
-        
+        if (!ClassroomManager.classController?.isTeacher()) return
+
         if (ClassroomManager.activeClassroom) {
             CommunicationManager.EmitVideoPause({
                 id: ClassroomManager.activeClassroom.guid,
                 name: ClassroomManager.activeClassroom.className,
                 description: ClassroomManager.activeClassroom.classDescription,
-                video: _video
+                video: {
+                    src: _video.src,
+                    caption: _video.caption,
+                    playing: false,
+                    position: _video.position ?? 0,
+                    volume: _video.volume ?? 1,
+                }
             })
         }
     }
 
     static SetVideoVolume(_video: ContentVideo): void {
-        if(!ClassroomManager.classController?.isTeacher()) return
-        
+        if (!ClassroomManager.classController?.isTeacher()) return
+
         if (ClassroomManager.activeClassroom) {
             CommunicationManager.EmitVideoVolume({
                 id: ClassroomManager.activeClassroom.guid,
                 name: ClassroomManager.activeClassroom.className,
                 description: ClassroomManager.activeClassroom.classDescription,
-                video: _video
+                video: {
+                    src: _video.src,
+                    caption: _video.caption,
+                    playing: _video.playing ?? true,
+                    position: _video.position ?? 0,
+                    volume: _video.volume ?? 1,
+                }
             })
         }
     }
