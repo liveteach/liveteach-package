@@ -20,10 +20,8 @@ export class Seat {
         this.id = _id
         this.entity = GlobalData.engine.addEntity()
 
-        let offset = Vector3.create(16, 0.3, 16)
-
         GlobalData.Transform.create(this.entity, {
-            position: Vector3.add(_position, offset),
+            position: _position,
             scale: Vector3.create(0.5, 1, 0.5)
         })
 
@@ -56,7 +54,7 @@ export class Seat {
 
         movePlayerTo({ newRelativePosition: GlobalData.Transform.get(this.entity).position, cameraTarget: Vector3.create(16, 2, 16) })
 
-     //   utils.timers.setTimeout(() => {
+        utils.timers.setTimeout(() => {
             let forwardVector: Vector3 = DclUtils.getForwardVector(GlobalData.Transform.get(GlobalData.engine.CameraEntity).rotation)
             let multiplyAmount: number = 0.3
             let multipliedVector: Vector3 = Vector3.create(forwardVector.x * multiplyAmount, forwardVector.y * multiplyAmount, forwardVector.z * multiplyAmount)
@@ -67,14 +65,14 @@ export class Seat {
 
             UserManager.myself.userType = UserType.student
 
-     //       utils.timers.setTimeout(() => {
+            utils.timers.setTimeout(() => {
                 AnimationHelper.sit()
-   //             utils.timers.setTimeout(() => {
+                utils.timers.setTimeout(() => {
                     SeatManager.seatedPosition = GlobalData.Transform.get(GlobalData.engine.PlayerEntity).position
                     SeatManager.seated = true
-      //          },100)
-      //      }, 200)
-     //   }, 200)
+                },100)
+            }, 200)
+        }, 200)
     }
 
     createCollider() { 
