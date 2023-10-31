@@ -136,7 +136,7 @@ export abstract class ClassroomManager {
     }
 
     static DisplayImage(_image: ContentImage): void {
-        if(!ClassroomManager.classController.isTeacher()) return
+        if(!ClassroomManager.classController?.isTeacher()) return
 
         if (ClassroomManager.activeClassroom) {
             CommunicationManager.EmitImageDisplay({
@@ -148,11 +148,37 @@ export abstract class ClassroomManager {
         }
     }
 
-    static DisplayVideo(_video: ContentVideo): void {
-        if(!ClassroomManager.classController.isTeacher()) return
+    static PlayVideo(_video: ContentVideo): void {
+        if(!ClassroomManager.classController?.isTeacher()) return
         
         if (ClassroomManager.activeClassroom) {
-            CommunicationManager.EmitVideoDisplay({
+            CommunicationManager.EmitVideoPlay({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription,
+                video: _video
+            })
+        }
+    }
+
+    static PauseVideo(_video: ContentVideo): void {
+        if(!ClassroomManager.classController?.isTeacher()) return
+        
+        if (ClassroomManager.activeClassroom) {
+            CommunicationManager.EmitVideoPause({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription,
+                video: _video
+            })
+        }
+    }
+
+    static SetVideoVolume(_video: ContentVideo): void {
+        if(!ClassroomManager.classController?.isTeacher()) return
+        
+        if (ClassroomManager.activeClassroom) {
+            CommunicationManager.EmitVideoVolume({
                 id: ClassroomManager.activeClassroom.guid,
                 name: ClassroomManager.activeClassroom.className,
                 description: ClassroomManager.activeClassroom.classDescription,
