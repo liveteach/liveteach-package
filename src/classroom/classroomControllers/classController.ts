@@ -1,4 +1,4 @@
-import { ClassPacket } from "../classroomObjects"
+import { ClassPacket } from "../classroomTypes"
 
 export abstract class ClassController {
     inSession: boolean = false

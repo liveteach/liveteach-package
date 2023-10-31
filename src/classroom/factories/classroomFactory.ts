@@ -1,5 +1,5 @@
 import { UserDataHelper } from "../userDataHelper";
-import { Classroom } from "../classroomObjects";
+import { Classroom } from "../classroomTypes";
 
 export abstract class ClassroomFactory {
     static CreateTeacherClassroom(_config: string, _className: string, _classDescription: string) : Classroom {

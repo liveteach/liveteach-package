@@ -1,4 +1,4 @@
-import { ClassContentPacket, ClassPacket, Classroom, StudentCommInfo } from "../classroomObjects";
+import { ClassContentPacket, ClassPacket, Classroom, StudentCommInfo } from "../classroomTypes";
 import { IClassroomChannel } from "./IClassroomChannel";
 import { ReferenceServerWebsocketManager} from "../websocket/ReferenceServerWebsocketManager";
 import {UserData} from "~system/UserIdentity";
@@ -12,30 +12,36 @@ export class ServerChannel implements IClassroomChannel{
     }
 
     emitClassActivation(_info: ClassPacket) {
-        ServerChannel.referenceServer.sendCommand("message","student",_info.toString(), "teacher")
+        ServerChannel.referenceServer.sendCommand("message","student", "activate_class",_info, "teacher")
     }
     emitClassDeactivation(_info: ClassPacket) {
-        ServerChannel.referenceServer.sendCommand("message","student",_info.toString(), "teacher")
+        ServerChannel.referenceServer.sendCommand("message","student", "deactivate_class",_info, "teacher")
     }
     emitClassStart(_info: ClassPacket) {
-        ServerChannel.referenceServer.sendCommand("message","student",_info.toString(), "teacher")
+        ServerChannel.referenceServer.sendCommand("message","student","start_class" ,_info, "teacher")
     }
     emitClassEnd(_info: ClassPacket) {
-        ServerChannel.referenceServer.sendCommand("message","student",_info.toString(), "teacher")
+        ServerChannel.referenceServer.sendCommand("message","student", "end_class",_info, "teacher")
     }
     emitClassJoin(_info: StudentCommInfo) {
-        ServerChannel.referenceServer.sendCommand("message","teacher",_info.toString(),"student")
+        ServerChannel.referenceServer.sendCommand("message","teacher", "join_class",_info,"student")
     }
     emitClassExit(_info: StudentCommInfo) {
-        ServerChannel.referenceServer.sendCommand("message","teacher",_info.toString(),"student")
+        ServerChannel.referenceServer.sendCommand("message","teacher", "exit_class",_info,"student")
     }
     emitClassroomConfig(_info: Classroom) {
-        ServerChannel.referenceServer.sendCommand("message","teacher",_info.toString(),"student")
+        ServerChannel.referenceServer.sendCommand("message","teacher", "config_class",_info,"student")
     }
     emitImageDisplay(_info: ClassContentPacket) {
         throw new Error("Method not implemented.");
     }
-    emitVideoDisplay(_info: ClassContentPacket) {
+    emitVideoPlay(_info: ClassContentPacket) {
+        throw new Error("Method not implemented.");
+    }
+    emitVideoPause(_info: ClassContentPacket) {
+        throw new Error("Method not implemented.");
+    }
+    emitVideoVolume(_info: ClassContentPacket) {
         throw new Error("Method not implemented.");
     }
     emitModelDisplay(_info: ClassContentPacket) {

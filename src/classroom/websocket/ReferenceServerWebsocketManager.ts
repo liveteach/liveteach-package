@@ -3,7 +3,8 @@ import {GetCurrentRealmResponse} from "~system/EnvironmentApi";
 import * as ui from 'dcl-ui-toolkit'
 import * as utils from '@dcl-sdk/utils'
 import {CommunicationManager} from "../comms/communicationManager";
-import {ClassPacket, StudentCommInfo, StudentInfo} from "../classroomObjects";
+import {ClassPacket, StudentCommInfo, StudentInfo} from "../classroomTypes";
+
 
 export class ReferenceServerWebsocketManager {
 
@@ -53,13 +54,14 @@ export class ReferenceServerWebsocketManager {
     }
 
 
-    public sendCommand(_type: string, topic: string, message: string, from:string) {
-        this.webSocket.send(this.getWebSocketMessage(_type, topic, message,from))
+    public sendCommand(_type: string, topic: string, message: string, payload: object, from:string) {
+        this.webSocket.send(this.getWebSocketMessage(_type, topic, message, payload,from))
     }
 
 
     public executeNext(message: any) {
         console.log("new-ws-message : " + JSON.stringify(message))
+        console.log(ReferenceServerWebsocketManager.guid)
         switch (message.type) {
             case "guid":
                 ReferenceServerWebsocketManager.guid = message.data
@@ -98,7 +100,7 @@ export class ReferenceServerWebsocketManager {
         }, 3000);
     }
 
-    getWebSocketMessage(_type: string, topic: string, message: string, from:string): string {
+    getWebSocketMessage(_type: string, topic: string, message: string, payload: object, from:string): string {
 
         let msg = {
             "header": {
@@ -108,6 +110,7 @@ export class ReferenceServerWebsocketManager {
             "body": {
                 "topic": topic,
                 "message": message,
+                "payload": payload,
                 "from": from,
                 "guid": ReferenceServerWebsocketManager.guid,
                 "wallet": this.wallet
