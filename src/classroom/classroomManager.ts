@@ -162,6 +162,7 @@ export abstract class ClassroomManager {
                     playing: true,
                     position: _video.position ?? 0,
                     volume: _video.volume ?? 1,
+                    ratio: _video.ratio
                 }
             })
         }
@@ -181,6 +182,7 @@ export abstract class ClassroomManager {
                     playing: false,
                     position: _video.position ?? 0,
                     volume: _video.volume ?? 1,
+                    ratio: _video.ratio
                 }
             })
         }
@@ -200,6 +202,7 @@ export abstract class ClassroomManager {
                     playing: _video.playing ?? true,
                     position: _video.position ?? 0,
                     volume: _video.volume ?? 1,
+                    ratio: _video.ratio
                 }
             })
         }

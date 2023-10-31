@@ -5,7 +5,7 @@ import { Classroom, StudentCommInfo, ClassPacket, ClassContentPacket } from "../
 import { Color3, Color4 } from "@dcl/sdk/math"
 import { IClassroomChannel } from "./IClassroomChannel"
 import { UserDataHelper } from "../userDataHelper"
-import { Material, VideoPlayer } from "@dcl/sdk/ecs"
+import { Material, Transform, VideoPlayer } from "@dcl/sdk/ecs"
 
 export class CommunicationManager {
     static messageBus: MessageBus
@@ -193,6 +193,12 @@ export class CommunicationManager {
                     metallic: 0,
                     roughness: 1
                 })
+
+                if (_info.image.ratio != undefined) {
+                    Transform.getMutable(screen).scale.x = Transform.getMutable(screen).scale.y * _info.image.ratio
+                } else {
+                    Transform.getMutable(screen).scale.x = Transform.getMutable(screen).scale.y
+                }
             });
             //TODO: Add log
         }
@@ -207,6 +213,26 @@ export class CommunicationManager {
                     videoPlayer.position = _info.video.position
                     videoPlayer.playing = _info.video.playing
                     videoPlayer.volume = _info.video.volume
+
+                    Material.setPbrMaterial(screen, {
+                        texture: Material.Texture.Video({
+                            videoPlayerEntity: screen
+                        }),
+                        emissiveTexture: Material.Texture.Video({
+                            videoPlayerEntity: screen
+                        }),
+                        emissiveColor: Color3.White(),
+                        emissiveIntensity: 1,
+                        specularIntensity: 0,
+                        metallic: 0,
+                        roughness: 1
+                    })
+
+                    if (_info.video.ratio != undefined) {
+                        Transform.getMutable(screen).scale.x = Transform.getMutable(screen).scale.y * _info.video.ratio
+                    } else {
+                        Transform.getMutable(screen).scale.x = Transform.getMutable(screen).scale.y
+                    }
                 }
             });
             //TODO: Add log

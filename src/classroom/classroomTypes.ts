@@ -1,12 +1,14 @@
 export type ContentImage = {
     src: string
     caption: string
+    ratio?: number
 }
 
 export type VideoSettings = {
     playing?: boolean
     position?: number
     volume?: number
+    ratio?: number
 }
 export type ContentVideo = {
     src: string
