@@ -79,7 +79,17 @@ export class CommunicationManager {
         //TODO: Add log
     }
 
-    static EmitVideoDisplay(_info: ClassContentPacket): void {
+    static EmitVideoPlay(_info: ClassContentPacket): void {
+        CommunicationManager.channel.emitVideoDisplay(_info)
+        //TODO: Add log
+    }
+
+    static EmitVideoPause(_info: ClassContentPacket): void {
+        CommunicationManager.channel.emitVideoDisplay(_info)
+        //TODO: Add log
+    }
+
+    static EmitVideoVolume(_info: ClassContentPacket): void {
         CommunicationManager.channel.emitVideoDisplay(_info)
         //TODO: Add log
     }
