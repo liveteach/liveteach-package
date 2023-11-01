@@ -1,6 +1,6 @@
 {
   "name": "@dclu/dclu-liveteach",
-  "version": "1.5.7",
+  "version": "1.5.8",
   "description": "Decentraland University shared library",
   "main": "index.js",
   "typings": "index.d.ts",
@@ -21,7 +21,8 @@
     "src/dclutils",
     "src/seating",
     "src/classroom",
-    "src/enums.ts"
+    "src/enums.ts",
+    "src/notifications"
   ],
   "dependencies": {
     "@dcl-sdk/utils": "^1.1.2",
