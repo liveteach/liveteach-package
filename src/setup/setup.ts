@@ -1,3 +1,4 @@
+import { Toaster } from "../notifications"
 
 export class GlobalData {
   static engine: any
@@ -39,5 +40,5 @@ export function setup(data: GlobalDataConfig): void {
   GlobalData.AvatarModifierArea = data.ecs.AvatarModifierArea
   GlobalData.AvatarModifierType = data.ecs.AvatarModifierType
 
-
+  new Toaster()
 }

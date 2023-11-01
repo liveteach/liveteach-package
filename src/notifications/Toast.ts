@@ -7,8 +7,8 @@ export class Toast {
     toastWidth: number = 400
     toastGrowSpeed:number = 500
     toastShrinkSpeed:number = 200
-    maxToastHeight: number = 50
-    minToastHeight: number = -200
+    maxToastHeight: number = -50
+    minToastHeight: number = -300
     currentToastHeight: number = this.minToastHeight
     reduceWidth:boolean = false
 
