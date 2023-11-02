@@ -1,3 +1,4 @@
+import { Vector3 } from "@dcl/sdk/math"
 import { ImageContentConfig, ModelContentConfig, VideoContentConfig } from "../../ClasstoomContent/types/mediaContentConfigs"
 
 export type StudentInfo = {
@@ -26,14 +27,16 @@ export class Classroom {
     className: string
     classDescription: string
     location: string
+    origin: Vector3
+    volume: Vector3
     capacity: number
     duration: number
     seatingEnabled: boolean
     videoPlaying: boolean
     skybox: string
-    displayedImage: string
-    displayedVideo: string
-    displayedModels: string[]
+    displayedImage: ImageContentConfig
+    displayedVideo: VideoContentConfig
+    displayedModel: ModelContentConfig
     students: StudentInfo[]
 }
 
