@@ -1,4 +1,4 @@
-import { ClassContentPacket, ClassPacket, Classroom, StudentCommInfo } from "../classroomTypes";
+import { ClassContentPacket, ClassPacket, Classroom, StudentCommInfo } from "../types/classroomTypes";
 
 export interface IClassroomChannel {
     emitClassActivation(_info: ClassPacket);

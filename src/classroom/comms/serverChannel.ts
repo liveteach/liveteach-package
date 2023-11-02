@@ -1,4 +1,4 @@
-import { ClassContentPacket, ClassPacket, Classroom, StudentCommInfo } from "../classroomTypes";
+import { ClassContentPacket, ClassPacket, Classroom, StudentCommInfo } from "../types/classroomTypes";
 import { IClassroomChannel } from "./IClassroomChannel";
 import { ReferenceServerWebsocketManager} from "../websocket/ReferenceServerWebsocketManager";
 import {UserData} from "~system/UserIdentity";

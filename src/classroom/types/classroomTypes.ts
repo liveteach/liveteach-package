@@ -1,29 +1,4 @@
-export type ContentImage = {
-    src: string
-    caption: string
-    ratio?: number
-}
-
-export type VideoSettings = {
-    playing?: boolean
-    position?: number
-    volume?: number
-    ratio?: number
-}
-export type ContentVideo = {
-    src: string
-    caption: string
-} & VideoSettings
-
-export type ModelAnimation = {
-    clip: string
-    loop: boolean
-}
-
-export type ContentModel = {
-    src: string
-    animations: ModelAnimation[]
-}
+import { ImageContentConfig, ModelContentConfig, VideoContentConfig } from "../../ClasstoomContent/types/mediaContentConfigs"
 
 export type StudentInfo = {
     studentID: string
@@ -37,9 +12,9 @@ export type ClassPacket = {
 }
 
 export type ClassContentPacket = ClassPacket & {
-    image?: ContentImage,
-    video?: ContentVideo,
-    model?: ContentModel
+    image?: ImageContentConfig,
+    video?: VideoContentConfig,
+    model?: ModelContentConfig
 }
 
 export type StudentCommInfo = ClassPacket & StudentInfo
@@ -66,7 +41,7 @@ export class ClassContent {
     id: string
     name: string
     description: string
-    images: ContentImage[]
-    videos: ContentVideo[]
-    models: ContentModel[]
+    images: ImageContentConfig[]
+    videos: VideoContentConfig[]
+    models: ModelContentConfig[]
 }
