@@ -1,11 +1,13 @@
 import { MessageBus } from "@dcl/sdk/message-bus"
 import { ClassroomManager } from "../classroomManager"
 import { DebugPanel } from "../ui/debugPanel"
-import { Classroom, StudentCommInfo, ClassPacket, ClassContentPacket } from "../classroomTypes"
+import { Classroom, StudentCommInfo, ClassPacket, ClassContentPacket } from "../types/classroomTypes"
 import { Color3, Color4, Vector3 } from "@dcl/sdk/math"
 import { IClassroomChannel } from "./IClassroomChannel"
 import { UserDataHelper } from "../userDataHelper"
 import { Entity, Material, Transform, VideoPlayer } from "@dcl/sdk/ecs"
+import { ScreenManager } from "../../ClasstoomContent/screenManager"
+import { VideoContent } from "../../ClasstoomContent/videoContent"
 
 export class CommunicationManager {
     static messageBus: MessageBus
@@ -184,8 +186,8 @@ export class CommunicationManager {
             //pause all videos
             CommunicationManager.pauseAllVideos()
 
-            ClassroomManager.screens.forEach(screen => {
-                Material.setPbrMaterial(screen, {
+            ClassroomManager.screenManager.screenDisplays.forEach(screen => {
+                Material.setPbrMaterial(screen.entity, {
                     texture: Material.Texture.Common({
                         src: _info.image.src
                     }),
@@ -199,9 +201,9 @@ export class CommunicationManager {
                 })
 
                 if (_info.image.ratio != undefined) {
-                    Transform.getMutable(screen).scale.x = Transform.getMutable(screen).scale.y * _info.image.ratio
+                    Transform.getMutable(screen.entity).scale.x = Transform.getMutable(screen.entity).scale.y * _info.image.ratio
                 } else {
-                    Transform.getMutable(screen).scale.x = Transform.getMutable(screen).scale.y
+                    Transform.getMutable(screen.entity).scale.x = Transform.getMutable(screen.entity).scale.y
                 }
             });
             //TODO: Add log
@@ -216,13 +218,13 @@ export class CommunicationManager {
             const videoPlayer = VideoPlayer.getMutableOrNull(videoPlayerEntity)
             if (videoPlayer === undefined || videoPlayer === null) return
 
-            ClassroomManager.screens.forEach(screen => {
+            ClassroomManager.screenManager.screenDisplays.forEach(screen => {
                 videoPlayer.src = _info.video.src
                 videoPlayer.playing = _info.video.playing
                 videoPlayer.volume = _info.video.volume
                 if (_info.video.position) videoPlayer.position = _info.video.position
 
-                Material.setPbrMaterial(screen, {
+                Material.setPbrMaterial(screen.entity, {
                     texture: Material.Texture.Video({
                         videoPlayerEntity: videoPlayerEntity
                     }),
@@ -237,9 +239,9 @@ export class CommunicationManager {
                 })
 
                 if (_info.video.ratio != undefined) {
-                    Transform.getMutable(screen).scale.x = Transform.getMutable(screen).scale.y * _info.video.ratio
+                    Transform.getMutable(screen.entity).scale.x = Transform.getMutable(screen.entity).scale.y * _info.video.ratio
                 } else {
-                    Transform.getMutable(screen).scale.x = Transform.getMutable(screen).scale.y
+                    Transform.getMutable(screen.entity).scale.x = Transform.getMutable(screen.entity).scale.y
                 }
             });
             //TODO: Add log
@@ -257,17 +259,17 @@ export class CommunicationManager {
     ////////////// HELPERS //////////////
 
     private static getVideoPlayerEntity(_src: string): Entity | null {
-        for (let videoPlayerEntity of ClassroomManager.videoPlayerEntities) {
-            if (videoPlayerEntity.src == _src) {
-                return videoPlayerEntity.entity
+        for (let videoContent of ClassroomManager.screenManager.videoContent.content) {
+            if (videoContent.configuration.src == _src) {
+                return (videoContent as VideoContent).videoEntity
             }
         }
         return null
     }
 
     private static pauseAllVideos(): void {
-        for (let videoPlayerEntity of ClassroomManager.videoPlayerEntities) {
-            const videoPlayer = VideoPlayer.getMutableOrNull(videoPlayerEntity.entity)
+        for (let videoContent of ClassroomManager.screenManager.videoContent.content) {
+            const videoPlayer = VideoPlayer.getMutableOrNull((videoContent as VideoContent).videoEntity)
             if (videoPlayer === undefined || videoPlayer === null) continue
     
             videoPlayer.playing = false

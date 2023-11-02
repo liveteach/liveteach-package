@@ -2,29 +2,29 @@ import { ClassController } from "./classroomControllers/classController";
 import { ClassControllerFactory } from "./factories/classControllerFactory";
 import { SmartContractManager } from "./smartContractManager";
 import { CommunicationManager } from "./comms/communicationManager";
-import { Classroom, ClassContent, ClassPacket, ContentImage, ContentVideo } from "./classroomTypes";
+import { Classroom, ClassContent, ClassPacket } from "./types/classroomTypes";
 import { ClassroomFactory } from "./factories/classroomFactory";
 import { UserDataHelper } from "./userDataHelper";
 import { UserType } from "../enums";
 import { IClassroomChannel } from "./comms/IClassroomChannel";
 import { Entity } from "@dcl/sdk/ecs";
+import { ImageContentConfig, VideoContentConfig } from "../ClasstoomContent/types/mediaContentConfigs";
+import { ScreenManager } from "../ClasstoomContent/screenManager";
 
 export abstract class ClassroomManager {
+    static screenManager: ScreenManager
     static classController: ClassController
     static activeClassroom: Classroom = null
     static activeContent: ClassContent = null
     static requestingJoinClass: boolean = false
     static classroomConfig: any
-    static screens: Entity[] = []
-    static videoPlayerEntities: { src: string, entity: Entity }[] = []
 
-    static Initialise(_classroomConfig: any, _channel: IClassroomChannel, _screens: Entity[], _videoPlayerEntities: { src: string, entity: Entity }[]): void {
+    static Initialise(_classroomConfig: any, _channel: IClassroomChannel): void {
         ClassroomManager.classroomConfig = _classroomConfig
-        ClassroomManager.screens = _screens
-        ClassroomManager.videoPlayerEntities = _videoPlayerEntities
 
         SmartContractManager.Initialise()
         CommunicationManager.Initialise(_channel)
+        ClassroomManager.screenManager = new ScreenManager()
     }
 
     static SetClassController(type: UserType): void {
@@ -55,6 +55,7 @@ export abstract class ClassroomManager {
                 ClassroomManager.activeContent = classContent
                 ClassroomManager.activeClassroom = ClassroomFactory.CreateTeacherClassroom(JSON.stringify(ClassroomManager.classroomConfig.classroom), ClassroomManager.activeContent.name, ClassroomManager.activeContent.description)
 
+                ClassroomManager.screenManager.loadContent()
                 CommunicationManager.EmitClassActivation({
                     id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
                     name: ClassroomManager.activeContent.name,
@@ -137,7 +138,7 @@ export abstract class ClassroomManager {
         }
     }
 
-    static DisplayImage(_image: ContentImage): void {
+    static DisplayImage(_image: ImageContentConfig): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
         if (ClassroomManager.activeClassroom) {
@@ -150,7 +151,7 @@ export abstract class ClassroomManager {
         }
     }
 
-    static PlayVideo(_video: ContentVideo): void {
+    static PlayVideo(_video: VideoContentConfig): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
         if (ClassroomManager.activeClassroom) {
@@ -170,7 +171,7 @@ export abstract class ClassroomManager {
         }
     }
 
-    static PauseVideo(_video: ContentVideo): void {
+    static PauseVideo(_video: VideoContentConfig): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
         if (ClassroomManager.activeClassroom) {
@@ -190,7 +191,7 @@ export abstract class ClassroomManager {
         }
     }
 
-    static SetVideoVolume(_video: ContentVideo): void {
+    static SetVideoVolume(_video: VideoContentConfig): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
         if (ClassroomManager.activeClassroom) {
