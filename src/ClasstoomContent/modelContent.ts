@@ -44,7 +44,7 @@ export class ModelContent extends MediaContent {
     play(): void {
         super.play()
         this.playAnimation()
-        Transform.getMutable(this.entity).scale = (this.configuration as ModelContentConfig).scale
+        Transform.getMutable(this.entity).scale = (this.configuration as ModelContentConfig).scale ?? Vector3.One()
     }
 
     stop(): void {
