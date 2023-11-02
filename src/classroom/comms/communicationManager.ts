@@ -1,13 +1,12 @@
 import { MessageBus } from "@dcl/sdk/message-bus"
 import { ClassroomManager } from "../classroomManager"
 import { DebugPanel } from "../ui/debugPanel"
-import { Classroom, StudentCommInfo, ClassPacket, ClassContentPacket } from "../types/classroomTypes"
-import { Color3, Color4, Vector3 } from "@dcl/sdk/math"
+import { Color3, Color4 } from "@dcl/sdk/math"
 import { IClassroomChannel } from "./IClassroomChannel"
 import { UserDataHelper } from "../userDataHelper"
+import { ClassContentPacket, ClassPacket, Classroom, StudentCommInfo } from "../types/classroomTypes"
 import { Entity, Material, Transform, VideoPlayer } from "@dcl/sdk/ecs"
-import { ScreenManager } from "../../classroomContent/screenManager"
-import { VideoContent } from "../../classroomContent/videoContent"
+import { VideoContent } from "../../classroomContent"
 
 export class CommunicationManager {
     static messageBus: MessageBus

@@ -8,9 +8,8 @@ import { UserDataHelper } from "./userDataHelper";
 import { UserType } from "../enums";
 import { IClassroomChannel } from "./comms/IClassroomChannel";
 import { Entity, Transform, engine } from "@dcl/sdk/ecs";
-import { ImageContentConfig, VideoContentConfig } from "../classroomContent/types/mediaContentConfigs";
-import { ScreenManager } from "../classroomContent/screenManager";
 import { Quaternion, Vector3 } from "@dcl/sdk/math";
+import { ImageContentConfig, ScreenManager, VideoContentConfig } from "../classroomContent";
 
 export abstract class ClassroomManager {
     static screenManager: ScreenManager
