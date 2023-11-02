@@ -7,22 +7,6 @@ export class ImageContent extends MediaContent {
         super(_screenConfig)
     }
 
-    play(): void {
-        super.play()
-    }
-
-    stop(): void {
-        super.stop()
-    }
-
-    resume(): void {
-        super.resume()
-    }
-
-    pause(): void {
-        super.pause()
-    }
-
     getContentType(): MediaContentType {
         return MediaContentType.image
     }

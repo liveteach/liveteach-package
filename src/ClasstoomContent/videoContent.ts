@@ -47,5 +47,4 @@ export class VideoContent extends MediaContent {
     update(_dt: number): void {
 
     }
-
 }
