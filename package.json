@@ -1,6 +1,6 @@
 {
   "name": "@dclu/dclu-liveteach",
-  "version": "1.5.13",
+  "version": "1.5.14",
   "description": "Decentraland University shared library",
   "main": "index.js",
   "typings": "index.d.ts",

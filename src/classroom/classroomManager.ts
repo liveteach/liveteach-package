@@ -66,6 +66,7 @@ export abstract class ClassroomManager {
                 ClassroomManager.activeClassroom = ClassroomFactory.CreateTeacherClassroom(JSON.stringify(ClassroomManager.classroomConfig.classroom), ClassroomManager.activeContent.name, ClassroomManager.activeContent.description)
 
                 ClassroomManager.screenManager.loadContent()
+
                 CommunicationManager.EmitClassActivation({
                     id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
                     name: ClassroomManager.activeContent.name,
