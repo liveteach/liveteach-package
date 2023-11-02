@@ -1,6 +1,6 @@
-import { MediaContentType } from "./enums";
-import { IMediaContent } from "./interfaces/IMediaContent";
-import { MediaContentConfig } from "./types/mediaContentConfigs";
+import { MediaContentType } from "./enums"
+import { IMediaContent } from "./interfaces/IMediaContent"
+import { MediaContentConfig } from "./types/mediaContentConfigs"
 
 export abstract class MediaContent implements IMediaContent {
     configuration: MediaContentConfig

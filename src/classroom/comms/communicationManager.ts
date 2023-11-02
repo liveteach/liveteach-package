@@ -6,8 +6,8 @@ import { Color3, Color4, Vector3 } from "@dcl/sdk/math"
 import { IClassroomChannel } from "./IClassroomChannel"
 import { UserDataHelper } from "../userDataHelper"
 import { Entity, Material, Transform, VideoPlayer } from "@dcl/sdk/ecs"
-import { ScreenManager } from "../../ClasstoomContent/screenManager"
-import { VideoContent } from "../../ClasstoomContent/videoContent"
+import { ScreenManager } from "../../classroomContent/screenManager"
+import { VideoContent } from "../../classroomContent/videoContent"
 
 export class CommunicationManager {
     static messageBus: MessageBus

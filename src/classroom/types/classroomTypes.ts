@@ -1,5 +1,5 @@
 import { Vector3 } from "@dcl/sdk/math"
-import { ImageContentConfig, ModelContentConfig, VideoContentConfig } from "../../ClasstoomContent/types/mediaContentConfigs"
+import { ImageContentConfig, ModelContentConfig, VideoContentConfig } from "../../classroomContent/types/mediaContentConfigs"
 
 export type StudentInfo = {
     studentID: string
