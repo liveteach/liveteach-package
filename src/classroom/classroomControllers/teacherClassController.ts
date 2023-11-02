@@ -1,7 +1,7 @@
 import { ClassController } from "./classController";
 import { ControllerUI } from "../ui/controllerUI";
 import { ClassroomManager } from "../classroomManager";
-import { ClassPacket } from "../classroomTypes";
+import { ClassPacket } from "../types/classroomTypes";
 
 export class TeacherClassController extends ClassController {
     activated: boolean = false

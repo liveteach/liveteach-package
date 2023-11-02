@@ -32,11 +32,13 @@
         "videos": [
             {
                 "src": "video/pexels-artem-podrez.mp4",
-                "caption": "Video Caption 1"
+                "caption": "Video Caption 1",
+                "ratio": 1.7
             },
             {
                 "src": "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8",
-                "caption": "Video Caption 2"
+                "caption": "Video Caption 2",
+                "ratio": 1.7
             }
         ],
         "models": [

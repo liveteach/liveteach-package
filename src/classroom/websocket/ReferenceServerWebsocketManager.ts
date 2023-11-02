@@ -3,7 +3,7 @@ import {GetCurrentRealmResponse} from "~system/EnvironmentApi";
 import * as ui from 'dcl-ui-toolkit'
 import * as utils from '@dcl-sdk/utils'
 import {CommunicationManager} from "../comms/communicationManager";
-import {ClassPacket, StudentCommInfo, StudentInfo} from "../classroomTypes";
+import {ClassPacket, StudentCommInfo, StudentInfo} from "../types/classroomTypes";
 
 
 export class ReferenceServerWebsocketManager {

@@ -1,4 +1,4 @@
-import { ClassContent } from "../classroomTypes";
+import { ClassContent } from "../types/classroomTypes";
 
 export abstract class ClassContentFactory {
     static Create(_config: string) : ClassContent {
