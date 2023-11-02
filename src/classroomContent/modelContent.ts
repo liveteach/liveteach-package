@@ -15,7 +15,7 @@ export class ModelContent extends MediaContent {
         Transform.create(this.entity, {
             parent: _config.parent,
             position: _config.position,
-            rotation: _config.rotation,
+            rotation: _config.rotation ?? Quaternion.Identity(),
             scale: Vector3.Zero()
         })
 

@@ -7,6 +7,7 @@ import { ClassroomManager } from "../classroom";
 import { ScreenContentConfig } from "./types/mediaContentConfigs";
 import { VideoContent } from "./videoContent";
 import { ImageContent } from "./imageContent";
+import { ModelContent } from "./modelContent";
 
 export class ScreenManager {
 
@@ -17,7 +18,7 @@ export class ScreenManager {
     videoContent: ContentList
     modelContent: ContentList
 
-    poweredOn: boolean = true
+    poweredOn: boolean = false
 
     constructor() {
         engine.addSystem(this.update.bind(this))
@@ -92,6 +93,8 @@ export class ScreenManager {
     }
 
     powerToggle() {
+        if (ClassroomManager.activeContent === undefined || ClassroomManager.activeContent === null) return
+        
         this.poweredOn = !this.poweredOn
 
         // When turning on try and find content to auto set to
@@ -122,8 +125,8 @@ export class ScreenManager {
         if (ClassroomManager.activeContent === undefined || ClassroomManager.activeContent === null) return
 
         let imageContentList: ImageContent[] = []
-        let videoContentList: ImageContent[] = []
-        let modelContentList: ImageContent[] = []
+        let videoContentList: VideoContent[] = []
+        let modelContentList: ModelContent[] = []
 
         ClassroomManager.activeContent.images.forEach(image => {
             imageContentList.push(new ImageContent({
@@ -144,8 +147,20 @@ export class ScreenManager {
             }))
         });
 
+        ClassroomManager.activeContent.models.forEach(model => {
+            console.log(model)
+            modelContentList.push(new ModelContent({
+                src: model.src,
+                caption: model.caption,
+                position: Vector3.create(0, 0, 0),
+                parent: ClassroomManager.originEntity,
+                animations: []
+            }))
+        });
+
         this.imageContent = new ContentList(imageContentList)
         this.videoContent = new ContentList(videoContentList)
+        this.modelContent = new ContentList(modelContentList)
     }
 
     private playContent() {
@@ -188,7 +203,7 @@ export class ScreenManager {
     }
 
     private update(_dt: number) {
-        if (this.poweredOn) {
+        if (this.poweredOn && this.currentContent) {
             let content = this.currentContent.getContent()
             content.update(_dt)
             if (!content.isShowing) {
