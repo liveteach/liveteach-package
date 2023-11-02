@@ -7,9 +7,10 @@ import { ClassroomFactory } from "./factories/classroomFactory";
 import { UserDataHelper } from "./userDataHelper";
 import { UserType } from "../enums";
 import { IClassroomChannel } from "./comms/IClassroomChannel";
-import { Entity } from "@dcl/sdk/ecs";
+import { Entity, Transform, engine } from "@dcl/sdk/ecs";
 import { ImageContentConfig, VideoContentConfig } from "../ClasstoomContent/types/mediaContentConfigs";
 import { ScreenManager } from "../ClasstoomContent/screenManager";
+import { Quaternion, Vector3 } from "@dcl/sdk/math";
 
 export abstract class ClassroomManager {
     static screenManager: ScreenManager
@@ -18,6 +19,7 @@ export abstract class ClassroomManager {
     static activeContent: ClassContent = null
     static requestingJoinClass: boolean = false
     static classroomConfig: any
+    static originEntity: Entity
 
     static Initialise(_classroomConfig: any, _channel: IClassroomChannel): void {
         ClassroomManager.classroomConfig = _classroomConfig
@@ -25,6 +27,15 @@ export abstract class ClassroomManager {
         SmartContractManager.Initialise()
         CommunicationManager.Initialise(_channel)
         ClassroomManager.screenManager = new ScreenManager()
+
+        ClassroomManager.originEntity = engine.addEntity()
+        Transform.create(ClassroomManager.originEntity, {
+            position: ClassroomManager.classroomConfig.classroom.origin
+        })
+    }
+
+    static AddScreen(_position: Vector3, _rotation: Quaternion, _scale: Vector3) {
+        ClassroomManager.screenManager.addScreen(_position, _rotation, _scale, ClassroomManager.originEntity)
     }
 
     static SetClassController(type: UserType): void {
