@@ -10,9 +10,9 @@
   "author": "Decentraland University",
   "license": "ISC",
   "devDependencies": {
-    "@dcl/sdk": "^7.3.17",
-    "typescript": "^5.1.6",
-    "@dcl-sdk/utils": "^1.1.2"
+    "@dcl-sdk/utils": "^1.1.2",
+    "@dcl/sdk": "^7.3.26",
+    "typescript": "^5.1.6"
   },
   "files": [
     "dist",
@@ -26,10 +26,10 @@
   ],
   "dependencies": {
     "@dcl-sdk/utils": "^1.1.2",
-    "dcl-ui-toolkit": "^0.9.1",
-    "sdk7-npc-utils": "^1.0.0",
     "core-js": "^3.32.0",
+    "dcl-ui-toolkit": "^0.9.1",
     "eth-connect": "^6.2.1",
+    "sdk7-npc-utils": "^1.0.0",
     "text-encoding": "^0.7.0"
   }
 }
