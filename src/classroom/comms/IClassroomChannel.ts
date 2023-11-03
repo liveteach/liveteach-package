@@ -1,16 +1,16 @@
 import { ClassContentPacket, ClassPacket, Classroom, StudentCommInfo } from "../types/classroomTypes";
 
 export interface IClassroomChannel {
-    emitClassActivation(_info: ClassPacket);
-    emitClassDeactivation(_info: ClassPacket);
-    emitClassStart(_info: ClassPacket);
-    emitClassEnd(_info: ClassPacket);
-    emitClassJoin(_info: StudentCommInfo);
-    emitClassExit(_info: StudentCommInfo);
-    emitClassroomConfig(_info: Classroom);
-    emitImageDisplay(_info: ClassContentPacket);
-    emitVideoPlay(_info: ClassContentPacket);
-    emitVideoPause(_info: ClassContentPacket);
-    emitVideoVolume(_info: ClassContentPacket);
-    emitModelDisplay(_info: ClassContentPacket);
+    emitClassActivation(_info: ClassPacket):void;
+    emitClassDeactivation(_info: ClassPacket):void;
+    emitClassStart(_info: ClassPacket):void;
+    emitClassEnd(_info: ClassPacket):void;
+    emitClassJoin(_info: StudentCommInfo):void;
+    emitClassExit(_info: StudentCommInfo):void;
+    emitClassroomConfig(_info: Classroom):void;
+    emitImageDisplay(_info: ClassContentPacket):void;
+    emitVideoPlay(_info: ClassContentPacket):void;
+    emitVideoPause(_info: ClassContentPacket):void;
+    emitVideoVolume(_info: ClassContentPacket):void;
+    emitModelDisplay(_info: ClassContentPacket):void;
 }
