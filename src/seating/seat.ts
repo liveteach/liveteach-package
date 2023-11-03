@@ -15,8 +15,9 @@ export class Seat {
     id: number
     entity: Entity
     claimed: boolean = false
+    lookAtTarget:Vector3 = Vector3.Zero()
 
-    constructor(_id: number, _position: Vector3) {
+    constructor(_id: number, _position: Vector3, _lookAtTarget:Vector3= Vector3.Zero()) {
         this.id = _id
         this.entity = GlobalData.engine.addEntity()
 
@@ -52,14 +53,22 @@ export class Seat {
         this.removeCollider()
         ui.createComponent(ui.Announcement, { value: 'Seat already taken', duration: 50 })
 
-        movePlayerTo({ newRelativePosition: GlobalData.Transform.get(this.entity).position, cameraTarget: Vector3.create(16, 2, 16) })
+        if(this.lookAtTarget!=Vector3.Zero()){
+            movePlayerTo({ newRelativePosition: GlobalData.Transform.get(this.entity).position, cameraTarget: this.lookAtTarget})
+        } else {
+            movePlayerTo({ newRelativePosition: GlobalData.Transform.get(this.entity).position})
+        }
 
         utils.timers.setTimeout(() => {
             let forwardVector: Vector3 = DclUtils.getForwardVector(GlobalData.Transform.get(GlobalData.engine.CameraEntity).rotation)
             let multiplyAmount: number = 0.3
             let multipliedVector: Vector3 = Vector3.create(forwardVector.x * multiplyAmount, forwardVector.y * multiplyAmount, forwardVector.z * multiplyAmount)
             let teleportPosition: Vector3 = Vector3.add(GlobalData.Transform.get(this.entity).position, multipliedVector)
-            movePlayerTo({ newRelativePosition: teleportPosition, cameraTarget: Vector3.create(16, 2, 16) })
+            if(this.lookAtTarget!=Vector3.Zero()){
+                movePlayerTo({ newRelativePosition: teleportPosition, cameraTarget: this.lookAtTarget})
+            } else {
+                movePlayerTo({ newRelativePosition: teleportPosition})
+            }
 
             AnimationHelper.sit()
 
