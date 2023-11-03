@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Entity} from "@dcl/sdk/ecs";
+import { Entity } from "@dcl/sdk/ecs";
 import { SeatingData } from "./SeatingData";
 import { Seat } from "./seat";
 import { MessageBus } from '@dcl/sdk/message-bus'
@@ -30,10 +30,16 @@ export class SeatManager {
     static connectedToWeb3: boolean = false
 
     seatingData: SeatingData
+    hideAreaPosition: Vector3
+    hideAreaVolume: Vector3
+    debugArea: boolean
 
-    constructor(_seatingData: SeatingData) {
+    constructor(_seatingData: SeatingData, _hideAreaPosition: Vector3, _hideAreaVolume: Vector3, _debugArea: boolean = false) {
         SeatManager.hideAvatarEntity = GlobalData.engine.addEntity()
         this.seatingData = _seatingData
+        this.hideAreaPosition = _hideAreaPosition
+        this.hideAreaVolume = _hideAreaVolume
+        this.debugArea = _debugArea
 
         GlobalData.executeTask(async () => {
             let userData = await getUserData({})
@@ -46,7 +52,7 @@ export class SeatManager {
             this.load()
         })
     }
- 
+
     load() {
         this.seatingData.seats.forEach(chair => {
             SeatManager.seats.push(new Seat(chair.id, chair.position, chair.lookAtTarget))
@@ -78,17 +84,24 @@ export class SeatManager {
         // Hide not seated avatars - don't do this with out web3
         if (SeatManager.connectedToWeb3) {
             GlobalData.AvatarModifierArea.create(SeatManager.hideAvatarEntity, {
-                area: Vector3.create(5, 4, 8.5),
+                area: this.hideAreaVolume,
                 modifiers: [GlobalData.AvatarModifierType.AMT_HIDE_AVATARS],
                 excludeIds: SeatManager.seatedAvatarList.sort(),
             })
 
-            //MeshRenderer.setBox(hideAvatarEntity)
+            if (this.debugArea) {
+                MeshRenderer.setBox(hideAvatarEntity)
+                GlobalData.Transform.create(SeatManager.hideAvatarEntity, {
+                    position: this.hideAreaPosition,
+                    scale: this.hideAreaVolume,
+                })
+            }
+            else {
 
-            GlobalData.Transform.create(SeatManager.hideAvatarEntity, {
-                position: Vector3.create(22, 2, 16),
-                //scale: Vector3.create(5, 4, 8.5),
-            })
+                GlobalData.Transform.create(SeatManager.hideAvatarEntity, {
+                    position: this.hideAreaPosition,
+                })
+            }
 
             SeatManager.addAddress(SeatManager.myAddress)
         }
@@ -115,7 +128,7 @@ export class SeatManager {
 
 
             if (SeatManager.seated && !match) {
-                
+
                 // Give up my seat as I have moved from it
                 console.log("Seat unclaimed sent")
                 SeatManager.sceneMessageBus.emit("UnClaimedSeat", { id: SeatManager.mySeatID, address: SeatManager.myAddress })
