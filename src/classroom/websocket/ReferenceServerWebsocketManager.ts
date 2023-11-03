@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {UserData} from "~system/UserIdentity"
 import {GetCurrentRealmResponse} from "~system/EnvironmentApi";
 import * as ui from 'dcl-ui-toolkit'

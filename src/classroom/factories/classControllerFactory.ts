@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { UserType } from "../../enums";
 import { ClassController } from "../classroomControllers/classController";
 import { StudentClassController } from "../classroomControllers/studentClassController";

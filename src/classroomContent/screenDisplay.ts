@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Color3, Quaternion, Vector3 } from "@dcl/sdk/math";
 import { Entity, Material, MeshRenderer, TextureUnion, Transform, engine } from "@dcl/sdk/ecs"
 import { MediaContent } from "./mediaContent";

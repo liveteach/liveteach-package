@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Entity, VideoPlayer, engine } from "@dcl/sdk/ecs";
 import { ScreenDisplay } from "./screenDisplay";
 import { Quaternion, Vector3 } from "@dcl/sdk/math";

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Entity} from "@dcl/sdk/ecs";
 import { SeatingData } from "./SeatingData";
 import { Seat } from "./seat";

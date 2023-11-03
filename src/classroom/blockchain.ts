@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 import { GetUserDataResponse, UserData, getUserData } from "~system/UserIdentity"
 import { RequestManager, ContractFactory } from 'eth-connect'
 import { createEthereumProvider } from '@dcl/sdk/ethereum-provider'

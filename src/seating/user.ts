@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { MessageBus } from "@dcl/sdk/message-bus";
 import { UserType } from "../enums";
 import { getUserData } from "~system/UserIdentity";

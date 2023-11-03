@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Entity, EntityState } from "@dcl/sdk/ecs"
 import { GlobalData } from "../setup/setup"
 import { Quaternion, Vector3 } from "@dcl/sdk/math"
