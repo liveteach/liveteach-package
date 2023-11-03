@@ -5,7 +5,7 @@ import { Quaternion, Vector3 } from "@dcl/sdk/math";
 import { ContentList } from "./contentList";
 import { MediaContentType } from "./enums";
 import { ClassroomManager } from "../classroom";
-import { ScreenContentConfig } from "./types/mediaContentConfigs";
+import { ImageContentConfig, VideoContentConfig, ModelContentConfig } from "./types/mediaContentConfigs";
 import { VideoContent } from "./videoContent";
 import { ImageContent } from "./imageContent";
 import { ModelContent } from "./modelContent";
@@ -27,7 +27,7 @@ export class ScreenManager {
     }
 
     next() {
-        if (!this.poweredOn) {
+        if (!ClassroomManager.classController.isTeacher() || !this.poweredOn) {
             return
         }
         this.currentContent.next()
@@ -35,7 +35,7 @@ export class ScreenManager {
     }
 
     previous() {
-        if (!this.poweredOn) {
+        if (!ClassroomManager.classController.isTeacher() || !this.poweredOn) {
             return
         }
         this.currentContent.previous()
@@ -43,7 +43,7 @@ export class ScreenManager {
     }
 
     toStart() {
-        if (!this.poweredOn) {
+        if (!ClassroomManager.classController.isTeacher() || !this.poweredOn) {
             return
         }
         this.currentContent.toStart()
@@ -51,7 +51,7 @@ export class ScreenManager {
     }
 
     toEnd() {
-        if (!this.poweredOn) {
+        if (!ClassroomManager.classController.isTeacher() || !this.poweredOn) {
             return
         }
         this.currentContent.toEnd()
@@ -59,10 +59,11 @@ export class ScreenManager {
     }
 
     showPresentation() {
-        console.log("show presentation")
-        if (!this.poweredOn) {
+        if (!ClassroomManager.classController.isTeacher() || !this.poweredOn) {
             return
         }
+
+        console.log("show presentation")
         if (this.currentContent != undefined) {
             this.currentContent.stop()
         }
@@ -71,10 +72,11 @@ export class ScreenManager {
     }
 
     showVideo() {
-        console.log("show video")
-        if (!this.poweredOn) {
+        if (!ClassroomManager.classController.isTeacher() || !this.poweredOn) {
             return
         }
+
+        console.log("show video")
         if (this.currentContent != undefined) {
             this.currentContent.stop()
         }
@@ -83,10 +85,11 @@ export class ScreenManager {
     }
 
     showModel() {
-        console.log("show model")
-        if (!this.poweredOn) {
+        if (!ClassroomManager.classController.isTeacher() || !this.poweredOn) {
             return
         }
+
+        console.log("show model")
         if (this.currentContent != undefined) {
             this.currentContent.stop()
         }
@@ -95,7 +98,7 @@ export class ScreenManager {
     }
 
     toggleMute() {
-        if (!this.poweredOn) {
+        if (!ClassroomManager.classController.isTeacher() || !this.poweredOn) {
             return
         }
 
@@ -116,7 +119,7 @@ export class ScreenManager {
     }
 
     playPause() {
-        if (!this.poweredOn) {
+        if (!ClassroomManager.classController.isTeacher() || !this.poweredOn) {
             return
         }
         if (this.currentContent != undefined) {
@@ -133,8 +136,13 @@ export class ScreenManager {
     }
 
 
-    powerToggle() {
-        if (ClassroomManager.activeContent === undefined || ClassroomManager.activeContent === null) return
+    powerToggle(_allowStudentControl: boolean = false) {
+        if (ClassroomManager.classController === undefined || ClassroomManager.classController === null) {
+            return
+        }
+
+        if ((!_allowStudentControl || !ClassroomManager.classController.isStudent())
+            && (ClassroomManager.activeContent === undefined || ClassroomManager.activeContent === null || !ClassroomManager.classController.isTeacher())) return
 
         this.poweredOn = !this.poweredOn
 
@@ -168,7 +176,8 @@ export class ScreenManager {
     }
 
     loadContent() {
-        if (ClassroomManager.activeContent === undefined || ClassroomManager.activeContent === null) return
+        if (ClassroomManager.activeContent === undefined || ClassroomManager.activeContent === null
+            || ClassroomManager.classController === undefined || ClassroomManager.classController === null || !ClassroomManager.classController.isTeacher()) return
 
         let imageContentList: ImageContent[] = []
         let videoContentList: VideoContent[] = []
@@ -197,7 +206,8 @@ export class ScreenManager {
             modelContentList.push(new ModelContent({
                 src: model.src,
                 caption: model.caption,
-                position: Vector3.create(0, 0, 0),
+                position: model.position ?? Vector3.Zero(),
+                scale: model.scale ?? Vector3.One(),
                 parent: ClassroomManager.originEntity,
                 animations: []
             }))
@@ -208,9 +218,110 @@ export class ScreenManager {
         this.modelContent = new ContentList(modelContentList)
     }
 
-    private playContent() {
+    addStudentContent(_imageContent: ImageContentConfig, _videoContent: VideoContentConfig, _modelContent: ModelContentConfig) {
+        if (ClassroomManager.classController === undefined || ClassroomManager.classController === null || !ClassroomManager.classController.isStudent()) return
+
+        if (this.currentContent) {
+            this.currentContent.stop()
+        }
+
+        if (_imageContent) {
+            const imageContent = new ImageContent({
+                src: _imageContent.src,
+                caption: _imageContent.caption,
+                ratio: _imageContent.ratio
+            })
+
+            if (this.imageContent) {
+                let index: number = -1
+                for (let i = 0; i < this.imageContent.content.length; i++) {
+                    if (this.imageContent.content[i].configuration.src == _imageContent.src) {
+                        index = i
+                        break
+                    }
+                }
+                if (index < 0) {
+                    this.imageContent.content.push(imageContent)
+                    this.imageContent.index = this.imageContent.content.length - 1
+                }
+                else {
+                    this.imageContent.index = index
+                }
+            }
+            else {
+                this.imageContent = new ContentList([imageContent])
+            }
+            this.currentContent = this.imageContent
+        }
+
+        if (_videoContent) {
+            const videoContent = new VideoContent({
+                src: _videoContent.src,
+                caption: _videoContent.caption,
+                ratio: _videoContent.ratio,
+                playing: _videoContent.playing,
+                position: _videoContent.position,
+                volume: _videoContent.volume
+            })
+
+            if (this.videoContent) {
+                let index: number = -1
+                for (let i = 0; i < this.videoContent.content.length; i++) {
+                    if (this.videoContent.content[i].configuration.src == _videoContent.src) {
+                        index = i
+                        break
+                    }
+                }
+                if (index < 0) {
+                    this.videoContent.content.push(videoContent)
+                    this.videoContent.index = this.videoContent.content.length - 1
+                }
+                else {
+                    this.videoContent.index = index
+                }
+            }
+            else {
+                this.videoContent = new ContentList([videoContent])
+            }
+            this.currentContent = this.videoContent
+        }
+
+        if (_modelContent) {
+            const modelContent = new ModelContent({
+                src: _modelContent.src,
+                caption: _modelContent.caption,
+                position: _modelContent.position,
+                rotation: _modelContent.rotation,
+                scale: _modelContent.scale,
+                parent: _modelContent.parent,
+                animations: _modelContent.animations
+            })
+
+            if (this.modelContent) {
+                let index: number = -1
+                for (let i = 0; i < this.modelContent.content.length; i++) {
+                    if (this.modelContent.content[i].configuration.src == _modelContent.src) {
+                        index = i
+                        break
+                    }
+                }
+                if (index < 0) {
+                    this.modelContent.content.push(modelContent)
+                    this.modelContent.index = this.modelContent.content.length - 1
+                }
+                else {
+                    this.modelContent.index = index
+                }
+            }
+            else {
+                this.modelContent = new ContentList([modelContent])
+            }
+            this.currentContent = this.modelContent
+        }
+    }
+
+    playContent() {
         const content = this.currentContent.getContent()
-        const screenConfig = content.configuration as ScreenContentConfig
 
         if (content.getContentType() == MediaContentType.model) {
             content.play()
@@ -225,31 +336,37 @@ export class ScreenManager {
             (content as VideoContent).setVolume(this.muted ? 0 : 1)
         }
 
+        if (ClassroomManager.classController === undefined || ClassroomManager.classController === null || !ClassroomManager.classController.isTeacher()) return
+
         switch (content.getContentType()) {
             case MediaContentType.image:
+                const imageConfig = content.configuration as ImageContentConfig
                 ClassroomManager.DisplayImage({
-                    src: content.configuration.src,
-                    "caption": "caption",
-                    ratio: screenConfig.ratio
+                    src: imageConfig.src,
+                    caption: imageConfig.caption,
+                    ratio: imageConfig.ratio
                 })
                 break
             case MediaContentType.video:
+                const videoConfig = content.configuration as VideoContentConfig
                 ClassroomManager.PlayVideo({
-                    src: content.configuration.src,
-                    "caption": "caption",
-                    ratio: screenConfig.ratio,
+                    src: videoConfig.src,
+                    caption: videoConfig.caption,
+                    ratio: videoConfig.ratio,
                     position: VideoPlayer.getMutable((content as VideoContent).videoEntity).position
                 })
                 break
             case MediaContentType.model:
-                /*
-                ClassroomManager.PlayVideo({
-                    src: content.configuration.src,
-                    "caption": "caption",
-                    ratio: screenConfig.ratio,
-                    position: VideoPlayer.getMutable((content as VideoContent).videoEntity).position
+                const modelConfig = content.configuration as ModelContentConfig
+                ClassroomManager.DisplayModel({
+                    src: modelConfig.src,
+                    caption: modelConfig.caption,
+                    animations: modelConfig.animations,
+                    parent: modelConfig.parent,
+                    position: modelConfig.position,
+                    rotation: modelConfig.rotation,
+                    scale: modelConfig.scale
                 })
-                */
                 break
         }
     }

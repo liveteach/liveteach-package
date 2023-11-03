@@ -10,7 +10,7 @@ import { UserType } from "../enums";
 import { IClassroomChannel } from "./comms/IClassroomChannel";
 import { Entity, Transform, engine } from "@dcl/sdk/ecs";
 import { Quaternion, Vector3 } from "@dcl/sdk/math";
-import { ImageContentConfig, ScreenManager, VideoContentConfig } from "../classroomContent";
+import { ImageContentConfig, ScreenManager, VideoContentConfig, ModelContentConfig } from "../classroomContent";
 
 export abstract class ClassroomManager {
     static screenManager: ScreenManager
@@ -219,6 +219,19 @@ export abstract class ClassroomManager {
                     volume: _video.volume ?? 1,
                     ratio: _video.ratio
                 }
+            })
+        }
+    }
+
+    static DisplayModel(_model: ModelContentConfig): void {
+        if (!ClassroomManager.classController?.isTeacher()) return
+
+        if (ClassroomManager.activeClassroom) {
+            CommunicationManager.EmitModelDisplay({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription,
+                model: _model
             })
         }
     }
