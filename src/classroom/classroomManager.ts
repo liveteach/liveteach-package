@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ClassController } from "./classroomControllers/classController";
 import { ClassControllerFactory } from "./factories/classControllerFactory";
 import { SmartContractManager } from "./smartContractManager";

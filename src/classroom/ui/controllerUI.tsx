@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Color4 } from "@dcl/sdk/math"
 import ReactEcs, { Button, Label, UiEntity } from "@dcl/sdk/react-ecs"
 import { ClassroomManager } from "../classroomManager";

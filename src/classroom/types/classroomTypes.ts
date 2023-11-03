@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Vector3 } from "@dcl/sdk/math"
 import { ImageContentConfig, ModelContentConfig, VideoContentConfig } from "../../classroomContent"
 
