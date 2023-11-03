@@ -7,6 +7,8 @@ import { Quaternion, Vector3 } from "@dcl/sdk/math";
 export class ModelContent extends MediaContent {
     entity: Entity
     currentClip: string = ""
+    spin: boolean = true
+    spinSpeed: number = 40
 
     constructor(_config: ModelContentConfig) {
         super(_config)
@@ -34,6 +36,8 @@ export class ModelContent extends MediaContent {
                 playing: false
             })
         }
+
+        this.spin = _config.animations.length <= 0
     }
 
     setAnimation(_clip: string) {
@@ -69,14 +73,13 @@ export class ModelContent extends MediaContent {
 
     update(_dt: number): void {
         const modelConfig = this.configuration as ModelContentConfig
-        if (modelConfig.spin !== null && modelConfig.spin !== undefined && modelConfig.spin && !this.isPaused) {
+        if (this.spin !== null && this.spin !== undefined && this.spin && !this.isPaused) {
             const rot = Transform.getMutable(this.entity).rotation
             let yRotation = Quaternion.toEulerAngles(rot).y
             let xRotation = Quaternion.toEulerAngles(rot).x
             let zRotation = Quaternion.toEulerAngles(rot).z
 
-            const spinSpeed = modelConfig.spinSpeed ?? 1
-            yRotation += _dt * spinSpeed
+            yRotation += _dt * this.spinSpeed
 
             Transform.getMutable(this.entity).rotation = Quaternion.fromEulerDegrees(xRotation, yRotation, zRotation)
         }

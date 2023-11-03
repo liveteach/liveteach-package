@@ -34,8 +34,8 @@ export abstract class ClassroomManager {
         })
     }
 
-    static AddScreen(_position: Vector3, _rotation: Quaternion, _scale: Vector3) {
-        ClassroomManager.screenManager.addScreen(_position, _rotation, _scale, ClassroomManager.originEntity)
+    static AddScreen(_position: Vector3, _rotation: Quaternion, _scale: Vector3, _parent?: Entity) {
+        ClassroomManager.screenManager.addScreen(_position, _rotation, _scale, _parent)
     }
 
     static SetClassController(type: UserType): void {

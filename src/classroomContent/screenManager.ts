@@ -20,6 +20,7 @@ export class ScreenManager {
     modelContent: ContentList
 
     poweredOn: boolean = false
+    muted: boolean = false
 
     constructor() {
         engine.addSystem(this.update.bind(this))
@@ -93,9 +94,48 @@ export class ScreenManager {
         this.playContent()
     }
 
+    toggleMute() {
+        if (!this.poweredOn) {
+            return
+        }
+
+        this.muted = !this.muted
+        if (this.currentContent != undefined) {
+            const content = this.currentContent.getContent()
+            if (content.getContentType() == MediaContentType.video) {
+                if (this.muted) {
+                    (content as VideoContent).setVolume(0)
+                    console.log("mute")
+                }
+                else {
+                    (content as VideoContent).setVolume(1)
+                    console.log("unmute")
+                }
+            }
+        }
+    }
+
+    playPause() {
+        if (!this.poweredOn) {
+            return
+        }
+        if (this.currentContent != undefined) {
+            const content = this.currentContent.getContent()
+            if (content.isPaused) {
+                content.resume()
+                console.log("resume")
+            }
+            else {
+                content.pause()
+                console.log("pause")
+            }
+        }
+    }
+
+
     powerToggle() {
         if (ClassroomManager.activeContent === undefined || ClassroomManager.activeContent === null) return
-        
+
         this.poweredOn = !this.poweredOn
 
         // When turning on try and find content to auto set to
@@ -116,10 +156,15 @@ export class ScreenManager {
         } else if (this.poweredOn) {
             this.unHideContent()
         }
+
+        if (!this.poweredOn) {
+            this.muted = false
+        }
     }
 
     addScreen(_position: Vector3, _rotation: Quaternion, _scale: Vector3, _parent?: Entity) {
         this.screenDisplays.push(new ScreenDisplay(_position, _rotation, _scale, _parent))
+        this.hideContent()
     }
 
     loadContent() {
@@ -149,7 +194,6 @@ export class ScreenManager {
         });
 
         ClassroomManager.activeContent.models.forEach(model => {
-            console.log(model)
             modelContentList.push(new ModelContent({
                 src: model.src,
                 caption: model.caption,
@@ -168,9 +212,18 @@ export class ScreenManager {
         const content = this.currentContent.getContent()
         const screenConfig = content.configuration as ScreenContentConfig
 
-        this.screenDisplays.forEach(display => {
-            display.startContent(content)
-        });
+        if (content.getContentType() == MediaContentType.model) {
+            content.play()
+        }
+        else {
+            this.screenDisplays.forEach(display => {
+                display.startContent(content)
+            });
+        }
+
+        if (content.getContentType() == MediaContentType.video) {
+            (content as VideoContent).setVolume(this.muted ? 0 : 1)
+        }
 
         switch (content.getContentType()) {
             case MediaContentType.image:
@@ -187,6 +240,16 @@ export class ScreenManager {
                     ratio: screenConfig.ratio,
                     position: VideoPlayer.getMutable((content as VideoContent).videoEntity).position
                 })
+                break
+            case MediaContentType.model:
+                /*
+                ClassroomManager.PlayVideo({
+                    src: content.configuration.src,
+                    "caption": "caption",
+                    ratio: screenConfig.ratio,
+                    position: VideoPlayer.getMutable((content as VideoContent).videoEntity).position
+                })
+                */
                 break
         }
     }

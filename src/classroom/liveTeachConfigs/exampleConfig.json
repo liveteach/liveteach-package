@@ -43,19 +43,11 @@
         ],
         "models": [
             {
-                "src": "models/LessonModels/model1.glb",
+                "src": "models/LessonModels/cake.glb",
                 "animations": []
             },
             {
-                "src": "models/LessonModels/model2.glb",
-                "animations": []
-            },
-            {
-                "src": "models/LessonModels/model3.glb",
-                "animations": []
-            },
-            {
-                "src": "models/LessonModels/model4.glb",
+                "src": "models/LessonModels/pizza.glb",
                 "animations": []
             }
         ]

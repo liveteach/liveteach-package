@@ -40,6 +40,10 @@ export class VideoContent extends MediaContent {
         VideoPlayer.getMutable(this.videoEntity).playing = false
     }
 
+    setVolume(_value: number): void {
+        VideoPlayer.getMutable(this.videoEntity).volume = _value
+    }
+
     getContentType(): MediaContentType {
         return MediaContentType.video
     }

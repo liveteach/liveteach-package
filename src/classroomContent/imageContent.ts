@@ -12,7 +12,7 @@ export class ImageContent extends MediaContent {
     }
 
     update(_dt: number): void {
-        
+
     }
 
 }
