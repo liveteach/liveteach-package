@@ -90,7 +90,7 @@ export class SeatManager {
             })
 
             if (this.debugArea) {
-                MeshRenderer.setBox(hideAvatarEntity)
+                GlobalData.MeshRenderer.setBox(SeatManager.hideAvatarEntity)
                 GlobalData.Transform.create(SeatManager.hideAvatarEntity, {
                     position: this.hideAreaPosition,
                     scale: this.hideAreaVolume,
