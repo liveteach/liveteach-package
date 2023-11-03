@@ -20,6 +20,7 @@ export class Seat {
     constructor(_id: number, _position: Vector3, _lookAtTarget:Vector3= Vector3.Zero()) {
         this.id = _id
         this.entity = GlobalData.engine.addEntity()
+        this.lookAtTarget = _lookAtTarget
 
         GlobalData.Transform.create(this.entity, {
             position: _position,
