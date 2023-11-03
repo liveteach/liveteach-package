@@ -49,7 +49,7 @@ export class SeatManager {
  
     load() {
         this.seatingData.seats.forEach(chair => {
-            SeatManager.seats.push(new Seat(chair.id, chair.position))
+            SeatManager.seats.push(new Seat(chair.id, chair.position, chair.lookAtTarget))
         });
 
         SeatManager.sceneMessageBus.on('ClaimedSeat', (data: any) => {
