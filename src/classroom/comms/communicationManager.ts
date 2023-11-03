@@ -2,12 +2,10 @@
 import { MessageBus } from "@dcl/sdk/message-bus"
 import { ClassroomManager } from "../classroomManager"
 import { DebugPanel } from "../ui/debugPanel"
-import { Color3, Color4 } from "@dcl/sdk/math"
+import { Color4 } from "@dcl/sdk/math"
 import { IClassroomChannel } from "./IClassroomChannel"
 import { UserDataHelper } from "../userDataHelper"
 import { ClassContentPacket, ClassPacket, Classroom, StudentCommInfo } from "../types/classroomTypes"
-import { Entity, Material, Transform, VideoPlayer } from "@dcl/sdk/ecs"
-import { VideoContent } from "../../classroomContent"
 
 export class CommunicationManager {
     static messageBus: MessageBus
@@ -30,6 +28,7 @@ export class CommunicationManager {
             CommunicationManager.messageBus.on('play_video', CommunicationManager.OnVideoDisplay)
             CommunicationManager.messageBus.on('pause_video', CommunicationManager.OnVideoDisplay)
             CommunicationManager.messageBus.on('set_video_volume', CommunicationManager.OnVideoDisplay)
+            CommunicationManager.messageBus.on('display_model', CommunicationManager.OnModelDisplay)
 
             CommunicationManager.messageBus.on('log', (info: any) => {
                 const logColor = info.studentEvent ? (info.highPriority ? Color4.Blue() : Color4.Green()) : (info.highPriority ? Color4.Red() : Color4.Yellow())
@@ -95,6 +94,11 @@ export class CommunicationManager {
 
     static EmitVideoVolume(_info: ClassContentPacket): void {
         CommunicationManager.channel.emitVideoPlay(_info)
+        //TODO: Add log
+    }
+
+    static EmitModelDisplay(_info: ClassContentPacket): void {
+        CommunicationManager.channel.emitModelDisplay(_info)
         //TODO: Add log
     }
 
@@ -183,67 +187,44 @@ export class CommunicationManager {
     static OnImageDisplay(_info: ClassContentPacket) {
         if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
 
-            //pause all videos
-            CommunicationManager.pauseAllVideos()
+            ClassroomManager.screenManager.addStudentContent(_info.image, _info.video, _info.model)
+            if (!ClassroomManager.screenManager.poweredOn) {
+                ClassroomManager.screenManager.powerToggle(true)
+            }
 
-            ClassroomManager.screenManager.screenDisplays.forEach(screen => {
-                Material.setPbrMaterial(screen.entity, {
-                    texture: Material.Texture.Common({
-                        src: _info.image.src
-                    }),
-                    emissiveTexture: Material.Texture.Common({
-                        src: _info.image.src
-                    }),
-                    emissiveColor: Color3.White(),
-                    emissiveIntensity: 1,
-                    metallic: 0,
-                    roughness: 1
-                })
+            ClassroomManager.screenManager.playContent()
 
-                if (_info.image.ratio != undefined) {
-                    Transform.getMutable(screen.entity).scale.x = Transform.getMutable(screen.entity).scale.y * _info.image.ratio
-                } else {
-                    Transform.getMutable(screen.entity).scale.x = Transform.getMutable(screen.entity).scale.y
-                }
-            });
+            return
             //TODO: Add log
         }
     }
 
     static OnVideoDisplay(_info: ClassContentPacket) {
         if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
-            const videoPlayerEntity = CommunicationManager.getVideoPlayerEntity(_info.video.src)
-            if (videoPlayerEntity === undefined || videoPlayerEntity === null) return
 
-            const videoPlayer = VideoPlayer.getMutableOrNull(videoPlayerEntity)
-            if (videoPlayer === undefined || videoPlayer === null) return
+            ClassroomManager.screenManager.addStudentContent(_info.image, _info.video, _info.model)
+            if (!ClassroomManager.screenManager.poweredOn) {
+                ClassroomManager.screenManager.powerToggle(true)
+            }
 
-            ClassroomManager.screenManager.screenDisplays.forEach(screen => {
-                videoPlayer.src = _info.video.src
-                videoPlayer.playing = _info.video.playing
-                videoPlayer.volume = _info.video.volume
-                if (_info.video.position) videoPlayer.position = _info.video.position
+            ClassroomManager.screenManager.playContent()
 
-                Material.setPbrMaterial(screen.entity, {
-                    texture: Material.Texture.Video({
-                        videoPlayerEntity: videoPlayerEntity
-                    }),
-                    emissiveTexture: Material.Texture.Video({
-                        videoPlayerEntity: videoPlayerEntity
-                    }),
-                    emissiveColor: Color3.White(),
-                    emissiveIntensity: 1,
-                    specularIntensity: 0,
-                    metallic: 0,
-                    roughness: 1
-                })
+            return
+            //TODO: Add log
+        }
+    }
 
-                if (_info.video.ratio != undefined) {
-                    Transform.getMutable(screen.entity).scale.x = Transform.getMutable(screen.entity).scale.y * _info.video.ratio
-                } else {
-                    Transform.getMutable(screen.entity).scale.x = Transform.getMutable(screen.entity).scale.y
-                }
-            });
+    static OnModelDisplay(_info: ClassContentPacket) {
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
+
+            ClassroomManager.screenManager.addStudentContent(_info.image, _info.video, _info.model)
+            if (!ClassroomManager.screenManager.poweredOn) {
+                ClassroomManager.screenManager.powerToggle(true)
+            }
+ 
+            ClassroomManager.screenManager.playContent()
+
+            return
             //TODO: Add log
         }
     }
@@ -253,26 +234,6 @@ export class CommunicationManager {
             ClassroomManager.requestingJoinClass = false
             ClassroomManager.activeClassroom = _info
             CommunicationManager.EmitLog(UserDataHelper.GetDisplayName() + " joined class " + _info.className, _info.guid, true, false)
-        }
-    }
-
-    ////////////// HELPERS //////////////
-
-    private static getVideoPlayerEntity(_src: string): Entity | null {
-        for (let videoContent of ClassroomManager.screenManager.videoContent.content) {
-            if (videoContent.configuration.src == _src) {
-                return (videoContent as VideoContent).videoEntity
-            }
-        }
-        return null
-    }
-
-    private static pauseAllVideos(): void {
-        for (let videoContent of ClassroomManager.screenManager.videoContent.content) {
-            const videoPlayer = VideoPlayer.getMutableOrNull((videoContent as VideoContent).videoEntity)
-            if (videoPlayer === undefined || videoPlayer === null) continue
-    
-            videoPlayer.playing = false
         }
     }
 }
