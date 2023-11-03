@@ -2,7 +2,7 @@ import { UserDataHelper } from "../userDataHelper";
 import { Classroom } from "../types/classroomTypes";
 
 export abstract class ClassroomFactory {
-    static CreateTeacherClassroom(_config: string, _className: string, _classDescription: string) : Classroom {
+    static CreateTeacherClassroom(_config: string, _className: string, _classDescription: string): Classroom {
         let classroom: Classroom = Object.assign(new Classroom(), JSON.parse(_config))
         classroom.teacherID = UserDataHelper.GetUserId()
         classroom.teacherName = UserDataHelper.GetDisplayName()
@@ -11,7 +11,7 @@ export abstract class ClassroomFactory {
         return classroom
     }
 
-    static CreateStudentClassroom(_info: Classroom) : Classroom {
+    static CreateStudentClassroom(_info: Classroom): Classroom {
         let classroom = new Classroom()
         classroom.guid = _info.guid ?? ""
         classroom.teacherID = _info.teacherID ?? ""
