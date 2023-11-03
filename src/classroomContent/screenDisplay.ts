@@ -52,6 +52,8 @@ export class ScreenDisplay {
     }
 
     startContent(_content: MediaContent) {
+        if(!_content) return
+        
         console.log("start content")
         _content.isShowing = true
         ScreenDisplay.currentContent = _content
