@@ -193,7 +193,6 @@ export class ScreenManager {
         });
 
         ClassroomManager.activeContent.models.forEach(model => {
-            console.log(model)
             modelContentList.push(new ModelContent({
                 src: model.src,
                 caption: model.caption,
