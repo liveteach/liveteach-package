@@ -6,67 +6,73 @@
         "images": [
             {
                 "src": "images/1.jpg",
-                "caption": "Image Caption 1"
+                "caption": "Image Caption 1",
+                "ratio": 1.7
             },
             {
                 "src": "images/2.jpg",
-                "caption": "Image Caption 2"
+                "caption": "Image Caption 2",
+                "ratio": 1.7
             },
             {
                 "src": "images/3.jpg",
-                "caption": "Image Caption 3"
+                "caption": "Image Caption 3",
+                "ratio": 1.7
             },
             {
                 "src": "images/4.jpg",
-                "caption": "Image Caption 4"
+                "caption": "Image Caption 4",
+                "ratio": 1.7
             },
             {
                 "src": "images/5.jpg",
-                "caption": "Image Caption 5"
+                "caption": "Image Caption 5",
+                "ratio": 1.7
             },
             {
                 "src": "images/6.jpg",
-                "caption": "Image Caption 6"
+                "caption": "Image Caption 6",
+                "ratio": 1.7
             }
         ],
         "videos": [
             {
-                "src": "video/pexels-artem-podrez.mp4",
-                "caption": "Video Caption 1",
+                "src": "https://5eb7131de84bb.streamlock.net/vod/mp4:dapp.mp4/playlist.m3u8",
+                "caption": "The LiveTeach dApp",
                 "ratio": 1.7
             },
             {
-                "src": "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8",
-                "caption": "Video Caption 2",
+                "src": "https://5eb7131de84bb.streamlock.net/vod/mp4:close.mp4/playlist.m3u8",
+                "caption": "Close Encounters of the 3rd Kind",
                 "ratio": 1.7
             }
         ],
         "models": [
             {
-                "src": "models/LessonModels/cake.glb",
+                "src": "models/LessonModels/space.glb",
                 "position": {
-                    "x": 2,
-                    "y": 1,
-                    "z": 0
+                    "x": -16,
+                    "y": -1,
+                    "z": 16
                 },
                 "scale": {
-                    "x": 0.5,
-                    "y": 0.5,
-                    "z": 0.5
+                    "x": 1,
+                    "y": 1,
+                    "z": 1
                 },
                 "animations": []
             },
             {
-                "src": "models/LessonModels/pizza.glb",
+                "src": "models/LessonModels/space-devil.glb",
                 "position": {
-                    "x": 2,
-                    "y": 1,
-                    "z": 0
+                    "x": -16,
+                    "y": -1,
+                    "z": 16
                 },
                 "scale": {
-                    "x": 2,
-                    "y": 2,
-                    "z": 2
+                    "x": 1,
+                    "y": 1,
+                    "z": 1
                 },
                 "animations": []
             }
