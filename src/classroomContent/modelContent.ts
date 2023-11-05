@@ -36,8 +36,6 @@ export class ModelContent extends MediaContent {
                 playing: false
             })
         }
-
-        this.spin = _config.animations.length <= 0
     }
 
     setAnimation(_clip: string) {
