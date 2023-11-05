@@ -7,7 +7,7 @@ import { Quaternion, Vector3 } from "@dcl/sdk/math";
 export class ModelContent extends MediaContent {
     entity: Entity
     currentClip: string = ""
-    spin: boolean = true
+    spin: boolean = false
     spinSpeed: number = 40
 
     constructor(_config: ModelContentConfig) {
@@ -36,8 +36,6 @@ export class ModelContent extends MediaContent {
                 playing: false
             })
         }
-
-        this.spin = _config.animations.length <= 0
     }
 
     setAnimation(_clip: string) {
