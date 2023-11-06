@@ -11,6 +11,9 @@ export interface IClassroomChannel {
     emitImageDisplay(_info: ClassContentPacket):void;
     emitVideoPlay(_info: ClassContentPacket):void;
     emitVideoPause(_info: ClassContentPacket):void;
+    emitVideoResume(_info: ClassContentPacket):void;
     emitVideoVolume(_info: ClassContentPacket):void;
-    emitModelDisplay(_info: ClassContentPacket):void;
+    emitModelPlay(_info: ClassContentPacket):void;
+    emitModelPause(_info: ClassContentPacket):void;
+    emitModelResume(_info: ClassContentPacket):void;
 }

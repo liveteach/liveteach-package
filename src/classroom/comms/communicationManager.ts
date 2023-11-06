@@ -25,10 +25,13 @@ export class CommunicationManager {
             CommunicationManager.messageBus.on('exit_class', CommunicationManager.OnExitClass)
             CommunicationManager.messageBus.on('share_classroom_config', CommunicationManager.OnShareClassroomConfig)
             CommunicationManager.messageBus.on('display_image', CommunicationManager.OnImageDisplay)
-            CommunicationManager.messageBus.on('play_video', CommunicationManager.OnVideoDisplay)
-            CommunicationManager.messageBus.on('pause_video', CommunicationManager.OnVideoDisplay)
-            CommunicationManager.messageBus.on('set_video_volume', CommunicationManager.OnVideoDisplay)
-            CommunicationManager.messageBus.on('display_model', CommunicationManager.OnModelDisplay)
+            CommunicationManager.messageBus.on('play_video', CommunicationManager.OnVideoPlay)
+            CommunicationManager.messageBus.on('pause_video', CommunicationManager.OnVideoPause)
+            CommunicationManager.messageBus.on('resume_video', CommunicationManager.OnVideoResume)
+            CommunicationManager.messageBus.on('set_video_volume', CommunicationManager.OnVideoVolume)
+            CommunicationManager.messageBus.on('play_model', CommunicationManager.OnModelPlay)
+            CommunicationManager.messageBus.on('pause_model', CommunicationManager.OnModelPause)
+            CommunicationManager.messageBus.on('resume_model', CommunicationManager.OnModelResume)
 
             CommunicationManager.messageBus.on('log', (info: any) => {
                 const logColor = info.studentEvent ? (info.highPriority ? Color4.Blue() : Color4.Green()) : (info.highPriority ? Color4.Red() : Color4.Yellow())
@@ -87,18 +90,33 @@ export class CommunicationManager {
         //TODO: Add log
     }
 
-    static EmitVideoPause(_info: ClassContentPacket): void {
-        CommunicationManager.channel.emitVideoPlay(_info)
+    static EmitVideoPause(_info: ClassPacket): void {
+        CommunicationManager.channel.emitVideoPause(_info)
+        //TODO: Add log
+    }
+
+    static EmitVideoResume(_info: ClassPacket): void {
+        CommunicationManager.channel.emitVideoResume(_info)
         //TODO: Add log
     }
 
     static EmitVideoVolume(_info: ClassContentPacket): void {
-        CommunicationManager.channel.emitVideoPlay(_info)
+        CommunicationManager.channel.emitVideoVolume(_info)
         //TODO: Add log
     }
 
-    static EmitModelDisplay(_info: ClassContentPacket): void {
-        CommunicationManager.channel.emitModelDisplay(_info)
+    static EmitModelPlay(_info: ClassContentPacket): void {
+        CommunicationManager.channel.emitModelPlay(_info)
+        //TODO: Add log
+    }
+
+    static EmitModelPause(_info: ClassPacket): void {
+        CommunicationManager.channel.emitModelPause(_info)
+        //TODO: Add log
+    }
+
+    static EmitModelResume(_info: ClassPacket): void {
+        CommunicationManager.channel.emitModelResume(_info)
         //TODO: Add log
     }
 
@@ -204,7 +222,7 @@ export class CommunicationManager {
         }
     }
 
-    static OnVideoDisplay(_info: ClassContentPacket) {
+    static OnVideoPlay(_info: ClassContentPacket) {
         if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
 
             ClassroomManager.screenManager.addStudentContent(_info.image, _info.video, _info.model)
@@ -219,7 +237,35 @@ export class CommunicationManager {
         }
     }
 
-    static OnModelDisplay(_info: ClassContentPacket) {
+    static OnVideoPause(_info: ClassPacket) {
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
+
+            if (!ClassroomManager.screenManager.poweredOn) {
+                ClassroomManager.screenManager.powerToggle(true)
+            }
+
+            ClassroomManager.screenManager.playPause()
+
+            return
+            //TODO: Add log
+        }
+    }
+
+    static OnVideoResume(_info: ClassPacket) {
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
+
+            if (!ClassroomManager.screenManager.poweredOn) {
+                ClassroomManager.screenManager.powerToggle(true)
+            }
+
+            ClassroomManager.screenManager.playPause()
+
+            return
+            //TODO: Add log
+        }
+    }
+
+    static OnVideoVolume(_info: ClassContentPacket) {
         if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
 
             ClassroomManager.screenManager.addStudentContent(_info.image, _info.video, _info.model)
@@ -228,6 +274,49 @@ export class CommunicationManager {
             }
 
             ClassroomManager.screenManager.playContent()
+
+            return
+            //TODO: Add log
+        }
+    }
+
+    static OnModelPlay(_info: ClassContentPacket) {
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
+
+            ClassroomManager.screenManager.addStudentContent(_info.image, _info.video, _info.model)
+            if (!ClassroomManager.screenManager.poweredOn) {
+                ClassroomManager.screenManager.powerToggle(true)
+            }
+
+            ClassroomManager.screenManager.playContent()
+
+            return
+            //TODO: Add log
+        }
+    }
+
+    static OnModelPause(_info: ClassPacket) {
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
+
+            if (!ClassroomManager.screenManager.poweredOn) {
+                ClassroomManager.screenManager.powerToggle(true)
+            }
+
+            ClassroomManager.screenManager.playPause()
+
+            return
+            //TODO: Add log
+        }
+    }
+
+    static OnModelResume(_info: ClassPacket) {
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
+
+            if (!ClassroomManager.screenManager.poweredOn) {
+                ClassroomManager.screenManager.powerToggle(true)
+            }
+
+            ClassroomManager.screenManager.playPause()
 
             return
             //TODO: Add log

@@ -183,22 +183,26 @@ export abstract class ClassroomManager {
         }
     }
 
-    static PauseVideo(_video: VideoContentConfig): void {
+    static PauseVideo(): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
         if (ClassroomManager.activeClassroom) {
             CommunicationManager.EmitVideoPause({
                 id: ClassroomManager.activeClassroom.guid,
                 name: ClassroomManager.activeClassroom.className,
-                description: ClassroomManager.activeClassroom.classDescription,
-                video: {
-                    src: _video.src,
-                    caption: _video.caption,
-                    playing: false,
-                    position: _video.position ?? 0,
-                    volume: _video.volume ?? 1,
-                    ratio: _video.ratio
-                }
+                description: ClassroomManager.activeClassroom.classDescription
+            })
+        }
+    }
+
+    static ResumeVideo(): void {
+        if (!ClassroomManager.classController?.isTeacher()) return
+
+        if (ClassroomManager.activeClassroom) {
+            CommunicationManager.EmitVideoResume({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription
             })
         }
     }
@@ -215,7 +219,7 @@ export abstract class ClassroomManager {
                     src: _video.src,
                     caption: _video.caption,
                     playing: _video.playing ?? true,
-                    position: _video.position ?? 0,
+                    position: _video.position,
                     volume: _video.volume ?? 1,
                     ratio: _video.ratio
                 }
@@ -223,15 +227,39 @@ export abstract class ClassroomManager {
         }
     }
 
-    static DisplayModel(_model: ModelContentConfig): void {
+    static PlayModel(_model: ModelContentConfig): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
         if (ClassroomManager.activeClassroom) {
-            CommunicationManager.EmitModelDisplay({
+            CommunicationManager.EmitModelPlay({
                 id: ClassroomManager.activeClassroom.guid,
                 name: ClassroomManager.activeClassroom.className,
                 description: ClassroomManager.activeClassroom.classDescription,
                 model: _model
+            })
+        }
+    }
+
+    static PauseModel(): void {
+        if (!ClassroomManager.classController?.isTeacher()) return
+
+        if (ClassroomManager.activeClassroom) {
+            CommunicationManager.EmitModelPause({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription
+            })
+        }
+    }
+
+    static ResumeModel(): void {
+        if (!ClassroomManager.classController?.isTeacher()) return
+
+        if (ClassroomManager.activeClassroom) {
+            CommunicationManager.EmitModelResume({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription
             })
         }
     }
