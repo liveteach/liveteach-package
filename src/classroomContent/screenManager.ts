@@ -114,6 +114,29 @@ export class ScreenManager {
                     (content as VideoContent).setVolume(1)
                     console.log("unmute")
                 }
+
+                if (ClassroomManager.classController === undefined || ClassroomManager.classController === null || !ClassroomManager.classController.isTeacher()) return
+
+                const videoConfig = content.configuration as VideoContentConfig
+                if (content.muted) {
+                    ClassroomManager.SetVideoVolume({
+                        src: videoConfig.src,
+                        caption: videoConfig.caption,
+                        ratio: videoConfig.ratio,
+                        position: VideoPlayer.getMutable((content as VideoContent).videoEntity).position,
+                        volume: 0
+                    })
+                }
+                else {
+                    ClassroomManager.SetVideoVolume({
+                        src: videoConfig.src,
+                        caption: videoConfig.caption,
+                        ratio: videoConfig.ratio,
+                        position: VideoPlayer.getMutable((content as VideoContent).videoEntity).position,
+                        volume: 1
+                    })
+                }
+                break
             }
         }
     }
@@ -131,6 +154,27 @@ export class ScreenManager {
             else {
                 content.pause()
                 console.log("pause")
+            }
+
+            if (ClassroomManager.classController === undefined || ClassroomManager.classController === null || !ClassroomManager.classController.isTeacher()) return
+
+            switch (content.getContentType()) {
+                case MediaContentType.video:
+                    if (content.isPaused) {
+                        ClassroomManager.PauseVideo()
+                    }
+                    else {
+                        ClassroomManager.ResumeVideo()
+                    }
+                    break
+                case MediaContentType.model:
+                    if (content.isPaused) {
+                        ClassroomManager.PauseModel()
+                    }
+                    else {
+                        ClassroomManager.ResumeModel()
+                    }
+                    break
             }
         }
     }
@@ -209,7 +253,7 @@ export class ScreenManager {
                 position: model.position ?? Vector3.Zero(),
                 scale: model.scale ?? Vector3.One(),
                 parent: ClassroomManager.originEntity,
-                animations: model.animations ,
+                animations: model.animations,
                 spin: model.spin,
                 replace: model.replace
             }))
@@ -374,7 +418,7 @@ export class ScreenManager {
                 break
             case MediaContentType.model:
                 const modelConfig = content.configuration as ModelContentConfig
-                ClassroomManager.DisplayModel({
+                ClassroomManager.PlayModel({
                     src: modelConfig.src,
                     caption: modelConfig.caption,
                     animations: modelConfig.animations,
