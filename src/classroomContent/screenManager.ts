@@ -209,7 +209,9 @@ export class ScreenManager {
                 position: model.position ?? Vector3.Zero(),
                 scale: model.scale ?? Vector3.One(),
                 parent: ClassroomManager.originEntity,
-                animations: []
+                animations: model.animations ,
+                spin: model.spin,
+                replace: model.replace
             }))
         });
 
@@ -220,10 +222,6 @@ export class ScreenManager {
 
     addStudentContent(_imageContent: ImageContentConfig, _videoContent: VideoContentConfig, _modelContent: ModelContentConfig) {
         if (ClassroomManager.classController === undefined || ClassroomManager.classController === null || !ClassroomManager.classController.isStudent()) return
-
-        if (this.currentContent) {
-            this.currentContent.stop()
-        }
 
         if (_imageContent) {
             const imageContent = new ImageContent({
@@ -250,6 +248,10 @@ export class ScreenManager {
             }
             else {
                 this.imageContent = new ContentList([imageContent])
+            }
+
+            if (this.currentContent) {
+                this.currentContent.stop()
             }
             this.currentContent = this.imageContent
         }
@@ -283,10 +285,15 @@ export class ScreenManager {
             else {
                 this.videoContent = new ContentList([videoContent])
             }
+
+            if (this.currentContent) {
+                this.currentContent.stop()
+            }
             this.currentContent = this.videoContent
         }
 
         if (_modelContent) {
+            let shouldStopPrevContent: boolean = true
             const modelContent = new ModelContent({
                 src: _modelContent.src,
                 caption: _modelContent.caption,
@@ -294,7 +301,9 @@ export class ScreenManager {
                 rotation: _modelContent.rotation,
                 scale: _modelContent.scale,
                 parent: _modelContent.parent,
-                animations: _modelContent.animations
+                animations: _modelContent.animations,
+                spin: _modelContent.spin,
+                replace: _modelContent.replace
             })
 
             if (this.modelContent) {
@@ -315,6 +324,13 @@ export class ScreenManager {
             }
             else {
                 this.modelContent = new ContentList([modelContent])
+            }
+
+            if (_modelContent.replace !== undefined && _modelContent.replace !== null && !_modelContent.replace) {
+                shouldStopPrevContent = this.currentContent.getContent().getContentType() != MediaContentType.model
+            }
+            if (this.currentContent && shouldStopPrevContent) {
+                this.currentContent.stop()
             }
             this.currentContent = this.modelContent
         }
@@ -365,7 +381,9 @@ export class ScreenManager {
                     parent: modelConfig.parent,
                     position: modelConfig.position,
                     rotation: modelConfig.rotation,
-                    scale: modelConfig.scale
+                    scale: modelConfig.scale,
+                    spin: modelConfig.spin,
+                    replace: modelConfig.replace
                 })
                 break
         }

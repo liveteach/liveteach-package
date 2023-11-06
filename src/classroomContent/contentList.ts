@@ -1,4 +1,6 @@
+import { MediaContentType } from "./enums"
 import { MediaContent } from "./mediaContent"
+import { ModelContentConfig } from "./types/mediaContentConfigs"
 
 export class ContentList {
     content: MediaContent[] = []
@@ -12,33 +14,52 @@ export class ContentList {
         return this.content[this.index]
     }
 
-    stop(){
-        this.content[this.index].stop()
+    stop() {
+        this.content.forEach(c => {
+            c.stop()
+        })
+    }
+
+    gatedStop(_nextIndex: number) {
+        if (this.content[_nextIndex].getContentType() == MediaContentType.model) {
+            const modelConfig = this.content[_nextIndex].configuration as ModelContentConfig
+            if (modelConfig.replace === undefined || modelConfig.replace === null || modelConfig.replace) {
+                this.stop()
+            }
+        }
+        else {
+            this.stop()
+        }
     }
 
     next() {
-        this.stop()
-        this.index++
-        if (this.index > this.content.length - 1) {
-            this.index = 0
+        let nextIndex = this.index + 1
+        if (nextIndex > this.content.length - 1) {
+            nextIndex = 0
         }
+
+        this.gatedStop(nextIndex)
+        this.index = nextIndex
     }
 
     previous() {
-        this.stop()
-        this.index--
-        if (this.index < 0) {
-            this.index = this.content.length - 1
+        let prevIndex = this.index - 1
+        if (prevIndex < 0) {
+            prevIndex = this.content.length - 1
         }
+
+        
+        this.gatedStop(prevIndex)
+        this.index = prevIndex
     }
 
     toStart() {
-        this.stop()
+        this.gatedStop(0)
         this.index = 0
     }
 
     toEnd() {
-        this.stop()
+        this.gatedStop(this.content.length - 1)
         this.index = this.content.length - 1
     }
 }
