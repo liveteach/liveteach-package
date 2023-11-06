@@ -1,11 +1,6 @@
 import { ClassContent, ClassPacket } from "./types/classroomTypes"
 import { BlockChain } from "./blockchain"
-import * as exampleConfig from "./liveTeachConfigs/exampleConfig.json"
-import * as biologyConfig from "./liveTeachConfigs/biologyConfig.json"
-import * as frenchConfig from "./liveTeachConfigs/frenchConfig.json"
-import * as historyConfig from "./liveTeachConfigs/historyConfig.json"
-import * as mathConfig from "./liveTeachConfigs/mathConfig.json"
-import * as physicsConfig from "./liveTeachConfigs/physicsConfig.json"
+import * as exampleConfig from "../classroomContent/liveTeachConfigs/exampleConfig.json"
 import { ClassContentFactory } from "./factories/classContentFactory"
 import { ClassroomManager } from "./classroomManager"
 
@@ -57,31 +52,6 @@ export class SmartContractManager {
                         name: exampleConfig.content.name,
                         description: exampleConfig.content.description
                     })
-                    classList.push({
-                        id: biologyConfig.content.id,
-                        name: biologyConfig.content.name,
-                        description: biologyConfig.content.description
-                    })
-                    classList.push({
-                        id: frenchConfig.content.id,
-                        name: frenchConfig.content.name,
-                        description: frenchConfig.content.description
-                    })
-                    classList.push({
-                        id: historyConfig.content.id,
-                        name: historyConfig.content.name,
-                        description: historyConfig.content.description
-                    })
-                    classList.push({
-                        id: mathConfig.content.id,
-                        name: mathConfig.content.name,
-                        description: mathConfig.content.description
-                    })
-                    classList.push({
-                        id: physicsConfig.content.id,
-                        name: physicsConfig.content.name,
-                        description: physicsConfig.content.description
-                    })
                     return classList
                 }
                 default: return []
@@ -98,16 +68,6 @@ export class SmartContractManager {
             let contentJson: string = ""
             switch (_id) {
                 case exampleConfig.content.id: contentJson = JSON.stringify(exampleConfig.content)
-                    break
-                case biologyConfig.content.id: contentJson = JSON.stringify(biologyConfig.content)
-                    break
-                case frenchConfig.content.id: contentJson = JSON.stringify(frenchConfig.content)
-                    break
-                case historyConfig.content.id: contentJson = JSON.stringify(historyConfig.content)
-                    break
-                case mathConfig.content.id: contentJson = JSON.stringify(mathConfig.content)
-                    break
-                case physicsConfig.content.id: contentJson = JSON.stringify(physicsConfig.content)
                     break
             }
             return ClassContentFactory.Create(contentJson)

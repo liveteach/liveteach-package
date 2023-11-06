@@ -132,6 +132,11 @@ export class CommunicationManager {
                     description: _info.description,
                 })
             }
+
+            //autojoin
+            if (ClassroomManager.classroomConfig.classroom.autojoin) {
+                ClassroomManager.JoinClass(ClassroomManager.classController.classList[0].id)
+            }
         }
     }
 
@@ -221,7 +226,7 @@ export class CommunicationManager {
             if (!ClassroomManager.screenManager.poweredOn) {
                 ClassroomManager.screenManager.powerToggle(true)
             }
- 
+
             ClassroomManager.screenManager.playContent()
 
             return
