@@ -136,7 +136,6 @@ export class ScreenManager {
                         volume: 1
                     })
                 }
-                break
             }
         }
     }
