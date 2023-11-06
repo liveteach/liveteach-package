@@ -41,10 +41,19 @@ export class ServerChannel implements IClassroomChannel{
     emitVideoPause(_info: ClassContentPacket) {
         throw new Error("Method not implemented.");
     }
+    emitVideoResume(_info: ClassContentPacket): void {
+        throw new Error("Method not implemented.");
+    }
     emitVideoVolume(_info: ClassContentPacket) {
         throw new Error("Method not implemented.");
     }
-    emitModelDisplay(_info: ClassContentPacket) {
+    emitModelPlay(_info: ClassContentPacket): void {
+        throw new Error("Method not implemented.");
+    }
+    emitModelPause(_info: ClassContentPacket): void {
+        throw new Error("Method not implemented.");
+    }
+    emitModelResume(_info: ClassContentPacket): void {
         throw new Error("Method not implemented.");
     }
 }

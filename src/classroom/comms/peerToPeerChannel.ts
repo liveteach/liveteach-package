@@ -33,10 +33,19 @@ export class PeerToPeerChannel implements IClassroomChannel{
     emitVideoPause(_info: ClassContentPacket) {
         CommunicationManager.messageBus.emit('pause_video', _info)
     }
+    emitVideoResume(_info: ClassContentPacket): void {
+        CommunicationManager.messageBus.emit('resume_video', _info)
+    }
     emitVideoVolume(_info: ClassContentPacket) {
         CommunicationManager.messageBus.emit('set_video_volume', _info)
     }
-    emitModelDisplay(_info: ClassContentPacket) {
-        CommunicationManager.messageBus.emit('display_model', _info)
+    emitModelPlay(_info: ClassContentPacket): void {
+        CommunicationManager.messageBus.emit('play_model', _info)
+    }
+    emitModelPause(_info: ClassContentPacket): void {
+        CommunicationManager.messageBus.emit('pause_model', _info)
+    }
+    emitModelResume(_info: ClassContentPacket): void {
+        CommunicationManager.messageBus.emit('resume_model', _info)
     }
 }
