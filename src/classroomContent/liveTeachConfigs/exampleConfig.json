@@ -60,10 +60,11 @@
                     "y": 1,
                     "z": 1
                 },
-                "animations": []
+                "animations": [],
+                "spin": false
             },
             {
-                "src": "models/LessonModels/space-devil.glb",
+                "src": "models/LessonModels/space-devil-add.glb",
                 "position": {
                     "x": -16,
                     "y": -1,
@@ -74,7 +75,14 @@
                     "y": 1,
                     "z": 1
                 },
-                "animations": []
+                "animations": [
+                    {
+                        "clip": "AnimStack",
+                        "loop": true
+                    }
+                ],
+                "spin": false,
+                "replace": false
             }
         ]
     }

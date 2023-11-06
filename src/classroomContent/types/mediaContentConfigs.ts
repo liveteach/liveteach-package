@@ -24,6 +24,8 @@ export type ModelContentConfig = BaseContentConfig & {
     position: Vector3 // relative to the classroom base position
     rotation?: Quaternion
     scale?: Vector3
+    spin?: boolean
+    replace?: boolean
 }
 
 export type MediaContentConfig = ImageContentConfig | VideoContentConfig | ModelContentConfig
