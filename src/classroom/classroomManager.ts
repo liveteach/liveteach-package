@@ -207,7 +207,7 @@ export abstract class ClassroomManager {
         }
     }
 
-    static SetVideoVolume(_video: VideoContentConfig): void {
+    static SetVideoVolume(_volume: number): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
         if (ClassroomManager.activeClassroom) {
@@ -215,14 +215,7 @@ export abstract class ClassroomManager {
                 id: ClassroomManager.activeClassroom.guid,
                 name: ClassroomManager.activeClassroom.className,
                 description: ClassroomManager.activeClassroom.classDescription,
-                video: {
-                    src: _video.src,
-                    caption: _video.caption,
-                    playing: _video.playing ?? true,
-                    position: _video.position,
-                    volume: _video.volume ?? 1,
-                    ratio: _video.ratio
-                }
+                volume: _volume
             })
         }
     }

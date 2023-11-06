@@ -97,6 +97,22 @@ export class ScreenManager {
         this.playContent()
     }
 
+    setVolume(_volume: number) {
+        console.log("setVolume: " + _volume)
+        if(_volume > 0) {
+            this.muted = false
+        }
+        else {
+            this.muted = true
+        }
+        if (this.currentContent != undefined) {
+            const content = this.currentContent.getContent()
+            if (content.getContentType() == MediaContentType.video) {
+                (content as VideoContent).setVolume(_volume)
+            }
+        }
+    }
+
     toggleMute() {
         if (!ClassroomManager.classController.isTeacher() || !this.poweredOn) {
             return
@@ -108,40 +124,20 @@ export class ScreenManager {
             if (content.getContentType() == MediaContentType.video) {
                 if (this.muted) {
                     (content as VideoContent).setVolume(0)
+                    ClassroomManager.SetVideoVolume(0)
                     console.log("mute")
                 }
                 else {
                     (content as VideoContent).setVolume(1)
+                    ClassroomManager.SetVideoVolume(1)
                     console.log("unmute")
-                }
-
-                if (ClassroomManager.classController === undefined || ClassroomManager.classController === null || !ClassroomManager.classController.isTeacher()) return
-
-                const videoConfig = content.configuration as VideoContentConfig
-                if (content.muted) {
-                    ClassroomManager.SetVideoVolume({
-                        src: videoConfig.src,
-                        caption: videoConfig.caption,
-                        ratio: videoConfig.ratio,
-                        position: VideoPlayer.getMutable((content as VideoContent).videoEntity).position,
-                        volume: 0
-                    })
-                }
-                else {
-                    ClassroomManager.SetVideoVolume({
-                        src: videoConfig.src,
-                        caption: videoConfig.caption,
-                        ratio: videoConfig.ratio,
-                        position: VideoPlayer.getMutable((content as VideoContent).videoEntity).position,
-                        volume: 1
-                    })
                 }
             }
         }
     }
 
     playPause() {
-        if (!ClassroomManager.classController.isTeacher() || !this.poweredOn) {
+        if (!this.poweredOn) {
             return
         }
         if (this.currentContent != undefined) {

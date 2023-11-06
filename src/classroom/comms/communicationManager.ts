@@ -100,7 +100,7 @@ export class CommunicationManager {
         //TODO: Add log
     }
 
-    static EmitVideoVolume(_info: ClassContentPacket): void {
+    static EmitVideoVolume(_info: ClassPacket & { volume: number }): void {
         CommunicationManager.channel.emitVideoVolume(_info)
         //TODO: Add log
     }
@@ -265,15 +265,14 @@ export class CommunicationManager {
         }
     }
 
-    static OnVideoVolume(_info: ClassContentPacket) {
+    static OnVideoVolume(_info: ClassPacket & { volume: number }) {
         if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
 
-            ClassroomManager.screenManager.addStudentContent(_info.image, _info.video, _info.model)
             if (!ClassroomManager.screenManager.poweredOn) {
                 ClassroomManager.screenManager.powerToggle(true)
             }
 
-            ClassroomManager.screenManager.playContent()
+            ClassroomManager.screenManager.setVolume(_info.volume)
 
             return
             //TODO: Add log
