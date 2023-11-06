@@ -15,7 +15,7 @@ export class ControllerUI {
                 height: "240px",
                 width: "380px",
                 positionType: 'absolute',
-                display: ControllerUI.visibility ? 'flex' : 'none'
+                display: ControllerUI.visibility && ClassroomManager.classController?.isTeacher() ? 'flex' : 'none'
             }}
             uiBackground={{ color: Color4.create(0, 0, 0, 0.8) }}
         >
@@ -28,21 +28,13 @@ export class ControllerUI {
                     display: "flex"
                 }}
             >
-                <Button
-                    value="Teacher"
-                    fontSize={18}
-                    color={Color4.Black()}
-                    variant={ClassroomManager.classController?.isTeacher() ? 'primary' : 'secondary'}
+                <Label
+                    value={"TEACHER CONTROLS"}
+                    color={Color4.Green()}
                     uiTransform={{ width: 80, height: 40, margin: 4 }}
-                    onMouseDown={() => { ControllerUI.SetTeacher() }}
-                />
-                <Button
-                    value="Student"
-                    fontSize={18}
-                    color={Color4.Black()}
-                    variant={ClassroomManager.classController?.isStudent() ? 'primary' : 'secondary'}
-                    uiTransform={{ width: 80, height: 40, margin: 4 }}
-                    onMouseDown={() => { ControllerUI.SetStudent() }}
+                    fontSize={20}
+                    font="serif"
+                    textAlign="top-left"
                 />
             </UiEntity>
             <UiEntity // CLASSROOM ACTIVATION

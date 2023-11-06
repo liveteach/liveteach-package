@@ -9,6 +9,8 @@ import { Vector3 } from "@dcl/sdk/math"
 import { TextEncoder, TextDecoder } from 'text-encoding'
 import { InfoUI } from "./ui/infoUI"
 import teachAbi from "./contracts/TeachContractABI.json"
+import { ClassroomManager } from "."
+import { UserType } from "../enums"
 
 export class BlockChain {
     public readonly UAT_SMART_CONTRACT_ADDRESS: string = "0x31Cd6F96EFf5256aFBe1F66E846D04016A35C615";
@@ -60,6 +62,13 @@ export class BlockChain {
                 if (userData != undefined) {
                     if (userData.data != undefined) {
                         this.userData = userData.data
+                        console.log("UserId: " + this.userData.userId)
+                        if(ClassroomManager.classroomConfig.classroom.teacherID == this.userData.userId) {
+                            ClassroomManager.SetClassController(UserType.teacher)
+                        }
+                        else {
+                            ClassroomManager.SetClassController(UserType.student)
+                        }
                         if (userData.data.hasConnectedWeb3) {
                             console.log(userData.data.publicKey)
                             InfoUI.updateUserData(userData.data)

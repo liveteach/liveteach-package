@@ -30,6 +30,7 @@ export class Classroom {
     location: string
     origin: Vector3
     volume: Vector3
+    autojoin: boolean
     capacity: number
     duration: number
     seatingEnabled: boolean
