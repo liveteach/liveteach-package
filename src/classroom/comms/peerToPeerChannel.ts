@@ -48,4 +48,10 @@ export class PeerToPeerChannel implements IClassroomChannel{
     emitModelResume(_info: ClassContentPacket): void {
         CommunicationManager.messageBus.emit('resume_model', _info)
     }
+    emitScreenDeactivation(_info: ClassPacket): void {
+        CommunicationManager.messageBus.emit('deactivate_screens', _info)
+    }
+    emitModelDeactivation(_info: ClassPacket): void {
+        CommunicationManager.messageBus.emit('deactivate_models', _info)
+    }
 }
