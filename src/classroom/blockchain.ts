@@ -63,7 +63,7 @@ export class BlockChain {
                     if (userData.data != undefined) {
                         this.userData = userData.data
                         console.log("UserId: " + this.userData.userId)
-                        if(ClassroomManager.classroomConfig.classroom.teacherID == this.userData.userId) {
+                        if(ClassroomManager.classroomConfig.classroom.teacherID.toLocaleLowerCase() == this.userData.userId.toLocaleLowerCase()) {
                             ClassroomManager.SetClassController(UserType.teacher)
                         }
                         else {
