@@ -48,7 +48,6 @@ export class ScreenDisplay {
     unHideContent() {
         console.log("unhide content")
         Transform.getMutable(this.baseEntity).scale = Vector3.One()
-        this.startContent(ScreenDisplay.currentContent)
     }
 
     startContent(_content: MediaContent) {
