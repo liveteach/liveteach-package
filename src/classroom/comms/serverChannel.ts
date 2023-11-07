@@ -56,4 +56,10 @@ export class ServerChannel implements IClassroomChannel{
     emitModelResume(_info: ClassContentPacket): void {
         throw new Error("Method not implemented.");
     }
+    emitScreenDeactivation(_info: ClassPacket): void {
+        throw new Error("Method not implemented.");
+    }
+    emitModelDeactivation(_info: ClassPacket): void {
+        throw new Error("Method not implemented.");
+    }
 }

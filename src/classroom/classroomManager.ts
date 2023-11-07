@@ -256,4 +256,28 @@ export abstract class ClassroomManager {
             })
         }
     }
+
+    static DeactivateScreens(): void {
+        if (!ClassroomManager.classController?.isTeacher()) return
+
+        if (ClassroomManager.activeClassroom) {
+            CommunicationManager.EmitScreenDeactivation({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription
+            })
+        }
+    }
+
+    static DeactivateModels(): void {
+        if (!ClassroomManager.classController?.isTeacher()) return
+
+        if (ClassroomManager.activeClassroom) {
+            CommunicationManager.EmitModelDeactivation({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription
+            })
+        }
+    }
 }

@@ -32,6 +32,8 @@ export class CommunicationManager {
             CommunicationManager.messageBus.on('play_model', CommunicationManager.OnModelPlay)
             CommunicationManager.messageBus.on('pause_model', CommunicationManager.OnModelPause)
             CommunicationManager.messageBus.on('resume_model', CommunicationManager.OnModelResume)
+            CommunicationManager.messageBus.on('deactivate_screens', CommunicationManager.OnScreenDeactivation)
+            CommunicationManager.messageBus.on('deactivate_models', CommunicationManager.OnModelDeactivation)
 
             CommunicationManager.messageBus.on('log', (info: any) => {
                 const logColor = info.studentEvent ? (info.highPriority ? Color4.Blue() : Color4.Green()) : (info.highPriority ? Color4.Red() : Color4.Yellow())
@@ -117,6 +119,16 @@ export class CommunicationManager {
 
     static EmitModelResume(_info: ClassPacket): void {
         CommunicationManager.channel.emitModelResume(_info)
+        //TODO: Add log
+    }
+
+    static EmitScreenDeactivation(_info: ClassPacket): void {
+        CommunicationManager.channel.emitScreenDeactivation(_info)
+        //TODO: Add log
+    }
+
+    static EmitModelDeactivation(_info: ClassPacket): void {
+        CommunicationManager.channel.emitModelDeactivation(_info)
         //TODO: Add log
     }
 
@@ -215,9 +227,9 @@ export class CommunicationManager {
                 ClassroomManager.screenManager.powerToggle(true)
             }
 
+            ClassroomManager.screenManager.unHideContent()
             ClassroomManager.screenManager.playContent()
 
-            return
             //TODO: Add log
         }
     }
@@ -230,9 +242,9 @@ export class CommunicationManager {
                 ClassroomManager.screenManager.powerToggle(true)
             }
 
+            ClassroomManager.screenManager.unHideContent()
             ClassroomManager.screenManager.playContent()
 
-            return
             //TODO: Add log
         }
     }
@@ -246,7 +258,6 @@ export class CommunicationManager {
 
             ClassroomManager.screenManager.playPause()
 
-            return
             //TODO: Add log
         }
     }
@@ -260,7 +271,6 @@ export class CommunicationManager {
 
             ClassroomManager.screenManager.playPause()
 
-            return
             //TODO: Add log
         }
     }
@@ -274,7 +284,6 @@ export class CommunicationManager {
 
             ClassroomManager.screenManager.setVolume(_info.volume)
 
-            return
             //TODO: Add log
         }
     }
@@ -289,7 +298,6 @@ export class CommunicationManager {
 
             ClassroomManager.screenManager.playContent()
 
-            return
             //TODO: Add log
         }
     }
@@ -303,7 +311,6 @@ export class CommunicationManager {
 
             ClassroomManager.screenManager.playPause()
 
-            return
             //TODO: Add log
         }
     }
@@ -317,7 +324,29 @@ export class CommunicationManager {
 
             ClassroomManager.screenManager.playPause()
 
-            return
+            //TODO: Add log
+        }
+    }
+
+    static OnScreenDeactivation(_info: ClassPacket) {
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
+
+            if (ClassroomManager.screenManager.poweredOn) {
+                ClassroomManager.screenManager.videoContent?.stop()
+                ClassroomManager.screenManager.hideContent()
+            }
+
+            //TODO: Add log
+        }
+    }
+
+    static OnModelDeactivation(_info: ClassPacket) {
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
+
+            if (ClassroomManager.screenManager.poweredOn) {
+                ClassroomManager.screenManager.modelContent?.stop()
+            }
+
             //TODO: Add log
         }
     }
