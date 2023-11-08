@@ -14,6 +14,10 @@ import { UserType } from "../enums"
 
 export class BlockChain {
     public readonly UAT_SMART_CONTRACT_ADDRESS: string = "0x31Cd6F96EFf5256aFBe1F66E846D04016A35C615";
+    public readonly TEACHER_ADDRESSES: string[] = [
+        "0xe5cf1BB88a59F9fC609689C681D1d14bfE7Ce73A",
+        "0xbEA7Ad6cdb932fD81EB386cc9BD21E426b99cB37"
+    ]
 
     userData: UserData
 
@@ -63,7 +67,14 @@ export class BlockChain {
                     if (userData.data != undefined) {
                         this.userData = userData.data
                         console.log("UserId: " + this.userData.userId)
-                        if(ClassroomManager.classroomConfig.classroom.teacherID.toLocaleLowerCase() == this.userData.userId.toLocaleLowerCase()) {
+                        let shouldBeTeacher: boolean = ClassroomManager.classroomConfig.classroom.teacherID.toLowerCase() == this.userData.userId.toLowerCase()
+                        for(let address of this.TEACHER_ADDRESSES) {
+                            if(address.toLowerCase() == this.userData.userId.toLowerCase()) {
+                                shouldBeTeacher = true
+                                break
+                            }
+                        }
+                        if(shouldBeTeacher) {
                             ClassroomManager.SetClassController(UserType.teacher)
                         }
                         else {
