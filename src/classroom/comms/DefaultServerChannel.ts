@@ -1,4 +1,4 @@
-import { ClassContentPacket, ClassPacket, Classroom, StudentCommInfo } from "../types/classroomTypes";
+import {ClassContentPacket, ClassPacket, Classroom, ServerParams, StudentCommInfo} from "../types/classroomTypes";
 import { ReferenceServerWebsocketManager} from "../websocket/ReferenceServerWebsocketManager";
 import {UserData} from "~system/UserIdentity";
 import {IServerChannel} from "./IServerChannel";
@@ -62,7 +62,7 @@ export class DefaultServerChannel implements IServerChannel{
         DefaultServerChannel.referenceServer.sendCommand("message","student","deactivate_models" ,_info, "teacher")
     }
 
-    serverConfig(params) {
+    serverConfig(params: ServerParams):void {
         DefaultServerChannel.serverUrl = params.serverUrl
         DefaultServerChannel.role = params.role
         DefaultServerChannel._userData = params._userData
