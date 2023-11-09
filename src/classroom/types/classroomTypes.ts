@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { Vector3 } from "@dcl/sdk/math"
 import { ImageContentConfig, ModelContentConfig, VideoContentConfig } from "../../classroomContent"
+import {UserData} from "~system/UserIdentity";
 
 export type StudentInfo = {
     studentID: string
@@ -49,4 +50,10 @@ export class ClassContent {
     images: ImageContentConfig[]
     videos: VideoContentConfig[]
     models: ModelContentConfig[]
+}
+
+export class ServerParams {
+    serverUrl: string
+    role: string
+    _userData: UserData
 }
