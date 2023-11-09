@@ -84,8 +84,35 @@ export class ReferenceServerWebsocketManager {
             case "join_class":
                 CommunicationManager.OnJoinClass(this.studentInfo(message))
                 break;
-            case "exit_class":
-                CommunicationManager.OnExitClass(this.studentInfo(message))
+            case "display_image":
+                CommunicationManager.OnImageDisplay(this.classPacket(message))
+                break;
+            case "play_video":
+                CommunicationManager.OnVideoPlay(this.classPacket(message))
+                break;
+            case "pause_video":
+                CommunicationManager.OnVideoPause(this.classPacket(message))
+                break;
+            case "resume_video":
+                CommunicationManager.OnVideoResume(this.classPacket(message))
+                break;
+            case "set_video_volume":
+                CommunicationManager.OnVideoVolume(this.classPacket(message) + message.volume)
+                break;
+            case "play_model":
+                CommunicationManager.OnModelPlay(this.classPacket(message))
+                break;
+            case "pause_model":
+                CommunicationManager.OnModelPause(this.classPacket(message))
+                break;
+            case "resume_model":
+                CommunicationManager.OnModelResume(this.classPacket(message))
+                break;
+            case "deactivate_screens":
+                CommunicationManager.OnScreenDeactivation(this.classPacket(message))
+                break;
+            case "deactivate_models":
+                CommunicationManager.OnModelDeactivation(this.classPacket(message))
                 break;
             case "sync":
                 console.log(message)
