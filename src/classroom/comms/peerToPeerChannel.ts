@@ -1,4 +1,4 @@
-import { ClassContentPacket, ClassPacket, Classroom, StudentCommInfo } from "../types/classroomTypes";
+import { ClassContentPacket, ClassPacket, Classroom, ContentUnitPacket, DataPacket, StudentCommInfo, StudentDataPacket } from "../types/classroomTypes";
 import { IClassroomChannel } from "./IClassroomChannel";
 import { CommunicationManager } from "./communicationManager";
 
@@ -53,5 +53,17 @@ export class PeerToPeerChannel implements IClassroomChannel{
     }
     emitModelDeactivation(_info: ClassPacket): void {
         CommunicationManager.messageBus.emit('deactivate_models', _info)
+    }
+    emitContentUnitStart(_info: ContentUnitPacket): void {
+        CommunicationManager.messageBus.emit('content_unit_start', _info)
+    }
+    emitContentUnitEnd(_info: ClassPacket): void {
+        CommunicationManager.messageBus.emit('content_unit_end', _info)
+    }
+    emitContentUnitTeacherSend(_info: DataPacket): void {
+        CommunicationManager.messageBus.emit('content_unit_teacher_send', _info)
+    }
+    emitContentUnitStudentSend(_info: StudentDataPacket): void {
+        CommunicationManager.messageBus.emit('content_unit_student_send', _info)
     }
 }

@@ -5,7 +5,8 @@ import { DebugPanel } from "../ui/debugPanel"
 import { Color4 } from "@dcl/sdk/math"
 import { IClassroomChannel } from "./IClassroomChannel"
 import { UserDataHelper } from "../userDataHelper"
-import { ClassContentPacket, ClassPacket, Classroom, StudentCommInfo } from "../types/classroomTypes"
+import { ClassContentPacket, ClassPacket, Classroom, StudentCommInfo, ContentUnitPacket, DataPacket, StudentDataPacket } from "../types/classroomTypes"
+import { ContentUnitManager } from "../../contentUnits/contentUnitManager"
 
 export class CommunicationManager {
     static messageBus: MessageBus
@@ -34,6 +35,10 @@ export class CommunicationManager {
             CommunicationManager.messageBus.on('resume_model', CommunicationManager.OnModelResume)
             CommunicationManager.messageBus.on('deactivate_screens', CommunicationManager.OnScreenDeactivation)
             CommunicationManager.messageBus.on('deactivate_models', CommunicationManager.OnModelDeactivation)
+            CommunicationManager.messageBus.on('content_unit_start', CommunicationManager.OnContentUnitStart)
+            CommunicationManager.messageBus.on('content_unit_end', CommunicationManager.OnContentUnitEnd)
+            CommunicationManager.messageBus.on('content_unit_teacher_send', CommunicationManager.OnContentUnitTeacherSend)
+            CommunicationManager.messageBus.on('content_unit_student_send', CommunicationManager.OnContentUnitStudentSend)
 
             CommunicationManager.messageBus.on('log', (info: any) => {
                 const logColor = info.studentEvent ? (info.highPriority ? Color4.Blue() : Color4.Green()) : (info.highPriority ? Color4.Red() : Color4.Yellow())
@@ -132,6 +137,26 @@ export class CommunicationManager {
         //TODO: Add log
     }
 
+    static EmitContentUnitStart(_info: ContentUnitPacket): void {
+        CommunicationManager.channel.emitContentUnitStart(_info)
+        //TODO: Add log
+    }
+
+    static EmitContentUnitEnd(_info: ClassPacket): void {
+        CommunicationManager.channel.emitContentUnitEnd(_info)
+        //TODO: Add log
+    }
+
+    static EmitContentUnitTeacherSend(_info: DataPacket): void {
+        CommunicationManager.channel.emitContentUnitTeacherSend(_info)
+        //TODO: Add log
+    }
+
+    static EmitContentUnitStudentSend(_info: StudentDataPacket): void {
+        CommunicationManager.channel.emitContentUnitStudentSend(_info)
+        //TODO: Add log
+    }
+
     static EmitLog(_message: string, _classroomGuid: string, _studentEvent: boolean, _highPriority: boolean, _global: boolean = false): void {
         CommunicationManager.messageBus.emit('log', {
             message: _message,
@@ -216,6 +241,14 @@ export class CommunicationManager {
                     break
                 }
             }
+        }
+    }
+
+    static OnShareClassroomConfig(_info: Classroom) {
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.requestingJoinClass && ClassroomManager.classController.classList[ClassroomManager.classController.selectedClassIndex].id == _info.guid) {
+            ClassroomManager.requestingJoinClass = false
+            ClassroomManager.activeClassroom = _info
+            CommunicationManager.EmitLog(UserDataHelper.GetDisplayName() + " joined class " + _info.className, _info.guid, true, false)
         }
     }
 
@@ -351,11 +384,39 @@ export class CommunicationManager {
         }
     }
 
-    static OnShareClassroomConfig(_info: Classroom) {
-        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.requestingJoinClass && ClassroomManager.classController.classList[ClassroomManager.classController.selectedClassIndex].id == _info.guid) {
-            ClassroomManager.requestingJoinClass = false
-            ClassroomManager.activeClassroom = _info
-            CommunicationManager.EmitLog(UserDataHelper.GetDisplayName() + " joined class " + _info.className, _info.guid, true, false)
+    static OnContentUnitStart(_info: ContentUnitPacket): void {
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
+
+            ContentUnitManager.start(_info.unit.key, _info.unit.data)
+
+            //TODO: Add log
+        }
+    }
+
+    static OnContentUnitEnd(_info: ClassPacket): void {
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
+
+            ContentUnitManager.end()
+
+            //TODO: Add log
+        }
+    }
+
+    static OnContentUnitTeacherSend(_info: DataPacket): void {
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
+
+            ContentUnitManager.receive(_info.data)
+
+            //TODO: Add log
+        }
+    }
+
+    static OnContentUnitStudentSend(_info: StudentDataPacket): void {
+        if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
+
+            ContentUnitManager.receive(_info.data)
+
+            //TODO: Add log
         }
     }
 }

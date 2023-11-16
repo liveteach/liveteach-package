@@ -1,4 +1,4 @@
-import {ClassContentPacket, ClassPacket, Classroom, ServerParams, StudentCommInfo} from "../types/classroomTypes";
+import {ClassContentPacket, ClassPacket, Classroom, ContentUnitPacket, DataPacket, ServerParams, StudentCommInfo, StudentDataPacket} from "../types/classroomTypes";
 import { ReferenceServerWebsocketManager} from "../websocket/ReferenceServerWebsocketManager";
 import {UserData} from "~system/UserIdentity";
 import {IServerChannel} from "./IServerChannel";
@@ -60,6 +60,18 @@ export class DefaultServerChannel implements IServerChannel{
     }
     emitModelDeactivation(_info: ClassPacket): void {
         DefaultServerChannel.referenceServer.sendCommand("message","student","deactivate_models" ,_info, "teacher")
+    }
+    emitContentUnitStart(_info: ContentUnitPacket): void {
+        throw new Error("Method not implemented.");
+    }
+    emitContentUnitEnd(_info: ClassPacket): void {
+        throw new Error("Method not implemented.");
+    }
+    emitContentUnitTeacherSend(_info: DataPacket): void {
+        throw new Error("Method not implemented.");
+    }
+    emitContentUnitStudentSend(_info: StudentDataPacket): void {
+        throw new Error("Method not implemented.");
     }
 
     serverConfig(params: ServerParams):void {
