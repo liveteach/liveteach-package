@@ -10,7 +10,6 @@ export class ServerChannel implements IClassroomChannel{
     constructor(_userData: UserData, role:string,serverUrl: string) {
         ServerChannel.referenceServer = new ReferenceServerWebsocketManager(_userData, role, serverUrl);
     }
-
     emitClassActivation(_info: ClassPacket) {
         ServerChannel.referenceServer.sendCommand("message","student", "activate_class",_info, "teacher")
     }
