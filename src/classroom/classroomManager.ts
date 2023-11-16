@@ -11,6 +11,8 @@ import { IClassroomChannel } from "./comms/IClassroomChannel";
 import { Entity, Transform, engine } from "@dcl/sdk/ecs";
 import { Quaternion, Vector3 } from "@dcl/sdk/math";
 import { ImageContentConfig, ScreenManager, VideoContentConfig, ModelContentConfig } from "../classroomContent";
+import { ContentUnitManager } from "../contentUnits/contentUnitManager";
+import { IContentUnit } from "../contentUnits/IContentUnit"
 
 export abstract class ClassroomManager {
     static screenManager: ScreenManager
@@ -274,6 +276,38 @@ export abstract class ClassroomManager {
 
         if (ClassroomManager.activeClassroom) {
             CommunicationManager.EmitModelDeactivation({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription
+            })
+        }
+    }
+
+    static RegisterContentUnit(_key: string, _unit: IContentUnit, _ui?: Function): void {
+        ContentUnitManager.register(_key, _unit, _ui ?? null)
+    }
+
+    static StartContentUnit(_key: string, _data: any): void {
+        if (!ClassroomManager.classController?.isTeacher()) return
+
+        if (ClassroomManager.activeClassroom) {
+            CommunicationManager.EmitContentUnitStart({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription,
+                unit: {
+                    key: _key,
+                    data: _data
+                }
+            })
+        }
+    }
+
+    static EndContentUnit(): void {
+        if (!ClassroomManager.classController?.isTeacher()) return
+
+        if (ClassroomManager.activeClassroom) {
+            CommunicationManager.EmitContentUnitEnd({
                 id: ClassroomManager.activeClassroom.guid,
                 name: ClassroomManager.activeClassroom.className,
                 description: ClassroomManager.activeClassroom.classDescription

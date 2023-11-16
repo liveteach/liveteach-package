@@ -1,4 +1,4 @@
-import { ClassContentPacket, ClassPacket, Classroom, StudentCommInfo } from "../types/classroomTypes";
+import { ClassContentPacket, ClassPacket, Classroom, ContentUnitPacket, DataPacket, StudentCommInfo, StudentDataPacket } from "../types/classroomTypes";
 import { IClassroomChannel } from "./IClassroomChannel";
 import { ReferenceServerWebsocketManager} from "../websocket/ReferenceServerWebsocketManager";
 import {UserData} from "~system/UserIdentity";
@@ -60,6 +60,18 @@ export class ServerChannel implements IClassroomChannel{
         throw new Error("Method not implemented.");
     }
     emitModelDeactivation(_info: ClassPacket): void {
+        throw new Error("Method not implemented.");
+    }
+    emitContentUnitStart(_info: ContentUnitPacket): void {
+        throw new Error("Method not implemented.");
+    }
+    emitContentUnitEnd(_info: ClassPacket): void {
+        throw new Error("Method not implemented.");
+    }
+    emitContentUnitTeacherSend(_info: DataPacket): void {
+        throw new Error("Method not implemented.");
+    }
+    emitContentUnitStudentSend(_info: StudentDataPacket): void {
         throw new Error("Method not implemented.");
     }
 }
