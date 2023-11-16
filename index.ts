@@ -4,6 +4,7 @@ import * as dclutils from "./src/dclutils"
 import * as seating from "./src/seating"
 import * as classroom from "./src/classroom"
 import * as classroomContent from "./src/classroomContent"
+import * as contentUnits from "./src/contentUnits"
 
 export {
   setup,
@@ -11,6 +12,7 @@ export {
   dclutils,
   seating,
   classroom,
-  classroomContent
+  classroomContent,
+  contentUnits
 }
 

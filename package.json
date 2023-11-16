@@ -25,7 +25,8 @@
     "src/classroom",
     "src/enums.ts",
     "src/notifications",
-    "src/classroomContent"
+    "src/classroomContent",
+    "src/contentUnits"
   ],
   "dependencies": {
     "@dcl-sdk/utils": "^1.1.2",
