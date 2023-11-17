@@ -283,13 +283,14 @@ export abstract class ClassroomManager {
         }
     }
 
-    static RegisterContentUnit(_key: string, _unit: IContentUnit, _ui?: Function): void {
-        ContentUnitManager.register(_key, _unit, _ui ?? null)
+    static RegisterContentUnit(_key: string, _unit: IContentUnit): void {
+        ContentUnitManager.register(_key, _unit)
     }
 
     static StartContentUnit(_key: string, _data: any): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
+        ContentUnitManager.start(_key, _data)
         if (ClassroomManager.activeClassroom) {
             CommunicationManager.EmitContentUnitStart({
                 id: ClassroomManager.activeClassroom.guid,
@@ -306,11 +307,35 @@ export abstract class ClassroomManager {
     static EndContentUnit(): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
+        ContentUnitManager.end(_key, _data)
         if (ClassroomManager.activeClassroom) {
             CommunicationManager.EmitContentUnitEnd({
                 id: ClassroomManager.activeClassroom.guid,
                 name: ClassroomManager.activeClassroom.className,
                 description: ClassroomManager.activeClassroom.classDescription
+            })
+        }
+    }
+
+    static SendContentUnitData(_data: any): void {
+        if (!ClassroomManager.activeClassroom) return
+
+        if (ClassroomManager.classController?.isTeacher()) {
+            CommunicationManager.EmitContentUnitTeacherSend({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription,
+                data: _data
+            })
+        }
+        else {
+            CommunicationManager.EmitContentUnitStudentSend({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription,
+                studentID: UserDataHelper.GetUserId(),
+                studentName: UserDataHelper.GetDisplayName(),
+                data: _data
             })
         }
     }
