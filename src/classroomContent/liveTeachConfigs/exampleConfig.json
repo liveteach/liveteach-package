@@ -84,6 +84,20 @@
                 "spin": false,
                 "replace": false
             }
+        ],
+        "contentUnits": [
+            {
+                "key": "poll",
+                "data": {
+                    "title": "What would you like to watch?",
+                    "options": [
+                        "The Shining",
+                        "Alien",
+                        "The Thing",
+                        "Terminator"
+                    ]
+                }
+            }
         ]
     }
 }

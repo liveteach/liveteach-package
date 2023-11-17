@@ -405,7 +405,7 @@ export class CommunicationManager {
     static OnContentUnitTeacherSend(_info: DataPacket): void {
         if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
 
-            ContentUnitManager.receive(_info.data)
+            ContentUnitManager.update(_info.data)
 
             //TODO: Add log
         }
@@ -414,7 +414,7 @@ export class CommunicationManager {
     static OnContentUnitStudentSend(_info: StudentDataPacket): void {
         if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
 
-            ContentUnitManager.receive(_info.data)
+            ContentUnitManager.update(_info.data)
 
             //TODO: Add log
         }
