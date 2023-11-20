@@ -22,9 +22,11 @@ export abstract class ClassroomManager {
     static requestingJoinClass: boolean = false
     static classroomConfig: any
     static originEntity: Entity
+    static testMode: boolean = false
 
-    static Initialise(_classroomConfig: any, _channel: IClassroomChannel): void {
+    static Initialise(_classroomConfig: any, _channel: IClassroomChannel, _testMode: boolean = false): void {
         ClassroomManager.classroomConfig = _classroomConfig
+        ClassroomManager.testMode = _testMode
 
         SmartContractManager.Initialise()
         CommunicationManager.Initialise(_channel)
@@ -41,18 +43,11 @@ export abstract class ClassroomManager {
     }
 
     static SetClassController(type: UserType): void {
-        if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && type === UserType.teacher) {
-            ClassroomManager.classController = null
-            return
-        }
-
-        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && type === UserType.student) {
-            ClassroomManager.classController = null
-            return
-        }
+        if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && type === UserType.teacher) return
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && type === UserType.student) return
 
         if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && type === UserType.student) {
-            ClassroomManager.classController.deactivateClassroom()
+            ClassroomManager.DeactivateClassroom()
         }
 
         if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && type === UserType.teacher) {
@@ -75,19 +70,6 @@ export abstract class ClassroomManager {
                     name: ClassroomManager.activeContent.name,
                     description: ClassroomManager.activeContent.description
                 })
-            })
-    }
-
-    static async ActivateClassroom(): Promise<void | ClassPacket[]> {
-        return SmartContractManager.ActivateClassroom()
-            .then(function (classroomGuid) {
-                const valid = SmartContractManager.ValidateClassroomGuid(classroomGuid)
-                if (valid) {
-                    return SmartContractManager.FetchClassList()
-                }
-                else {
-                    return []
-                }
             })
     }
 

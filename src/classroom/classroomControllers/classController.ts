@@ -18,11 +18,9 @@ export abstract class ClassController {
     }
 
     isInClass(): boolean {
-        return false
+        return this.inSession
     }
 
-    activateClassroom(): void { }
-    deactivateClassroom(): void { }
     setClassroom(): void { }
     fetchClassroomContent(): void { }
     startClass(): void { }
