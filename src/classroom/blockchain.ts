@@ -1,10 +1,8 @@
 import { GetUserDataResponse, UserData, getUserData } from "~system/UserIdentity"
 import { RequestManager, ContractFactory } from 'eth-connect'
 import { createEthereumProvider } from '@dcl/sdk/ethereum-provider'
-import { Entity, executeTask } from '@dcl/sdk/ecs'
+import { executeTask } from '@dcl/sdk/ecs'
 import { InfoUI } from "./ui/infoUI"
-import { ClassroomManager } from "."
-import { UserType } from "../enums"
 import { GetSceneResponse, getSceneInfo } from '~system/Scene'
 import abi from "./contracts/TeachContractAbi.json"
 
