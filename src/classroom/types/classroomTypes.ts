@@ -39,7 +39,6 @@ export class Classroom {
     teacherName: string
     className: string
     classDescription: string
-    location: string
     origin: Vector3
     volume: Vector3
     autojoin: boolean
@@ -47,7 +46,6 @@ export class Classroom {
     duration: number
     seatingEnabled: boolean
     videoPlaying: boolean
-    skybox: string
     displayedImage: ImageContentConfig
     displayedVideo: VideoContentConfig
     displayedModel: ModelContentConfig

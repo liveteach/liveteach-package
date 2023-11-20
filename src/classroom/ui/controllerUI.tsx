@@ -1,25 +1,22 @@
-// @ts-nocheck
 import { Color4 } from "@dcl/sdk/math"
 import ReactEcs, { Button, Label, UiEntity } from "@dcl/sdk/react-ecs"
 import { ClassroomManager } from "../classroomManager";
-import { UserType } from "../../enums";
 
 export class ControllerUI {
     private static visibility: boolean = false
-    static activationMessage: string = ""
 
     private static component = () => (
         <UiEntity
             uiTransform={{
                 position: { left: '0px', bottom: '380px' },
-                height: "240px",
+                height: "180px",
                 width: "380px",
                 positionType: 'absolute',
-                display: ControllerUI.visibility && ClassroomManager.classController?.isTeacher() ? 'flex' : 'none'
+                display: ControllerUI.visibility && (ClassroomManager.classController?.isTeacher() || (ClassroomManager.classController?.isStudent() && !ClassroomManager.classroomConfig?.classroom.autojoin)) ? 'flex' : 'none'
             }}
             uiBackground={{ color: Color4.create(0, 0, 0, 0.8) }}
         >
-            <UiEntity // TEACHER / STUDENT
+            <UiEntity // CONTROLS
                 uiTransform={{
                     position: { left: "10px", top: "10px" },
                     height: "200px",
@@ -29,7 +26,7 @@ export class ControllerUI {
                 }}
             >
                 <Label
-                    value={"TEACHER CONTROLS"}
+                    value={(ClassroomManager.classController?.isTeacher() ? "TEACHER" : "STUDENT") + " CONTROLS"}
                     color={Color4.Green()}
                     uiTransform={{ width: 80, height: 40, margin: 4 }}
                     fontSize={20}
@@ -37,39 +34,13 @@ export class ControllerUI {
                     textAlign="top-left"
                 />
             </UiEntity>
-            <UiEntity // CLASSROOM ACTIVATION
+            <UiEntity // CLASS SELECTION
                 uiTransform={{
                     position: { left: "10px", top: "60px" },
                     height: "200px",
                     width: "500px",
                     positionType: 'absolute',
-                    display: ClassroomManager.classController?.isTeacher() ? "flex" : "none"
-                }}
-            >
-                <Button
-                    value="Activate Classroom"
-                    fontSize={16}
-                    color={Color4.Black()}
-                    variant={ClassroomManager.classController?.isInClass() ? 'primary' : 'secondary'}
-                    uiTransform={{ width: 160, height: 40, margin: 4 }}
-                    onMouseDown={() => { ControllerUI.ToggleActivateClass() }}
-                />
-                <Label
-                    value={ControllerUI.activationMessage}
-                    color={ClassroomManager.classController?.isInClass() ? Color4.Green() : Color4.Red()}
-                    uiTransform={{ width: 160, height: 40, margin: 4 }}
-                    fontSize={16}
-                    font="serif"
-                    textAlign="top-left"
-                />
-            </UiEntity>
-            <UiEntity // CLASS SELECTION
-                uiTransform={{
-                    position: { left: "10px", top: "110px" },
-                    height: "200px",
-                    width: "500px",
-                    positionType: 'absolute',
-                    display: (ClassroomManager.classController?.isTeacher() && ClassroomManager.classController?.isInClass()) || (ClassroomManager.classController?.isStudent() && ClassroomManager.classController?.classList?.length > 0) ? "flex" : "none"
+                    display: ClassroomManager.classController?.classList?.length > 0 ? "flex" : "none"
                 }}
             >
                 <Button
@@ -98,11 +69,11 @@ export class ControllerUI {
             </UiEntity>
             <UiEntity // START CLASS / JOIN CLASS
                 uiTransform={{
-                    position: { left: "10px", top: "160px" },
+                    position: { left: "10px", top: "110px" },
                     height: "200px",
                     width: "500px",
                     positionType: 'absolute',
-                    display: (ClassroomManager.classController?.isTeacher() && ClassroomManager.classController?.isInClass()) || (ClassroomManager.classController?.isStudent() && ClassroomManager.classController?.classList?.length > 0) ? "flex" : "none"
+                    display: ClassroomManager.classController?.classList?.length > 0 ? "flex" : "none"
                 }}
             >
                 <Button
@@ -169,23 +140,6 @@ export class ControllerUI {
                     ClassroomManager.classController.exitClass()
                 }
             }
-        }
-    }
-
-    private static SetTeacher(): void {
-        ClassroomManager.SetClassController(UserType.teacher)
-    }
-
-    private static SetStudent(): void {
-        ClassroomManager.SetClassController(UserType.student)
-    }
-
-    private static ToggleActivateClass(): void {
-        if (ClassroomManager.classController.isInClass()) {
-            ClassroomManager.classController.deactivateClassroom()
-        }
-        else {
-            ClassroomManager.classController.activateClassroom()
         }
     }
 

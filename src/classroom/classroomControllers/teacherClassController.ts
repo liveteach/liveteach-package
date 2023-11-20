@@ -1,11 +1,7 @@
 import { ClassController } from "./classController";
-import { ControllerUI } from "../ui/controllerUI";
 import { ClassroomManager } from "../classroomManager";
-import { ClassPacket } from "../types/classroomTypes";
 
 export class TeacherClassController extends ClassController {
-    activated: boolean = false
-
     constructor() {
         super()
     }
@@ -19,33 +15,7 @@ export class TeacherClassController extends ClassController {
     }
 
     override isInClass(): boolean {
-        return this.activated
-    }
-
-    override activateClassroom(): void {
-        const self = this
-        ClassroomManager.ActivateClassroom()
-            .then(function (classList) {
-                self.activated = true
-                self.classList = classList as ClassPacket[]
-                self.setClassroom()
-                ControllerUI.activationMessage = "activated"
-            })
-            .catch(function (error) {
-                ControllerUI.activationMessage = error.toString()
-            })
-    }
-
-    override deactivateClassroom(): void {
-        const self = this
-        ClassroomManager.DeactivateClassroom()
-            .then(function () {
-                self.activated = false
-                ControllerUI.activationMessage = "deactivated"
-            })
-            .catch(function (error) {
-                ControllerUI.activationMessage = error.toString()
-            })
+        return this.inSession
     }
 
     override setClassroom(): void {
@@ -59,7 +29,7 @@ export class TeacherClassController extends ClassController {
                 self.inSession = true
             })
             .catch(function (error) {
-
+                console.error(error)
             })
     }
 
@@ -70,7 +40,7 @@ export class TeacherClassController extends ClassController {
                 self.inSession = false
             })
             .catch(function (error) {
-
+                console.error(error)
             })
     }
 }

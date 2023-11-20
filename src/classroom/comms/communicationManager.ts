@@ -170,54 +170,57 @@ export class CommunicationManager {
     ////////////// RECEIVE //////////////
 
     static OnActivateClass(_info: ClassPacket): void {
-        if (ClassroomManager.classController && ClassroomManager.classController.isStudent()) {
-            let classFound: boolean = false
-            for (let i = 0; i < ClassroomManager.classController.classList.length; i++) {
-                if (ClassroomManager.classController.classList[i].id == _info.id) {
-                    ClassroomManager.classController.classList[i].name = _info.name
-                    ClassroomManager.classController.classList[i].description = _info.description
-                    classFound = true
-                    break
-                }
-            }
-            if (!classFound) {
-                ClassroomManager.classController.classList.push({
-                    id: _info.id,
-                    name: _info.name,
-                    description: _info.description,
-                })
-            }
 
+    }
+
+    static OnDeactivateClass(_info: ClassPacket): void {
+        
+    }
+
+    static OnStartClass(_info: ClassPacket): void {
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent()) {
             //autojoin
             if (ClassroomManager.classroomConfig.classroom.autojoin) {
                 ClassroomManager.JoinClass(ClassroomManager.classController.classList[0].id)
             }
-        }
-    }
-
-    static OnDeactivateClass(_info: ClassPacket): void {
-        if (ClassroomManager.classController && ClassroomManager.classController.isStudent()) {
-            for (let i = 0; i < ClassroomManager.classController.classList.length; i++) {
-                if (ClassroomManager.classController.classList[i].id == _info.id) {
-                    ClassroomManager.classController.classList.splice(i, 1)
-                    if (ClassroomManager.classController.selectedClassIndex == i) {
-                        ClassroomManager.classController.selectedClassIndex = Math.max(0, i - 1)
+            else {
+                let classFound: boolean = false
+                for (let i = 0; i < ClassroomManager.classController.classList.length; i++) {
+                    if (ClassroomManager.classController.classList[i].id == _info.id) {
+                        ClassroomManager.classController.classList[i].name = _info.name
+                        ClassroomManager.classController.classList[i].description = _info.description
+                        classFound = true
+                        break
                     }
-                    break
+                }
+                if (!classFound) {
+                    ClassroomManager.classController.classList.push({
+                        id: _info.id,
+                        name: _info.name,
+                        description: _info.description,
+                    })
                 }
             }
         }
     }
 
-    static OnStartClass(_info: ClassPacket): void {
-        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
-            //TODO
-        }
-    }
-
     static OnEndClass(_info: ClassPacket): void {
-        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
-            //TODO
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent()) {
+            if (ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
+                ClassroomManager.ExitClass()
+            }
+
+            if (ClassroomManager.classController && ClassroomManager.classController.isStudent()) {
+                for (let i = 0; i < ClassroomManager.classController.classList.length; i++) {
+                    if (ClassroomManager.classController.classList[i].id == _info.id) {
+                        ClassroomManager.classController.classList.splice(i, 1)
+                        if (ClassroomManager.classController.selectedClassIndex == i) {
+                            ClassroomManager.classController.selectedClassIndex = Math.max(0, i - 1)
+                        }
+                        break
+                    }
+                }
+            }
         }
     }
 
