@@ -62,16 +62,16 @@ export class DefaultServerChannel implements IServerChannel{
         DefaultServerChannel.referenceServer.sendCommand("message","student","deactivate_models" ,_info, "teacher")
     }
     emitContentUnitStart(_info: ContentUnitPacket): void {
-        throw new Error("Method not implemented.");
+        DefaultServerChannel.referenceServer.sendCommand("message","student","content_unit_start" ,_info, "teacher")
     }
     emitContentUnitEnd(_info: ClassPacket): void {
-        throw new Error("Method not implemented.");
+        DefaultServerChannel.referenceServer.sendCommand("message","student","content_unit_end" ,_info, "teacher")
     }
     emitContentUnitTeacherSend(_info: DataPacket): void {
-        throw new Error("Method not implemented.");
+        DefaultServerChannel.referenceServer.sendCommand("message","student","content_unit_teacher_send" ,_info, "teacher")
     }
     emitContentUnitStudentSend(_info: StudentDataPacket): void {
-        throw new Error("Method not implemented.");
+        DefaultServerChannel.referenceServer.sendCommand("message","teacher","content_unit_student_send" ,_info, "student")
     }
 
     serverConfig(params: ServerParams):void {
