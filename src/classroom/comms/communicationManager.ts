@@ -7,10 +7,14 @@ import { IClassroomChannel } from "./IClassroomChannel"
 import { UserDataHelper } from "../userDataHelper"
 import { ClassContentPacket, ClassPacket, Classroom, StudentCommInfo, ContentUnitPacket, DataPacket, StudentDataPacket } from "../types/classroomTypes"
 import { ContentUnitManager } from "../../contentUnits/contentUnitManager"
+import { engine } from "@dcl/sdk/ecs"
 
 export class CommunicationManager {
+    static readonly CLASS_EMIT_PERIOD: number = 10
+
     static messageBus: MessageBus
     static channel: IClassroomChannel
+    static elapsed: number = 0
 
     static Initialise(_channel: IClassroomChannel): void {
         CommunicationManager.channel = _channel
@@ -43,6 +47,22 @@ export class CommunicationManager {
             CommunicationManager.messageBus.on('log', (info: any) => {
                 const logColor = info.studentEvent ? (info.highPriority ? Color4.Blue() : Color4.Green()) : (info.highPriority ? Color4.Red() : Color4.Yellow())
                 DebugPanel.LogClassEvent(info.message, logColor, info.classroomGuid, info.studentEvent, info.global)
+            })
+
+            engine.addSystem((dt: number) => {
+                if (!ClassroomManager.classController?.isTeacher()) return
+
+                CommunicationManager.elapsed += dt
+                if (CommunicationManager.elapsed > CommunicationManager.CLASS_EMIT_PERIOD) {
+                    CommunicationManager.elapsed = 0
+
+                    ClassroomManager.UpdateClassroom()
+                    CommunicationManager.EmitClassStart({
+                        id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
+                        name: ClassroomManager.activeContent.name,
+                        description: ClassroomManager.activeContent.description
+                    })
+                }
             })
         }
     }
@@ -174,32 +194,32 @@ export class CommunicationManager {
     }
 
     static OnDeactivateClass(_info: ClassPacket): void {
-        
+
     }
 
     static OnStartClass(_info: ClassPacket): void {
         if (ClassroomManager.classController && ClassroomManager.classController.isStudent()) {
-            //autojoin
-            if (ClassroomManager.classroomConfig.classroom.autojoin) {
-                ClassroomManager.JoinClass(ClassroomManager.classController.classList[0].id)
+
+            let classFound: boolean = false
+            for (let i = 0; i < ClassroomManager.classController.classList.length; i++) {
+                if (ClassroomManager.classController.classList[i].id == _info.id) {
+                    ClassroomManager.classController.classList[i].name = _info.name
+                    ClassroomManager.classController.classList[i].description = _info.description
+                    classFound = true
+                    break
+                }
             }
-            else {
-                let classFound: boolean = false
-                for (let i = 0; i < ClassroomManager.classController.classList.length; i++) {
-                    if (ClassroomManager.classController.classList[i].id == _info.id) {
-                        ClassroomManager.classController.classList[i].name = _info.name
-                        ClassroomManager.classController.classList[i].description = _info.description
-                        classFound = true
-                        break
-                    }
-                }
-                if (!classFound) {
-                    ClassroomManager.classController.classList.push({
-                        id: _info.id,
-                        name: _info.name,
-                        description: _info.description,
-                    })
-                }
+            if (!classFound) {
+                ClassroomManager.classController.classList.push({
+                    id: _info.id,
+                    name: _info.name,
+                    description: _info.description,
+                })
+            }
+
+            //autojoin
+            if (ClassroomManager.activeClassroom?.guid != _info.id && ClassroomManager.classroomConfig.classroom.autojoin) {
+                ClassroomManager.JoinClass(_info.id)
             }
         }
     }
@@ -251,6 +271,7 @@ export class CommunicationManager {
         if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.requestingJoinClass && ClassroomManager.classController.classList[ClassroomManager.classController.selectedClassIndex].id == _info.guid) {
             ClassroomManager.requestingJoinClass = false
             ClassroomManager.activeClassroom = _info
+            ClassroomManager.SyncClassroom()
             CommunicationManager.EmitLog(UserDataHelper.GetDisplayName() + " joined class " + _info.className, _info.guid, true, false)
         }
     }

@@ -45,7 +45,6 @@ export class Classroom {
     capacity: number
     duration: number
     seatingEnabled: boolean
-    videoPlaying: boolean
     displayedImage: ImageContentConfig
     displayedVideo: VideoContentConfig
     displayedModel: ModelContentConfig
