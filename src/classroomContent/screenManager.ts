@@ -506,12 +506,25 @@ export class ScreenManager {
     }
 
     private update(_dt: number): void {
-        if (this.poweredOn && this.currentContent) {
-            let content = this.currentContent.getContent()
+        if (!this.poweredOn) return
+
+        if (this.imageContent) {
+            const content = this.imageContent.getContent()
             content.update(_dt)
-            if (!content.isShowing) {
-                this.currentContent.next()
-            }
+        }
+
+        if (this.videoContent) {
+            const content = this.videoContent.getContent()
+            content.update(_dt)
+        }
+
+        if (this.modelContent) {
+            const content = this.modelContent.getContent()
+            content.update(_dt)
+        }
+
+        if (this.currentContent && !this.currentContent.getContent().isShowing) {
+            this.currentContent.next()
         }
     }
 }
