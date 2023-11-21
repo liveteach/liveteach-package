@@ -4,7 +4,7 @@ import {GetCurrentRealmResponse} from "~system/EnvironmentApi";
 import * as ui from 'dcl-ui-toolkit'
 import * as utils from '@dcl-sdk/utils'
 import {CommunicationManager} from "../comms/communicationManager";
-import {ClassPacket, Classroom, ContentUnitPacket, DataPacket, StudentCommInfo, StudentDataPacket, StudentInfo} from "../types/classroomTypes";
+import {ClassContentPacket, ClassPacket, Classroom, ContentUnitPacket, DataPacket, StudentCommInfo, StudentDataPacket, StudentInfo} from "../types/classroomTypes";
 
 
 export class ReferenceServerWebsocketManager {
@@ -85,10 +85,10 @@ export class ReferenceServerWebsocketManager {
                 CommunicationManager.OnJoinClass(this.studentInfo(message))
                 break;
             case "display_image":
-                CommunicationManager.OnImageDisplay(this.classPacket(message))
+                CommunicationManager.OnImageDisplay(this.classContentPacket(message))
                 break;
             case "play_video":
-                CommunicationManager.OnVideoPlay(this.classPacket(message))
+                CommunicationManager.OnVideoPlay(this.classContentPacket(message))
                 break;
             case "pause_video":
                 CommunicationManager.OnVideoPause(this.classPacket(message))
@@ -100,7 +100,7 @@ export class ReferenceServerWebsocketManager {
                 CommunicationManager.OnVideoVolume(this.classPacket(message) + message.volume)
                 break;
             case "play_model":
-                CommunicationManager.OnModelPlay(this.classPacket(message))
+                CommunicationManager.OnModelPlay(this.classContentPacket(message))
                 break;
             case "pause_model":
                 CommunicationManager.OnModelPause(this.classPacket(message))
@@ -191,6 +191,18 @@ export class ReferenceServerWebsocketManager {
             description: message.data.description,
             studentID: message.data.studentID,
             studentName: message.data.name
+        }
+    }
+
+    classContentPacket(message): ClassContentPacket{
+        return{
+            id: message.data.id,
+            name: message.data.name,
+            description: message.data.description,
+            unit: message.data.unit,
+            image: message.data.image || "",
+            video: message.data.video || "",
+            model: message.data.model || ""
         }
     }
 
