@@ -1,57 +1,23 @@
-// @ts-nocheck
 import { GetUserDataResponse, UserData, getUserData } from "~system/UserIdentity"
 import { RequestManager, ContractFactory } from 'eth-connect'
 import { createEthereumProvider } from '@dcl/sdk/ethereum-provider'
-import { Entity, InputAction, MeshCollider, MeshRenderer, Transform, executeTask, pointerEventsSystem, } from '@dcl/sdk/ecs'
-import landABI from "./contracts/LANDRegistry.json"
-import estateABI from "./contracts/EstateRegistry.json"
-import { Vector3 } from "@dcl/sdk/math"
-import { TextEncoder, TextDecoder } from 'text-encoding'
+import { executeTask } from '@dcl/sdk/ecs'
 import { InfoUI } from "./ui/infoUI"
-import teachAbi from "./contracts/TeachContractABI.json"
+import { GetSceneResponse, getSceneInfo } from '~system/Scene'
+import abi from "./contracts/TeachContractAbi.json"
 
 export class BlockChain {
     public readonly UAT_SMART_CONTRACT_ADDRESS: string = "0x31Cd6F96EFf5256aFBe1F66E846D04016A35C615";
 
-    userData: UserData
+    userData: UserData | undefined = undefined
+    sceneBaseX: number = 1000
+    sceneBaseZ: number = 1000
 
     constructor() {
-        Object.assign(globalThis, {
-            TextEncoder: TextEncoder,
-            TextDecoder: TextDecoder
-        })
         this.getUserData()
+        this.getSceneData()
         //this.getGasPrice()
-    }
 
-    createSphere() {
-        let startClassEntity: Entity
-        MeshRenderer.setSphere(startClassEntity)
-        MeshCollider.setSphere(startClassEntity)
-        Transform.create(startClassEntity, {
-            position: Vector3.create(8, 1.5, 8)
-        })
-
-        pointerEventsSystem.onPointerDown(
-            {
-                entity: startClassEntity,
-                opts: {
-                    button: InputAction.IA_POINTER,
-                    hoverText: 'Start Class'
-                }
-            },
-            () => {
-                //this.startClass()
-                //this.decodeTokenId()
-                this.setLandUpdateOperator()
-                /* In order to call getClassroomGuid you will need to be
-                   be using a wallet address that is registered as a teacher 
-                   and has access to the landids specified.
-                */
-                // this.getClassroomGuid(-55, 1) 
-
-            }
-        )
     }
 
     getUserData() {
@@ -60,17 +26,34 @@ export class BlockChain {
                 if (userData != undefined) {
                     if (userData.data != undefined) {
                         this.userData = userData.data
+                        console.log("UserId: " + this.userData.userId)
                         if (userData.data.hasConnectedWeb3) {
                             console.log(userData.data.publicKey)
                             InfoUI.updateUserData(userData.data)
                             //this.getEthBalance()
-                            //this.createSphere()
                         } else {
                             console.log("Player is not connected with Web3")
                         }
                     }
                 }
             })
+        })
+    }
+
+    getSceneData() {
+        executeTask(async () => {
+            let sceneInfo: GetSceneResponse = await getSceneInfo({});
+            if (!sceneInfo || !sceneInfo.metadata) {
+                throw new Error('Cannot get scene info');
+            }
+            let parsedMetaData: any = JSON.parse(sceneInfo.metadata)
+            if (!parsedMetaData || !parsedMetaData.scene || !parsedMetaData.scene.base) {
+                throw new Error('Cannot get scene info from parsed metadata');
+            }
+            let parcel: string = parsedMetaData.scene.base
+            let sceneBaseArr = parcel.split(",")
+            this.sceneBaseX = parseInt(sceneBaseArr[0])
+            this.sceneBaseZ = parseInt(sceneBaseArr[1])
         })
     }
 
@@ -95,7 +78,7 @@ export class BlockChain {
             // Create the object that will handle the sending and receiving of RPC messages
             const requestManager = new RequestManager(provider)
 
-            requestManager.eth_getBalance(this.userData.publicKey, await requestManager.eth_blockNumber()).then((data) => {
+            requestManager.eth_getBalance(this.userData?.publicKey ?? "", await requestManager.eth_blockNumber()).then((data) => {
                 let number = data.toNumber() / 1000000000000000000
                 InfoUI.updateEthBalance(number.toString())
             })
@@ -110,62 +93,53 @@ export class BlockChain {
             const requestManager = new RequestManager(provider)
 
             requestManager.eth_sendTransaction({
-                from: this.userData.publicKey,
-                to: this.userData.publicKey,
+                from: this.userData?.publicKey ?? "",
+                to: this.userData?.publicKey ?? "",
                 data: "Test"
             })
         })
     }
 
-    decodeTokenId() {
-        executeTask(async () => {
-            // create an instance of the web3 provider to interface with Metamask
-            const provider = createEthereumProvider()
-            // Create the object that will handle the sending and receiving of RPC messages
-            const requestManager = new RequestManager(provider)
-            const factory = new ContractFactory(requestManager, landABI)
-            const contract = (await factory.at("0x554bb6488ba955377359bed16b84ed0822679cdc")) as any
-
-            const result = await contract.decodeTokenId(
-                '115792089237316195423570985008687907811415253534365133033462507293805639630971'
-            )
-            console.log(result)
-        })
+    getUserParcel(_x: number, _z: number): [number, number] {
+        let worldPositionX = this.sceneBaseX + (_x / 16)
+        let worldPositionZ = this.sceneBaseZ + (_z / 16)
+        worldPositionX = Math.floor(worldPositionX)
+        worldPositionZ = Math.floor(worldPositionZ)
+        return [worldPositionX, worldPositionZ]
     }
 
-    setLandUpdateOperator() {
-        executeTask(async () => {
-            // create an instance of the web3 provider to interface with Metamask
-            const provider = createEthereumProvider()
-            // Create the object that will handle the sending and receiving of RPC messages
-            const requestManager = new RequestManager(provider)
-            const factory = new ContractFactory(requestManager, estateABI)
-            const contract = (await factory.at("0x959e104e1a4db6317fa58f8295f586e1a978c297")) as any
+    public async getClassroomGuid(_parcel: [number, number]): Promise<string> {
+        try {
+            if (this.userData && this.userData.hasConnectedWeb3) {
+                console.log("wallet address", this.userData.publicKey)
+                // create an instance of the web3 provider to interface with Metamask
+                const provider = createEthereumProvider()
+                // Create the object that will handle the sending and receiving of RPC messages
+                const requestManager = new RequestManager(provider)
+                // Create a factory object based on the abi
+                const factory = new ContractFactory(requestManager, abi)
+                // Use the factory object to instance a `contract` object, referencing a specific contract
+                const contract = (await factory.at(
+                    "0x3185cafec6fc18267ac92f83ffc8f08658519097"
+                )) as any
 
-            // set LandUpdateOperator to Burner wallet on -150,150
-            const result = await contract.setLandUpdateOperator(1186,
-                '115792089237316195423570985008687907802227629627499794519951392893147897921686',
-                '0x560955D890e715c0F2940349f24594F5712bb78D',
-                {
-                    from: this.userData.publicKey,
-                    value: 0
-                }
-            )
-            console.log(result)
-        })
-    }
+                const res = await contract.getClassroomGuid(
+                    _parcel[0], _parcel[1],
+                    {
+                        from: this.userData.publicKey,
+                    }
+                )
+                // Log response
+                console.log("Classroom Guid", res)
 
-    getClassroomGuid(x: number, y: number) {
-        executeTask(async () => {
-            const provider = createEthereumProvider()
-            const requestManager = new RequestManager(provider)
-            const factory = new ContractFactory(requestManager, teachAbi)
-            const contract = (await factory.at(this.UAT_SMART_CONTRACT_ADDRESS)) as any
-
-            let result = await contract.getClassroomGuid(x, y, {
-                from: this.userData.publicKey
-            })
-            console.log("classroom guid", result);
-        })
+                return res as string
+            } else {
+                console.log("Player is not connected with Web3")
+                return ""
+            }
+        } catch (error) {
+            console.error(error)
+            return ""
+        }
     }
 }

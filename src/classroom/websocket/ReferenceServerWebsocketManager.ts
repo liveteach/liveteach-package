@@ -4,7 +4,7 @@ import {GetCurrentRealmResponse} from "~system/EnvironmentApi";
 import * as ui from 'dcl-ui-toolkit'
 import * as utils from '@dcl-sdk/utils'
 import {CommunicationManager} from "../comms/communicationManager";
-import {ClassPacket, StudentCommInfo, StudentInfo} from "../types/classroomTypes";
+import {ClassPacket, ContentUnitPacket, DataPacket, StudentCommInfo, StudentDataPacket, StudentInfo} from "../types/classroomTypes";
 
 
 export class ReferenceServerWebsocketManager {
@@ -84,8 +84,47 @@ export class ReferenceServerWebsocketManager {
             case "join_class":
                 CommunicationManager.OnJoinClass(this.studentInfo(message))
                 break;
-            case "exit_class":
-                CommunicationManager.OnExitClass(this.studentInfo(message))
+            case "display_image":
+                CommunicationManager.OnImageDisplay(this.classPacket(message))
+                break;
+            case "play_video":
+                CommunicationManager.OnVideoPlay(this.classPacket(message))
+                break;
+            case "pause_video":
+                CommunicationManager.OnVideoPause(this.classPacket(message))
+                break;
+            case "resume_video":
+                CommunicationManager.OnVideoResume(this.classPacket(message))
+                break;
+            case "set_video_volume":
+                CommunicationManager.OnVideoVolume(this.classPacket(message) + message.volume)
+                break;
+            case "play_model":
+                CommunicationManager.OnModelPlay(this.classPacket(message))
+                break;
+            case "pause_model":
+                CommunicationManager.OnModelPause(this.classPacket(message))
+                break;
+            case "resume_model":
+                CommunicationManager.OnModelResume(this.classPacket(message))
+                break;
+            case "deactivate_screens":
+                CommunicationManager.OnScreenDeactivation(this.classPacket(message))
+                break;
+            case "deactivate_models":
+                CommunicationManager.OnModelDeactivation(this.classPacket(message))
+                break;
+            case "content_unit_start":
+                CommunicationManager.OnContentUnitStart(this.contentPacket(message))
+                break;
+            case "content_unit_end":
+                CommunicationManager.OnContentUnitEnd(this.classPacket(message))
+                break;
+            case "content_unit_teacher_send":
+                CommunicationManager.OnContentUnitTeacherSend(this.dataPacket(message))
+                break;
+            case "content_unit_student_send":
+                CommunicationManager.OnContentUnitStudentSend(this.studentDataPacket(message))
                 break;
             case "sync":
                 console.log(message)
@@ -152,4 +191,32 @@ export class ReferenceServerWebsocketManager {
         }
     }
 
+    contentPacket(message): ContentUnitPacket{
+        return {
+            id: message.data.id,
+            name: message.data.name,
+            description: message.data.description,
+            unit: message.data.unit
+        }
+    }
+
+    dataPacket(message): DataPacket{
+        return {
+            id: message.data.id,
+            name: message.data.name,
+            description: message.data.description,
+            data: message.data.data
+        }
+    }
+
+    studentDataPacket(message): StudentDataPacket{
+        return {
+            id: message.data.id,
+            name: message.data.name,
+            description: message.data.description,
+            studentID: message.data.studentID,
+            studentName: message.data.studentName,
+            data: message.data.data
+        }
+    }
 }

@@ -4,8 +4,11 @@ import { MediaContent } from "./mediaContent";
 import { VideoContentConfig } from "./types/mediaContentConfigs";
 
 export class VideoContent extends MediaContent {
+    static readonly SYNC_OFFSET: number = 4
+
     videoEntity: Entity
     videoTexture: TextureUnion
+    offset: number = 0
 
     constructor(_screenConfig: VideoContentConfig) {
         super(_screenConfig)
@@ -14,7 +17,9 @@ export class VideoContent extends MediaContent {
 
         VideoPlayer.createOrReplace(this.videoEntity, {
             src: _screenConfig.src,
-            playing: false
+            playing: false,
+            position: _screenConfig.position,
+            volume: _screenConfig.volume
         })
 
         this.videoTexture = Material.Texture.Video({ videoPlayerEntity: this.videoEntity })
@@ -49,6 +54,8 @@ export class VideoContent extends MediaContent {
     }
 
     update(_dt: number): void {
-
+        if (!this.isPaused) {
+            this.offset += _dt
+        }
     }
 }

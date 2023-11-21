@@ -3,14 +3,17 @@ import { ClassController } from "./classroomControllers/classController";
 import { ClassControllerFactory } from "./factories/classControllerFactory";
 import { SmartContractManager } from "./smartContractManager";
 import { CommunicationManager } from "./comms/communicationManager";
-import { Classroom, ClassContent, ClassPacket } from "./types/classroomTypes";
+import { Classroom, ClassContent } from "./types/classroomTypes";
 import { ClassroomFactory } from "./factories/classroomFactory";
 import { UserDataHelper } from "./userDataHelper";
 import { UserType } from "../enums";
 import { IClassroomChannel } from "./comms/IClassroomChannel";
 import { Entity, Transform, engine } from "@dcl/sdk/ecs";
 import { Quaternion, Vector3 } from "@dcl/sdk/math";
-import { ImageContentConfig, ScreenManager, VideoContentConfig, ModelContentConfig } from "../classroomContent";
+import { ImageContentConfig, ScreenManager, VideoContentConfig, ModelContentConfig, VideoContent } from "../classroomContent";
+import { ContentUnitManager } from "../contentUnits/contentUnitManager";
+import { IContentUnit } from "../contentUnits/IContentUnit"
+import * as utils from '@dcl-sdk/utils'
 
 export abstract class ClassroomManager {
     static screenManager: ScreenManager
@@ -20,9 +23,11 @@ export abstract class ClassroomManager {
     static requestingJoinClass: boolean = false
     static classroomConfig: any
     static originEntity: Entity
+    static testMode: boolean = false
 
-    static Initialise(_classroomConfig: any, _channel: IClassroomChannel): void {
+    static Initialise(_classroomConfig: any, _channel: IClassroomChannel, _testMode: boolean = false): void {
         ClassroomManager.classroomConfig = _classroomConfig
+        ClassroomManager.testMode = _testMode
 
         SmartContractManager.Initialise()
         CommunicationManager.Initialise(_channel)
@@ -39,18 +44,11 @@ export abstract class ClassroomManager {
     }
 
     static SetClassController(type: UserType): void {
-        if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && type === UserType.teacher) {
-            ClassroomManager.classController = null
-            return
-        }
-
-        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && type === UserType.student) {
-            ClassroomManager.classController = null
-            return
-        }
+        if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && type === UserType.teacher) return
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && type === UserType.student) return
 
         if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && type === UserType.student) {
-            ClassroomManager.classController.deactivateClassroom()
+            ClassroomManager.DeactivateClassroom()
         }
 
         if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && type === UserType.teacher) {
@@ -73,19 +71,6 @@ export abstract class ClassroomManager {
                     name: ClassroomManager.activeContent.name,
                     description: ClassroomManager.activeContent.description
                 })
-            })
-    }
-
-    static async ActivateClassroom(): Promise<void | ClassPacket[]> {
-        return SmartContractManager.ActivateClassroom()
-            .then(function (classroomGuid) {
-                const valid = SmartContractManager.ValidateClassroomGuid(classroomGuid)
-                if (valid) {
-                    return SmartContractManager.FetchClassList()
-                }
-                else {
-                    return []
-                }
             })
     }
 
@@ -153,6 +138,8 @@ export abstract class ClassroomManager {
     static DisplayImage(_image: ImageContentConfig): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
+        ClassroomManager.activeClassroom.displayedImage = _image
+        ClassroomManager.activeClassroom.displayedVideo = null
         if (ClassroomManager.activeClassroom) {
             CommunicationManager.EmitImageDisplay({
                 id: ClassroomManager.activeClassroom.guid,
@@ -166,6 +153,8 @@ export abstract class ClassroomManager {
     static PlayVideo(_video: VideoContentConfig): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
+        ClassroomManager.activeClassroom.displayedImage = null
+        ClassroomManager.activeClassroom.displayedVideo = _video
         if (ClassroomManager.activeClassroom) {
             CommunicationManager.EmitVideoPlay({
                 id: ClassroomManager.activeClassroom.guid,
@@ -183,55 +172,225 @@ export abstract class ClassroomManager {
         }
     }
 
-    static PauseVideo(_video: VideoContentConfig): void {
+    static PauseVideo(): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
+        ClassroomManager.activeClassroom.displayedVideo.playing = false
         if (ClassroomManager.activeClassroom) {
             CommunicationManager.EmitVideoPause({
                 id: ClassroomManager.activeClassroom.guid,
                 name: ClassroomManager.activeClassroom.className,
-                description: ClassroomManager.activeClassroom.classDescription,
-                video: {
-                    src: _video.src,
-                    caption: _video.caption,
-                    playing: false,
-                    position: _video.position ?? 0,
-                    volume: _video.volume ?? 1,
-                    ratio: _video.ratio
-                }
+                description: ClassroomManager.activeClassroom.classDescription
             })
         }
     }
 
-    static SetVideoVolume(_video: VideoContentConfig): void {
+    static ResumeVideo(): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
+        ClassroomManager.activeClassroom.displayedVideo.playing = true
+        if (ClassroomManager.activeClassroom) {
+            CommunicationManager.EmitVideoResume({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription
+            })
+        }
+    }
+
+    static SetVideoVolume(_volume: number): void {
+        if (!ClassroomManager.classController?.isTeacher()) return
+
+        ClassroomManager.activeClassroom.displayedVideo.volume = _volume
         if (ClassroomManager.activeClassroom) {
             CommunicationManager.EmitVideoVolume({
                 id: ClassroomManager.activeClassroom.guid,
                 name: ClassroomManager.activeClassroom.className,
                 description: ClassroomManager.activeClassroom.classDescription,
-                video: {
-                    src: _video.src,
-                    caption: _video.caption,
-                    playing: _video.playing ?? true,
-                    position: _video.position ?? 0,
-                    volume: _video.volume ?? 1,
-                    ratio: _video.ratio
+                volume: _volume
+            })
+        }
+    }
+
+    static PlayModel(_model: ModelContentConfig): void {
+        if (!ClassroomManager.classController?.isTeacher()) return
+
+        ClassroomManager.activeClassroom.displayedModel = _model
+        if (ClassroomManager.activeClassroom) {
+            CommunicationManager.EmitModelPlay({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription,
+                model: _model
+            })
+        }
+    }
+
+    static PauseModel(): void {
+        if (!ClassroomManager.classController?.isTeacher()) return
+
+        if (ClassroomManager.activeClassroom) {
+            CommunicationManager.EmitModelPause({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription
+            })
+        }
+    }
+
+    static ResumeModel(): void {
+        if (!ClassroomManager.classController?.isTeacher()) return
+
+        if (ClassroomManager.activeClassroom) {
+            CommunicationManager.EmitModelResume({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription
+            })
+        }
+    }
+
+    static DeactivateScreens(): void {
+        if (!ClassroomManager.classController?.isTeacher()) return
+
+        if (ClassroomManager.activeClassroom) {
+            CommunicationManager.EmitScreenDeactivation({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription
+            })
+        }
+    }
+
+    static DeactivateModels(): void {
+        if (!ClassroomManager.classController?.isTeacher()) return
+
+        ClassroomManager.activeClassroom.displayedModel = null
+        if (ClassroomManager.activeClassroom) {
+            CommunicationManager.EmitModelDeactivation({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription
+            })
+        }
+    }
+
+    static RegisterContentUnit(_key: string, _unit: IContentUnit): void {
+        ContentUnitManager.register(_key, _unit)
+    }
+
+    static StartContentUnit(_key: string, _data: any): void {
+        if (!ClassroomManager.classController?.isTeacher()) return
+
+        ContentUnitManager.start(_key, _data)
+        if (ClassroomManager.activeClassroom) {
+            CommunicationManager.EmitContentUnitStart({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription,
+                unit: {
+                    key: _key,
+                    data: _data
                 }
             })
         }
     }
 
-    static DisplayModel(_model: ModelContentConfig): void {
+    static EndContentUnit(): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
+        ContentUnitManager.end()
         if (ClassroomManager.activeClassroom) {
-            CommunicationManager.EmitModelDisplay({
+            CommunicationManager.EmitContentUnitEnd({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription
+            })
+        }
+    }
+
+    static SendContentUnitData(_data: any): void {
+        if (!ClassroomManager.activeClassroom) return
+
+        if (ClassroomManager.classController?.isTeacher()) {
+            CommunicationManager.EmitContentUnitTeacherSend({
                 id: ClassroomManager.activeClassroom.guid,
                 name: ClassroomManager.activeClassroom.className,
                 description: ClassroomManager.activeClassroom.classDescription,
-                model: _model
+                data: _data
+            })
+        }
+        else {
+            CommunicationManager.EmitContentUnitStudentSend({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription,
+                studentID: UserDataHelper.GetUserId(),
+                studentName: UserDataHelper.GetDisplayName(),
+                data: _data
+            })
+        }
+    }
+
+    static UpdateClassroom(): void {
+        // video
+        if (ClassroomManager.screenManager.videoContent && ClassroomManager.screenManager.videoContent.content.length > 0) {
+            const content = ClassroomManager.screenManager.videoContent.getContent() as VideoContent
+            ClassroomManager.activeClassroom.displayedVideo.position = content.offset + VideoContent.SYNC_OFFSET
+            ClassroomManager.activeClassroom.displayedVideo.playing = content.isPaused ? false : true
+            ClassroomManager.activeClassroom.displayedVideo.volume = ClassroomManager.screenManager.muted ? 0 : 1
+        }
+        // model
+    }
+
+    static SyncClassroom(): void {
+        // sync seating
+        if (ClassroomManager.activeClassroom.seatingEnabled) {
+
+        }
+
+        // sync image
+        if (ClassroomManager.activeClassroom.displayedImage) {
+            CommunicationManager.OnImageDisplay({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription,
+                image: ClassroomManager.activeClassroom.displayedImage
+            })
+        }
+
+        // sync video
+        if (ClassroomManager.activeClassroom.displayedVideo) {
+            CommunicationManager.OnVideoPlay({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription,
+                video: ClassroomManager.activeClassroom.displayedVideo
+            })
+            if (!ClassroomManager.activeClassroom.displayedVideo.playing) {
+                utils.timers.setTimeout(() => {
+                    CommunicationManager.OnVideoPause({
+                        id: ClassroomManager.activeClassroom.guid,
+                        name: ClassroomManager.activeClassroom.className,
+                        description: ClassroomManager.activeClassroom.classDescription
+                    })
+                }, 1000)
+            }
+            CommunicationManager.OnVideoVolume({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription,
+                volume: ClassroomManager.activeClassroom.displayedVideo.volume ?? 1
+            })
+        }
+
+        // sync model
+        if (ClassroomManager.activeClassroom.displayedModel) {
+            CommunicationManager.OnModelPlay({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription,
+                model: ClassroomManager.activeClassroom.displayedModel
             })
         }
     }
