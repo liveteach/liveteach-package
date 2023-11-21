@@ -32,7 +32,7 @@ export class DefaultServerChannel implements IServerChannel{
         DefaultServerChannel.referenceServer.sendCommand("message","student","share_classroom_config",_info,"teacher")
     }
     emitImageDisplay(_info: ClassContentPacket) {
-        DefaultServerChannel.referenceServer.sendCommand("message","student","display_image'" ,_info, "teacher")
+        DefaultServerChannel.referenceServer.sendCommand("message","student","display_image" ,_info, "teacher")
     }
     emitVideoPlay(_info: ClassContentPacket) {
         DefaultServerChannel.referenceServer.sendCommand("message","student","play_video" ,_info, "teacher")
