@@ -334,7 +334,7 @@ export abstract class ClassroomManager {
 
     static UpdateClassroom(): void {
         // video
-        if (ClassroomManager.screenManager.videoContent && ClassroomManager.screenManager.videoContent.content.length > 0) {
+        if (ClassroomManager.screenManager.videoContent && ClassroomManager.screenManager.videoContent.content.length > 0 && ClassroomManager.activeClassroom.displayedVideo) {
             const content = ClassroomManager.screenManager.videoContent.getContent() as VideoContent
             ClassroomManager.activeClassroom.displayedVideo.position = content.offset + VideoContent.SYNC_OFFSET
             ClassroomManager.activeClassroom.displayedVideo.playing = content.isPaused ? false : true
