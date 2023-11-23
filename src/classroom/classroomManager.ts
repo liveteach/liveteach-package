@@ -10,10 +10,9 @@ import { UserType } from "../enums";
 import { IClassroomChannel } from "./comms/IClassroomChannel";
 import { Entity, Transform, engine } from "@dcl/sdk/ecs";
 import { Quaternion, Vector3 } from "@dcl/sdk/math";
-import { ImageContentConfig, ScreenManager, VideoContentConfig, ModelContentConfig, VideoContent } from "../classroomContent";
+import { ImageContentConfig, ScreenManager, VideoContentConfig, ModelContentConfig } from "../classroomContent";
 import { ContentUnitManager } from "../contentUnits/contentUnitManager";
 import { IContentUnit } from "../contentUnits/IContentUnit"
-import * as utils from '@dcl-sdk/utils'
 
 export abstract class ClassroomManager {
     static screenManager: ScreenManager
@@ -333,14 +332,42 @@ export abstract class ClassroomManager {
     }
 
     static UpdateClassroom(): void {
+        // image
+        ClassroomManager.activeContent.images.forEach(image => {
+            for (let imageContent of ClassroomManager.screenManager.imageContent.content) {
+                if (imageContent.configuration.src == image.src) {
+                    // found
+                    image.showing = imageContent.configuration.showing
+                    break
+                }
+            }
+        });
         // video
-        if (ClassroomManager.screenManager.videoContent && ClassroomManager.screenManager.videoContent.content.length > 0) {
-            const content = ClassroomManager.screenManager.videoContent.getContent() as VideoContent
-            ClassroomManager.activeClassroom.displayedVideo.position = content.offset + VideoContent.SYNC_OFFSET
-            ClassroomManager.activeClassroom.displayedVideo.playing = content.isPaused ? false : true
-            ClassroomManager.activeClassroom.displayedVideo.volume = ClassroomManager.screenManager.muted ? 0 : 1
-        }
+        ClassroomManager.activeContent.videos.forEach(video => {
+            for (let videoContent of ClassroomManager.screenManager.videoContent.content) {
+                if (videoContent.configuration.src == video.src) {
+                    // found
+                    const config = videoContent.configuration as VideoContentConfig
+                    video.playing = config.playing
+                    video.volume = config.volume
+                    video.position = config.position
+                    video.showing = config.showing
+                    break
+                }
+            }
+        });
         // model
+        ClassroomManager.activeContent.models.forEach(model => {
+            for (let modelContent of ClassroomManager.screenManager.modelContent.content) {
+                if (modelContent.configuration.src == model.src) {
+                    // found
+                    const config = modelContent.configuration as ModelContentConfig
+                    model.showing = config.showing
+                    model.playing = !modelContent.isPaused
+                    break
+                }
+            }
+        });
     }
 
     static SyncClassroom(): void {
@@ -349,49 +376,56 @@ export abstract class ClassroomManager {
 
         }
 
+        ClassroomManager.screenManager.loadContent()
+
         // sync image
-        if (ClassroomManager.activeClassroom.displayedImage) {
-            CommunicationManager.OnImageDisplay({
-                id: ClassroomManager.activeClassroom.guid,
-                name: ClassroomManager.activeClassroom.className,
-                description: ClassroomManager.activeClassroom.classDescription,
-                image: ClassroomManager.activeClassroom.displayedImage
-            })
-        }
+        ClassroomManager.screenManager.imageContent.content.forEach(content => {
+            if (content.configuration.showing) {
+                CommunicationManager.OnImageDisplay({
+                    id: ClassroomManager.activeClassroom.guid,
+                    name: ClassroomManager.activeClassroom.className,
+                    description: ClassroomManager.activeClassroom.classDescription,
+                    image: content.configuration
+                })
+            }
+        });
 
         // sync video
-        if (ClassroomManager.activeClassroom.displayedVideo) {
-            CommunicationManager.OnVideoPlay({
-                id: ClassroomManager.activeClassroom.guid,
-                name: ClassroomManager.activeClassroom.className,
-                description: ClassroomManager.activeClassroom.classDescription,
-                video: ClassroomManager.activeClassroom.displayedVideo
-            })
-            if (!ClassroomManager.activeClassroom.displayedVideo.playing) {
-                utils.timers.setTimeout(() => {
+        ClassroomManager.screenManager.videoContent.content.forEach(content => {
+            if (content.configuration.showing) {
+                CommunicationManager.OnVideoPlay({
+                    id: ClassroomManager.activeClassroom.guid,
+                    name: ClassroomManager.activeClassroom.className,
+                    description: ClassroomManager.activeClassroom.classDescription,
+                    video: content.configuration
+                })
+                if (!content.configuration.playing) {
                     CommunicationManager.OnVideoPause({
                         id: ClassroomManager.activeClassroom.guid,
                         name: ClassroomManager.activeClassroom.className,
                         description: ClassroomManager.activeClassroom.classDescription
                     })
-                }, 1000)
+                }
             }
-            CommunicationManager.OnVideoVolume({
-                id: ClassroomManager.activeClassroom.guid,
-                name: ClassroomManager.activeClassroom.className,
-                description: ClassroomManager.activeClassroom.classDescription,
-                volume: ClassroomManager.activeClassroom.displayedVideo.volume ?? 1
-            })
-        }
+        });
 
         // sync model
-        if (ClassroomManager.activeClassroom.displayedModel) {
-            CommunicationManager.OnModelPlay({
-                id: ClassroomManager.activeClassroom.guid,
-                name: ClassroomManager.activeClassroom.className,
-                description: ClassroomManager.activeClassroom.classDescription,
-                model: ClassroomManager.activeClassroom.displayedModel
-            })
-        }
+        ClassroomManager.screenManager.modelContent.content.forEach(content => {
+            if (content.configuration.showing) {
+                CommunicationManager.OnModelPlay({
+                    id: ClassroomManager.activeClassroom.guid,
+                    name: ClassroomManager.activeClassroom.className,
+                    description: ClassroomManager.activeClassroom.classDescription,
+                    model: content.configuration
+                })
+                if (!content.configuration.playing) {
+                    CommunicationManager.OnModelPause({
+                        id: ClassroomManager.activeClassroom.guid,
+                        name: ClassroomManager.activeClassroom.className,
+                        description: ClassroomManager.activeClassroom.classDescription
+                    })
+                }
+            }
+        });
     }
 }

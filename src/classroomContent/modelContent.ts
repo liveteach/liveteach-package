@@ -39,6 +39,8 @@ export class ModelContent extends MediaContent {
         if(_config.animations.length > 0) {
             this.setAnimation(_config.animations[0].clip, false)
         }
+
+        this.isPaused = !_config.playing
     }
 
     setAnimation(_clip: string, _play: boolean = true) {

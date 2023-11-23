@@ -1,4 +1,4 @@
-import { ClassContentPacket, ClassPacket, Classroom, ContentUnitPacket, DataPacket, StudentCommInfo, StudentDataPacket } from "../types/classroomTypes";
+import { ClassContent, ClassContentPacket, ClassPacket, Classroom, ContentUnitPacket, DataPacket, StudentCommInfo, StudentDataPacket, ClassroomSharePacket } from "../types/classroomTypes";
 import { IClassroomChannel } from "./IClassroomChannel";
 import { CommunicationManager } from "./communicationManager";
 
@@ -21,7 +21,7 @@ export class PeerToPeerChannel implements IClassroomChannel{
     emitClassExit(_info: StudentCommInfo) {
         CommunicationManager.messageBus.emit('exit_class', _info)
     }
-    emitClassroomConfig(_info: Classroom) {
+    emitClassroomConfig(_info: ClassroomSharePacket) {
         CommunicationManager.messageBus.emit('share_classroom_config', _info)
     }
     emitImageDisplay(_info: ClassContentPacket) {

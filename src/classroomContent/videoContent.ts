@@ -4,8 +4,6 @@ import { MediaContent } from "./mediaContent";
 import { VideoContentConfig } from "./types/mediaContentConfigs";
 
 export class VideoContent extends MediaContent {
-    static readonly SYNC_OFFSET: number = 4
-
     videoEntity: Entity
     videoTexture: TextureUnion
     offset: number = 0
@@ -28,25 +26,40 @@ export class VideoContent extends MediaContent {
     play(): void {
         super.play()
         VideoPlayer.getMutable(this.videoEntity).playing = true
+
+        const config = this.configuration as VideoContentConfig
+        config.playing = true
     }
 
     stop(): void {
         super.stop()
         VideoPlayer.getMutable(this.videoEntity).playing = false
+        
+        const config = this.configuration as VideoContentConfig
+        config.playing = false
     }
 
     resume(): void {
         super.resume()
         VideoPlayer.getMutable(this.videoEntity).playing = true
+        
+        const config = this.configuration as VideoContentConfig
+        config.playing = true
     }
 
     pause(): void {
         super.pause()
         VideoPlayer.getMutable(this.videoEntity).playing = false
+        
+        const config = this.configuration as VideoContentConfig
+        config.playing = false
     }
 
     setVolume(_value: number): void {
         VideoPlayer.getMutable(this.videoEntity).volume = _value
+        
+        const config = this.configuration as VideoContentConfig
+        config.volume = _value
     }
 
     getContentType(): MediaContentType {
@@ -56,6 +69,9 @@ export class VideoContent extends MediaContent {
     update(_dt: number): void {
         if (!this.isPaused) {
             this.offset += _dt
+        
+            const config = this.configuration as VideoContentConfig
+            config.position = this.offset
         }
     }
 }
