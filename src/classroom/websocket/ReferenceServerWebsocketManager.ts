@@ -4,7 +4,7 @@ import {GetCurrentRealmResponse} from "~system/EnvironmentApi";
 import * as ui from 'dcl-ui-toolkit'
 import * as utils from '@dcl-sdk/utils'
 import {CommunicationManager} from "../comms/communicationManager";
-import {ClassContentPacket, ClassPacket, Classroom, ContentUnitPacket, DataPacket, StudentCommInfo, StudentDataPacket, StudentInfo} from "../types/classroomTypes";
+import {ClassContent, ClassContentPacket, ClassPacket, Classroom, ClassroomSharePacket, ContentUnitPacket, DataPacket, StudentCommInfo, StudentDataPacket, StudentInfo} from "../types/classroomTypes";
 
 
 export class ReferenceServerWebsocketManager {
@@ -127,7 +127,7 @@ export class ReferenceServerWebsocketManager {
                 CommunicationManager.OnContentUnitStudentSend(this.studentDataPacket(message))
                 break;
             case "share_classroom_config":
-                CommunicationManager.OnShareClassroomConfig(this.classroom(message))
+                CommunicationManager.OnShareClassroomConfig(this.classShareConfig(message))
                 break;
             case "sync":
                 console.log(message)
@@ -235,23 +235,11 @@ export class ReferenceServerWebsocketManager {
         }
     }
 
-    classroom(message): Classroom{
-        return{
-            guid: message.data.guid,
-            teacherID: message.data.teacherID,
-            teacherName: message.data.teacherName,
-            className: message.data.className,
-            classDescription: message.data.classDescription,
-            origin: message.data.origin,
-            volume: message.data.volume,
-            autojoin: message.data.autojoin,
-            capacity: message.data.capacity,
-            duration: message.data.duration,
-            seatingEnabled: message.data.seatingEnabled,
-            displayedImage: message.data.displayedImage,
-            displayedVideo: message.data.displayedVideo,
-            displayedModel: message.data.displayedModel,
-            students: message.data.students
+
+    classShareConfig(message): ClassroomSharePacket{
+        return {
+            config: message.data.config,
+            content: message.data.content
         }
     }
 }
