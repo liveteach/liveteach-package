@@ -283,41 +283,47 @@ export class ScreenManager {
         let videoContentList: VideoContent[] = []
         let modelContentList: ModelContent[] = []
 
-        ClassroomManager.activeContent.images.forEach(image => {
-            imageContentList.push(new ImageContent({
-                src: image.src,
-                caption: image.caption,
-                showing: image.showing ?? false,
-                ratio: image.ratio
-            }))
-        });
+        if (ClassroomManager.activeContent.images) {
+            ClassroomManager.activeContent.images.forEach(image => {
+                imageContentList.push(new ImageContent({
+                    src: image.src,
+                    caption: image.caption,
+                    showing: image.showing ?? false,
+                    ratio: image.ratio
+                }))
+            });
+        }
 
-        ClassroomManager.activeContent.videos.forEach(video => {
-            videoContentList.push(new VideoContent({
-                src: video.src,
-                caption: video.caption,
-                showing: video.showing ?? false,
-                ratio: video.ratio,
-                playing: false,
-                position: video.position ?? 0,
-                volume: video.volume ?? 1
-            }))
-        });
+        if (ClassroomManager.activeContent.videos) {
+            ClassroomManager.activeContent.videos.forEach(video => {
+                videoContentList.push(new VideoContent({
+                    src: video.src,
+                    caption: video.caption,
+                    showing: video.showing ?? false,
+                    ratio: video.ratio,
+                    playing: false,
+                    position: video.position ?? 0,
+                    volume: video.volume ?? 1
+                }))
+            });
+        }
 
-        ClassroomManager.activeContent.models.forEach(model => {
-            modelContentList.push(new ModelContent({
-                src: model.src,
-                caption: model.caption,
-                showing: model.showing ?? false,
-                position: model.position ?? Vector3.Zero(),
-                scale: model.scale ?? Vector3.One(),
-                parent: ClassroomManager.originEntity,
-                animations: model.animations,
-                spin: model.spin,
-                replace: model.replace,
-                playing: model.playing ?? true
-            }))
-        });
+        if (ClassroomManager.activeContent.models) {
+            ClassroomManager.activeContent.models.forEach(model => {
+                modelContentList.push(new ModelContent({
+                    src: model.src,
+                    caption: model.caption,
+                    showing: model.showing ?? false,
+                    position: model.position ?? Vector3.Zero(),
+                    scale: model.scale ?? Vector3.One(),
+                    parent: ClassroomManager.originEntity,
+                    animations: model.animations,
+                    spin: model.spin,
+                    replace: model.replace,
+                    playing: model.playing ?? true
+                }))
+            });
+        }
 
         this.imageContent = new ContentList(imageContentList)
         this.videoContent = new ContentList(videoContentList)

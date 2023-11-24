@@ -333,41 +333,47 @@ export abstract class ClassroomManager {
 
     static UpdateClassroom(): void {
         // image
-        ClassroomManager.activeContent.images.forEach(image => {
-            for (let imageContent of ClassroomManager.screenManager.imageContent.content) {
-                if (imageContent.configuration.src == image.src) {
-                    // found
-                    image.showing = imageContent.configuration.showing
-                    break
+        if (ClassroomManager.activeContent.images) {
+            ClassroomManager.activeContent.images.forEach(image => {
+                for (let imageContent of ClassroomManager.screenManager.imageContent.content) {
+                    if (imageContent.configuration.src == image.src) {
+                        // found
+                        image.showing = imageContent.configuration.showing
+                        break
+                    }
                 }
-            }
-        });
+            });
+        }
         // video
-        ClassroomManager.activeContent.videos.forEach(video => {
-            for (let videoContent of ClassroomManager.screenManager.videoContent.content) {
-                if (videoContent.configuration.src == video.src) {
-                    // found
-                    const config = videoContent.configuration as VideoContentConfig
-                    video.playing = config.playing
-                    video.volume = config.volume
-                    video.position = config.position
-                    video.showing = config.showing
-                    break
+        if (ClassroomManager.activeContent.videos) {
+            ClassroomManager.activeContent.videos.forEach(video => {
+                for (let videoContent of ClassroomManager.screenManager.videoContent.content) {
+                    if (videoContent.configuration.src == video.src) {
+                        // found
+                        const config = videoContent.configuration as VideoContentConfig
+                        video.playing = config.playing
+                        video.volume = config.volume
+                        video.position = config.position
+                        video.showing = config.showing
+                        break
+                    }
                 }
-            }
-        });
+            });
+        }
         // model
-        ClassroomManager.activeContent.models.forEach(model => {
-            for (let modelContent of ClassroomManager.screenManager.modelContent.content) {
-                if (modelContent.configuration.src == model.src) {
-                    // found
-                    const config = modelContent.configuration as ModelContentConfig
-                    model.showing = config.showing
-                    model.playing = !modelContent.isPaused
-                    break
+        if (ClassroomManager.activeContent.models) {
+            ClassroomManager.activeContent.models.forEach(model => {
+                for (let modelContent of ClassroomManager.screenManager.modelContent.content) {
+                    if (modelContent.configuration.src == model.src) {
+                        // found
+                        const config = modelContent.configuration as ModelContentConfig
+                        model.showing = config.showing
+                        model.playing = !modelContent.isPaused
+                        break
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     static SyncClassroom(): void {
