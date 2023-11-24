@@ -24,6 +24,13 @@ export abstract class ClassroomManager {
     static originEntity: Entity
     static testMode: boolean = false
 
+    /**
+     * Initialises the ClassroomManager.
+     *
+     * @param _classroomConfig the classroom config json.
+     * @param _channel the classroom channel used for communication.
+     * @param _testMode optional parameter to enable test mode.
+     */
     static Initialise(_classroomConfig: any, _channel: IClassroomChannel, _testMode: boolean = false): void {
         ClassroomManager.classroomConfig = _classroomConfig
         ClassroomManager.testMode = _testMode
@@ -38,25 +45,43 @@ export abstract class ClassroomManager {
         })
     }
 
-    static AddScreen(_position: Vector3, _rotation: Quaternion, _scale: Vector3, _parent?: Entity) {
+    /**
+     * Adds a screen for image/video display.
+     *
+     * @param _position the screen position.
+     * @param _rotation the screen rotation.
+     * @param _scale the screen scale.
+     * @param _parent the screen's parent entity (optional parameter).
+     */
+    static AddScreen(_position: Vector3, _rotation: Quaternion, _scale: Vector3, _parent?: Entity): void {
         ClassroomManager.screenManager.addScreen(_position, _rotation, _scale, _parent)
     }
 
-    static SetClassController(type: UserType): void {
-        if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && type === UserType.teacher) return
-        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && type === UserType.student) return
+    /**
+     * Sets the user's class controller.
+     *
+     * @param _type the user type, i.e teacher or student.
+     */
+    static SetClassController(_type: UserType): void {
+        if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && _type === UserType.teacher) return
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && _type === UserType.student) return
 
-        if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && type === UserType.student) {
+        if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && _type === UserType.student) {
             ClassroomManager.DeactivateClassroom()
         }
 
-        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && type === UserType.teacher) {
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && _type === UserType.teacher) {
             ClassroomManager.classController.exitClass()
         }
 
-        ClassroomManager.classController = ClassControllerFactory.Create(type)
+        ClassroomManager.classController = ClassControllerFactory.Create(_type)
     }
 
+    /**
+     * Fetches and sets the teacher's class content.
+     *
+     * @param _id the id of the class/course.
+     */
     static async SetTeacherClassContent(_id: string): Promise<void> {
         SmartContractManager.FetchClassContent(_id)
             .then(function (classContent) {
@@ -73,6 +98,9 @@ export abstract class ClassroomManager {
             })
     }
 
+    /**
+     * Deactivates a classroom. Called by the teacher.
+     */
     static async DeactivateClassroom(): Promise<void> {
         return SmartContractManager.DectivateClassroom()
             .then(function () {
@@ -87,6 +115,9 @@ export abstract class ClassroomManager {
             })
     }
 
+    /**
+     * Starts a class. Called by the teacher.
+     */
     static async StartClass(): Promise<void> {
         return SmartContractManager.StartClass()
             .then(function () {
@@ -98,6 +129,9 @@ export abstract class ClassroomManager {
             })
     }
 
+    /**
+     * Ends a class. Called by the teacher.
+     */
     static async EndClass(): Promise<void> {
         return SmartContractManager.EndClass()
             .then(function () {
@@ -109,7 +143,11 @@ export abstract class ClassroomManager {
             })
     }
 
-    static JoinClass(_guid: string): void {
+    /**
+     * Joins the currently selected class. Called by students.
+     * If autojoin is enabled in the classroom config, it joins the class that's been started by the teacher.
+     */
+    static JoinClass(): void {
         ClassroomManager.requestingJoinClass = true
 
         CommunicationManager.EmitClassJoin({
@@ -121,6 +159,9 @@ export abstract class ClassroomManager {
         })
     }
 
+    /**
+     * Exits the class we're currently in. Called by students.
+     */
     static ExitClass(): void {
         if (ClassroomManager.activeClassroom) {
             CommunicationManager.EmitClassExit({
@@ -134,6 +175,11 @@ export abstract class ClassroomManager {
         }
     }
 
+    /**
+     * Displays an Image to the students. Called by the teacher.
+     *
+     * @param _image the content config of the image.
+     */
     static DisplayImage(_image: ImageContentConfig): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
@@ -149,6 +195,11 @@ export abstract class ClassroomManager {
         }
     }
 
+    /**
+     * Displays a video to the students. Called by the teacher.
+     *
+     * @param _video the content config of the video.
+     */
     static PlayVideo(_video: VideoContentConfig): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
@@ -171,6 +222,9 @@ export abstract class ClassroomManager {
         }
     }
 
+    /**
+     * Pauses the currently displayed video for students. Called by the teacher.
+     */
     static PauseVideo(): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
@@ -184,6 +238,9 @@ export abstract class ClassroomManager {
         }
     }
 
+    /**
+     * Resumes the currently displayed video for students. Called by the teacher.
+     */
     static ResumeVideo(): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
@@ -197,6 +254,11 @@ export abstract class ClassroomManager {
         }
     }
 
+    /**
+     * Sets the volume for the  students' currently displayed video. Called by the teacher.
+     *
+     * @param _volume the target volume for the video.
+     */
     static SetVideoVolume(_volume: number): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
@@ -211,6 +273,11 @@ export abstract class ClassroomManager {
         }
     }
 
+    /**
+     * Displays a model to the students. Called by the teacher.
+     *
+     * @param _model the content config of the model.
+     */
     static PlayModel(_model: ModelContentConfig): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
@@ -225,6 +292,10 @@ export abstract class ClassroomManager {
         }
     }
 
+    /**
+     * Pauses the currently displayed model for students. Called by the teacher.
+     * It pauses the model's animation if it has one. Otherwise it stops the model from spinning in its place.
+     */
     static PauseModel(): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
@@ -237,6 +308,10 @@ export abstract class ClassroomManager {
         }
     }
 
+    /**
+     * Resumes the currently displayed model for students. Called by the teacher.
+     * It resumes the model's animation if it has one. Otherwise it resumes spinning.
+     */
     static ResumeModel(): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
@@ -249,6 +324,9 @@ export abstract class ClassroomManager {
         }
     }
 
+    /**
+     * Deactivates all student screens. Called by the teacher.
+     */
     static DeactivateScreens(): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
@@ -261,6 +339,9 @@ export abstract class ClassroomManager {
         }
     }
 
+    /**
+     * Deactivates all student models. Called by the teacher.
+     */
     static DeactivateModels(): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
@@ -274,10 +355,22 @@ export abstract class ClassroomManager {
         }
     }
 
+    /**
+     * Registers a content unit. Called by both teachers and students.
+     *
+     * @param _key the content unit key.
+     * @param _unit the content unit instance.
+     */
     static RegisterContentUnit(_key: string, _unit: IContentUnit): void {
         ContentUnitManager.register(_key, _unit)
     }
 
+    /**
+     * Starts a content unit for students. Called by the teacher.
+     *
+     * @param _key the content unit key.
+     * @param _data any data associated with starting the content unit.
+     */
     static StartContentUnit(_key: string, _data: any): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
@@ -295,6 +388,9 @@ export abstract class ClassroomManager {
         }
     }
 
+    /**
+     * Ends the currently displayed content unit for students. Called by the teacher.
+     */
     static EndContentUnit(): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
@@ -308,6 +404,11 @@ export abstract class ClassroomManager {
         }
     }
 
+    /**
+     * Sends data associated with a content unit. Can be called by either teachers or students for two-way communication.
+     *
+     * @param _data any data associated with the content unit for sending updates.
+     */
     static SendContentUnitData(_data: any): void {
         if (!ClassroomManager.activeClassroom) return
 
@@ -331,6 +432,9 @@ export abstract class ClassroomManager {
         }
     }
 
+    /**
+     * Updates all properties in the active content before sending it to the students. Called by the teacher when a student requests to join.
+     */
     static UpdateClassroom(): void {
         // image
         if (ClassroomManager.activeContent.images) {
@@ -376,6 +480,9 @@ export abstract class ClassroomManager {
         }
     }
 
+    /**
+     * Syncs/updates the student's active content and loads the content via the ScreenManager. Called by students upon joining a classroom.
+     */
     static SyncClassroom(): void {
         // sync seating
         if (ClassroomManager.activeClassroom.seatingEnabled) {

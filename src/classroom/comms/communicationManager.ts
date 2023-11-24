@@ -222,7 +222,7 @@ export class CommunicationManager {
 
             //autojoin
             if (ClassroomManager.activeClassroom?.guid != _info.id && ClassroomManager.classroomConfig.classroom.autojoin) {
-                ClassroomManager.JoinClass(_info.id)
+                ClassroomManager.JoinClass()
             }
         }
     }

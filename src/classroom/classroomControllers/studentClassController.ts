@@ -20,7 +20,7 @@ export class StudentClassController extends ClassController {
     }
 
     override joinClass(): void {
-        ClassroomManager.JoinClass(this.classList[this.selectedClassIndex].id)
+        ClassroomManager.JoinClass()
     }
 
     override exitClass(): void {
