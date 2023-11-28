@@ -20,19 +20,17 @@ export abstract class ClassroomManager {
     static activeClassroom: Classroom = null
     static activeContent: ClassContent = null
     static requestingJoinClass: boolean = false
-    static classroomConfig: any
     static originEntity: Entity
     static testMode: boolean = false
+    static classroomConfigs: any[] = []
 
     /**
      * Initialises the ClassroomManager.
      *
-     * @param _classroomConfig the classroom config json.
      * @param _channel the classroom channel used for communication.
      * @param _testMode optional parameter to enable test mode.
      */
-    static Initialise(_classroomConfig: any, _channel: IClassroomChannel, _testMode: boolean = false): void {
-        ClassroomManager.classroomConfig = _classroomConfig
+    static Initialise(_channel: IClassroomChannel, _testMode: boolean = false): void {
         ClassroomManager.testMode = _testMode
 
         SmartContractManager.Initialise()
@@ -41,8 +39,35 @@ export abstract class ClassroomManager {
 
         ClassroomManager.originEntity = engine.addEntity()
         Transform.create(ClassroomManager.originEntity, {
-            position: ClassroomManager.classroomConfig.classroom.origin
+            position: Vector3.Zero()
         })
+    }
+
+    /**
+     * Registers a classroom.
+     *
+     * @param _classroomConfig the classroom config json.
+     */
+    static RegisterClassroom(_classroomConfig: any): void {
+        ClassroomManager.classroomConfigs.push(_classroomConfig)
+    }
+
+    /**
+     * Gets the classroom config based on the user's position. If no config matches, null is returned.
+     */
+    static GetClassroomConfig(): any | null {
+        const userPosition = Transform.get(engine.PlayerEntity).position
+
+        for (let config of ClassroomManager.classroomConfigs) {
+            const origin = config.classroom.origin
+            const volume = config.classroom.volume
+            if ((userPosition.x > origin.x - (0.5 * volume.x)) && (userPosition.x < origin.x + (0.5 * volume.x))
+                && (userPosition.y > origin.y - (0.5 * volume.y)) && (userPosition.y < origin.y + (0.5 * volume.y))
+                && (userPosition.z > origin.z - (0.5 * volume.z)) && (userPosition.z < origin.z + (0.5 * volume.z))) {
+                return config
+            }
+        }
+        return null
     }
 
     /**
@@ -85,16 +110,25 @@ export abstract class ClassroomManager {
     static async SetTeacherClassContent(_id: string): Promise<void> {
         SmartContractManager.FetchClassContent(_id)
             .then(function (classContent) {
-                ClassroomManager.activeContent = classContent
-                ClassroomManager.activeClassroom = ClassroomFactory.CreateTeacherClassroom(JSON.stringify(ClassroomManager.classroomConfig.classroom), ClassroomManager.activeContent.name, ClassroomManager.activeContent.description)
+                const config = ClassroomManager.GetClassroomConfig()
 
-                ClassroomManager.screenManager.loadContent()
+                if (config) {
+                    ClassroomManager.activeContent = classContent
+                    ClassroomManager.activeClassroom = ClassroomFactory.CreateTeacherClassroom(JSON.stringify(config.classroom), ClassroomManager.activeContent.name, ClassroomManager.activeContent.description)
 
-                CommunicationManager.EmitClassActivation({
-                    id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
-                    name: ClassroomManager.activeContent.name,
-                    description: ClassroomManager.activeContent.description
-                })
+                    let originEntityTransform = Transform.getMutableOrNull(ClassroomManager.originEntity)
+                    if (originEntityTransform) {
+                        originEntityTransform.position = config.classroom.origin
+                    }
+
+                    ClassroomManager.screenManager.loadContent()
+
+                    CommunicationManager.EmitClassActivation({
+                        id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
+                        name: ClassroomManager.activeContent.name,
+                        description: ClassroomManager.activeContent.description
+                    })
+                }
             })
     }
 
