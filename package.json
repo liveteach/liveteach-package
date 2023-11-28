@@ -18,7 +18,7 @@
   },
   "files": [
     "dist",
-    "src/index.ts",
+    "index.ts",
     "src/setup",
     "src/dclutils",
     "src/seating",
