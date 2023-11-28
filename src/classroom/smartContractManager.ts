@@ -26,15 +26,20 @@ export class SmartContractManager {
         if (!SmartContractManager.blockchain.userData || !SmartContractManager.blockchain.userData.userId) return ""
 
         if (ClassroomManager.testMode) {
-
-            let authorized: boolean = ClassroomManager.classroomConfig.classroom.teacherID.toLowerCase() == SmartContractManager.blockchain.userData.userId.toLowerCase()
-            for (let address of SmartContractManager.TEST_TEACHER_ADDRESSES) {
-                if (address.toLowerCase() == SmartContractManager.blockchain.userData.userId.toLowerCase()) {
-                    authorized = true
-                    break
+            const config = ClassroomManager.GetClassroomConfig()
+            if (config) {
+                let authorized: boolean = config.classroom.teacherID.toLowerCase() == SmartContractManager.blockchain.userData.userId.toLowerCase()
+                for (let address of SmartContractManager.TEST_TEACHER_ADDRESSES) {
+                    if (address.toLowerCase() == SmartContractManager.blockchain.userData.userId.toLowerCase()) {
+                        authorized = true
+                        break
+                    }
                 }
+                return authorized ? "382c74c3-721d-4f34-80e5-57657b6cbc27" : ""
             }
-            return authorized ? "382c74c3-721d-4f34-80e5-57657b6cbc27" : ""
+            else {
+                return ""
+            }
         }
         else {
             return SmartContractManager.blockchain.getClassroomGuid(_parcel)
@@ -101,7 +106,11 @@ export class SmartContractManager {
     }
 
     private static ValidateClassroomGuid(_guid: string): boolean {
-        return ClassroomManager.classroomConfig.classroom.guid === _guid
+        const config = ClassroomManager.GetClassroomConfig()
+        if (config) {
+            return config.classroom.guid === _guid
+        }
+        return false
     }
 
     private static update(): void {

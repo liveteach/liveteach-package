@@ -220,9 +220,12 @@ export class CommunicationManager {
                 })
             }
 
-            //autojoin
-            if (ClassroomManager.activeClassroom?.guid != _info.id && ClassroomManager.classroomConfig.classroom.autojoin) {
-                ClassroomManager.JoinClass()
+            const config = ClassroomManager.GetClassroomConfig()
+            if (config) {
+                //autojoin
+                if (ClassroomManager.activeClassroom?.guid != _info.id && config.classroom.autojoin) {
+                    ClassroomManager.JoinClass()
+                }
             }
         }
     }
