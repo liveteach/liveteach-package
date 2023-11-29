@@ -6,7 +6,7 @@ import { IClassroomChannel } from "./IClassroomChannel"
 import { UserDataHelper } from "../userDataHelper"
 import { ClassContentPacket, ClassPacket, Classroom, StudentCommInfo, ContentUnitPacket, DataPacket, StudentDataPacket, ClassContent, ClassroomSharePacket } from "../types/classroomTypes"
 import { ContentUnitManager } from "../../contentUnits/contentUnitManager"
-import { engine } from "@dcl/sdk/ecs"
+import { Transform, engine } from "@dcl/sdk/ecs"
 import { MediaContentType } from "../../classroomContent/enums";
 
 export class CommunicationManager {
@@ -279,6 +279,10 @@ export class CommunicationManager {
             ClassroomManager.activeClassroom = _info.config
             ClassroomManager.activeContent = _info.content
             ClassroomManager.SyncClassroom()
+            let originEntityTransform = Transform.getMutableOrNull(ClassroomManager.originEntity)
+            if (originEntityTransform) {
+                originEntityTransform.position = ClassroomManager.activeClassroom.origin
+            }
             CommunicationManager.EmitLog(UserDataHelper.GetDisplayName() + " joined class " + _info.config.className, _info.config.guid, true, false)
         }
     }
