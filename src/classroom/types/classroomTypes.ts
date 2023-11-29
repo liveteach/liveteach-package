@@ -66,5 +66,5 @@ export type ClassroomSharePacket = {
 export class ServerParams {
     serverUrl: string
     role: string
-    _userData: UserData
+    _userData: GetUserDataResponse
 }
