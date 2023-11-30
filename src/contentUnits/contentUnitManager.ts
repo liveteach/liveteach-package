@@ -11,6 +11,9 @@ export class ContentUnitManager {
     }
 
     static start(_key: string, _data: any): void {
+        // Check if a content unit is already active
+        if (ContentUnitManager.activeUnit) return
+
         if (!ContentUnitManager.units.has(_key)) return
 
         ContentUnitManager.activeUnit = ContentUnitManager.units.get(_key)
