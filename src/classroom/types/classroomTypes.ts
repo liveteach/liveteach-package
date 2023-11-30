@@ -1,7 +1,6 @@
 // @ts-nocheck
 import { Vector3 } from "@dcl/sdk/math"
 import { ImageContentConfig, ModelContentConfig, VideoContentConfig } from "../../classroomContent"
-import { UserData } from "~system/UserIdentity";
 import { ContentUnitConfig } from "../../contentUnits"
 import { MediaContentType } from "../../classroomContent/enums";
 

@@ -87,6 +87,7 @@
         ],
         "contentUnits": [
             {
+                "name": "Movie Poll",
                 "key": "poll",
                 "data": {
                     "title": "What would you like to watch?",
@@ -99,6 +100,7 @@
                 }
             },
             {
+                "name": "Biology Quiz",
                 "key": "quiz",
                 "data": {
                     "question": "Which of these is the\npowerhouse of a cell?",
@@ -112,6 +114,7 @@
                 }
             },
             {
+                "name": "Cell Model",
                 "key": "interactive_model",
                 "data": {
                     "parent": {
