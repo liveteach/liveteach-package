@@ -99,6 +99,19 @@
                 }
             },
             {
+                "key": "quiz",
+                "data": {
+                    "question": "Which of these is the\npowerhouse of a cell?",
+                    "options": [
+                        "Nucleus",
+                        "Mitochondria",
+                        "Lysosome",
+                        "Golgi Complex"
+                    ],
+                    "answer": 2
+                }
+            },
+            {
                 "key": "interactive_model",
                 "data": {
                     "parent": {
