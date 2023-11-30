@@ -13,6 +13,7 @@ import { Quaternion, Vector3 } from "@dcl/sdk/math";
 import { ImageContentConfig, ScreenManager, VideoContentConfig, ModelContentConfig } from "../classroomContent";
 import { ContentUnitManager } from "../contentUnits/contentUnitManager";
 import { IContentUnit } from "../contentUnits/IContentUnit"
+import { MediaContentType } from "../classroomContent/enums";
 
 export abstract class ClassroomManager {
     static screenManager: ScreenManager
@@ -517,7 +518,7 @@ export abstract class ClassroomManager {
     /**
      * Syncs/updates the student's active content and loads the content via the ScreenManager. Called by students upon joining a classroom.
      */
-    static SyncClassroom(): void {
+    static SyncClassroom(_activeContentType: MediaContentType): void {
         // sync seating
         if (ClassroomManager.activeClassroom.seatingEnabled) {
 
@@ -574,5 +575,17 @@ export abstract class ClassroomManager {
                 }
             }
         });
+
+        if (_activeContentType) {
+            if (_activeContentType == MediaContentType.image) {
+                ClassroomManager.screenManager.currentContent = ClassroomManager.screenManager.imageContent
+            }
+            else if (_activeContentType == MediaContentType.video) {
+                ClassroomManager.screenManager.currentContent = ClassroomManager.screenManager.videoContent
+            }
+            else if (_activeContentType == MediaContentType.model) {
+                ClassroomManager.screenManager.currentContent = ClassroomManager.screenManager.modelContent
+            }
+        }
     }
 }
