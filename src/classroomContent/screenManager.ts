@@ -142,6 +142,9 @@ export class ScreenManager {
             ClassroomManager.DeactivateModels()
             return
         }
+        else if (this.currentContent != undefined && this.currentContent.getContent().getContentType() == MediaContentType.image) {
+            this.currentContent.stop()
+        }
         this.currentContent = this.modelContent
         this.playContent()
     }
