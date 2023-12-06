@@ -16,8 +16,11 @@ export class Seat {
     entity: Entity
     claimed: boolean = false
     lookAtTarget:Vector3 = Vector3.Zero()
+    sitAnimationPath:string = "animations/sit_emote.glb"
+    handupAnimationPath:string = "animations/handup_emote.glb"
+    clapAnimationPath:string = "animations/clap_emote.glb"
 
-    constructor(_id: number, _position: Vector3, _lookAtTarget:Vector3= Vector3.Zero()) {
+    constructor(_id: number, _position: Vector3, _lookAtTarget:Vector3= Vector3.Zero(), _chair:any) {
         this.id = _id
         this.entity = GlobalData.engine.addEntity()
         this.lookAtTarget = _lookAtTarget
@@ -27,7 +30,19 @@ export class Seat {
             scale: Vector3.create(0.5, 1, 0.5)
         })
 
-        //MeshRenderer.setBox(entity)
+        // Override animation paths as necessary
+        if(_chair.sitAnimationPath!=undefined){
+            this.sitAnimationPath = _chair.sitAnimationPath
+        }
+
+        if(_chair.handupAnimationPath!=undefined){
+            this.handupAnimationPath = _chair.handupAnimationPath
+        }
+
+        if(_chair.clapAnimationPath!=undefined){
+            this.clapAnimationPath = _chair.clapAnimationPath
+        }
+
         this.createCollider()
 
         let self = this
@@ -71,12 +86,12 @@ export class Seat {
                 movePlayerTo({ newRelativePosition: teleportPosition})
             }
 
-            AnimationHelper.sit()
+            AnimationHelper.sit(this.sitAnimationPath)
 
             UserManager.myself.userType = UserType.student
 
             utils.timers.setTimeout(() => {
-                AnimationHelper.sit()
+                AnimationHelper.sit(this.sitAnimationPath)
                 utils.timers.setTimeout(() => {
                     SeatManager.seatedPosition = GlobalData.Transform.get(GlobalData.engine.PlayerEntity).position
                     SeatManager.seated = true

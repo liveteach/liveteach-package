@@ -12,6 +12,7 @@ import { GlobalData } from "../setup/setup";
 export class SeatManager {
 
     static mySeatID: number = -1 // No seat by default
+    static mySeat: Seat
     static tryingToSit: boolean = false
     static sceneMessageBus = new MessageBus()
     static seats: Seat[] = []
@@ -55,7 +56,7 @@ export class SeatManager {
 
     load() {
         this.seatingData.seats.forEach(chair => {
-            SeatManager.seats.push(new Seat(chair.id, chair.position, chair.lookAtTarget))
+            SeatManager.seats.push(new Seat(chair.id, chair.position, chair.lookAtTarget,chair))
         });
 
         SeatManager.sceneMessageBus.on('ClaimedSeat', (data: any) => {
@@ -197,6 +198,7 @@ export class SeatManager {
                 if (!seat.claimed) {
                     seat.claimed = true
                     SeatManager.mySeatID = _seatID
+                    SeatManager.mySeat = seat
                     seat.sitDown()
                     SeatManager.sceneMessageBus.emit("ClaimedSeat", { id: SeatManager.mySeatID, address: SeatManager.myAddress })
                 } else {
