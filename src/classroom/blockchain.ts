@@ -4,7 +4,24 @@ import { createEthereumProvider } from '@dcl/sdk/ethereum-provider'
 import { executeTask } from '@dcl/sdk/ecs'
 import { InfoUI } from "./ui/infoUI"
 import { GetSceneResponse, getSceneInfo } from '~system/Scene'
-import abi from "./contracts/TeachContractAbi.json"
+import teachAbi from "./contracts/TeachContractAbi.json"
+import teacherAbi from "./contracts/TeacherContractAbi.json"
+import { ClassPacket } from "./types/classroomTypes"
+
+class ClassContentData {
+    public id: number;
+    public teacher: string;
+    public classReference: string;
+    public contentUrl: string;
+
+    constructor(id: number, teacher: string, classReference: string, contentUrl: string) {
+        this.id = id;
+        this.teacher = teacher;
+        this.classReference = classReference;
+        this.contentUrl = contentUrl;
+
+    }
+}
 
 export class BlockChain {
     public readonly UAT_SMART_CONTRACT_ADDRESS: string = "0x31Cd6F96EFf5256aFBe1F66E846D04016A35C615";
@@ -17,7 +34,6 @@ export class BlockChain {
         this.getUserData()
         this.getSceneData()
         //this.getGasPrice()
-
     }
 
     getUserData() {
@@ -117,7 +133,7 @@ export class BlockChain {
                 // Create the object that will handle the sending and receiving of RPC messages
                 const requestManager = new RequestManager(provider)
                 // Create a factory object based on the abi
-                const factory = new ContractFactory(requestManager, abi)
+                const factory = new ContractFactory(requestManager, teachAbi)
                 // Use the factory object to instance a `contract` object, referencing a specific contract
                 const contract = (await factory.at(
                     "0x3185cafec6fc18267ac92f83ffc8f08658519097"
@@ -133,6 +149,87 @@ export class BlockChain {
                 console.log("Classroom Guid", res)
 
                 return res as string
+            } else {
+                console.log("Player is not connected with Web3")
+                return ""
+            }
+        } catch (error) {
+            console.error(error)
+            return ""
+        }
+    }
+
+    public async getClassContentList(): Promise<ClassPacket[]> {
+        try {
+            if (this.userData && this.userData.hasConnectedWeb3) {
+                const provider = createEthereumProvider()
+                const requestManager = new RequestManager(provider)
+                const factory = new ContractFactory(requestManager, teacherAbi)
+                const contract = (await factory.at(
+                    "0x67499D72f32606606E7A57a59986Ca8025e25e39" // teachers contract, dev version.
+                )) as any
+
+                // get all ClassContent objects associated with this teacher
+                const classContents: [ClassContentData] = await contract.getClassConfigs(
+                    {
+                        from: this.userData.publicKey,
+                    }
+                )
+
+                const classContentsList: ClassPacket[] = []
+                for (let i = 0; i < classContents.length; i++) {
+                    const content: ClassContentData = classContents[i];
+                    classContentsList.push({
+                        id: content.id.toString(),
+                        name: content.classReference,
+                        description: ""
+                    })
+                }
+                return classContentsList
+            } else {
+                console.log("Player is not connected with Web3")
+                return []
+            }
+        } catch (error) {
+            console.error(error)
+            return []
+        }
+    }
+
+    public async getClassContent(_id: number): Promise<string> {
+        try {
+            if (this.userData && this.userData.hasConnectedWeb3) {
+                const provider = createEthereumProvider()
+                const requestManager = new RequestManager(provider)
+                const factory = new ContractFactory(requestManager, teacherAbi)
+                const contract = (await factory.at(
+                    "0x67499D72f32606606E7A57a59986Ca8025e25e39" // teachers contract, dev version.
+                )) as any
+
+                // get the ClassContent object associated with this teacher and this id
+                const classContent: ClassContentData = await contract.getClassConfig(
+                    _id,
+                    {
+                        from: this.userData.publicKey,
+                    }
+                )
+                console.log("CLASS CONTENT OBJECT BY ID \n",
+                    "id: " + classContent.id + "\n" +
+                    "teacher: " + classContent.teacher + "\n" +
+                    "classReference: " + classContent.classReference + "\n" +
+                    "contentUrl: " + classContent.contentUrl
+                );
+
+                // Fetch json from url
+                // Example contentUrl: "https://gateway.pinata.cloud/ipfs/QmW8sQ5drvmLeQwbYXi9tWfYR4TbdM4HTkQMwMS3v62m5N"
+                await fetch(classContent.contentUrl)
+                    .then(response => response.json())
+                    .then(json => {
+                        if (json != null && json != undefined) {
+                            return json
+                        }
+                    })
+                return ""
             } else {
                 console.log("Player is not connected with Web3")
                 return ""

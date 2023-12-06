@@ -4,23 +4,21 @@ import {GetCurrentRealmResponse} from "~system/EnvironmentApi";
 import * as ui from 'dcl-ui-toolkit'
 import * as utils from '@dcl-sdk/utils'
 import {CommunicationManager} from "../comms/communicationManager";
-import {ClassPacket, ContentUnitPacket, DataPacket, StudentCommInfo, StudentDataPacket, StudentInfo} from "../types/classroomTypes";
+import {ClassContent, ClassContentPacket, ClassPacket, Classroom, ClassroomSharePacket, ContentUnitPacket, DataPacket, StudentCommInfo, StudentDataPacket, StudentInfo} from "../types/classroomTypes";
 
 
 export class ReferenceServerWebsocketManager {
 
     private serverUrl: string
     private static realm: GetCurrentRealmResponse | null = null
-    private user: UserData
     private wallet: string
     public webSocket: WebSocket
     public announcement = ui.createComponent(ui.Announcement, { value: "", duration: 2 })
     public static guid
 
-    constructor(_userData: UserData, role:string,serverUrl: string) {
+    constructor(role:string,serverUrl: string) {
 
         this.serverUrl = serverUrl
-        this.user = _userData
         this.wallet = this.user.publicKey || "GUEST_" + this.user.userId
 
         this.webSocket = new WebSocket(this.serverUrl)
@@ -85,10 +83,10 @@ export class ReferenceServerWebsocketManager {
                 CommunicationManager.OnJoinClass(this.studentInfo(message))
                 break;
             case "display_image":
-                CommunicationManager.OnImageDisplay(this.classPacket(message))
+                CommunicationManager.OnImageDisplay(this.classContentPacket(message))
                 break;
             case "play_video":
-                CommunicationManager.OnVideoPlay(this.classPacket(message))
+                CommunicationManager.OnVideoPlay(this.classContentPacket(message))
                 break;
             case "pause_video":
                 CommunicationManager.OnVideoPause(this.classPacket(message))
@@ -100,7 +98,7 @@ export class ReferenceServerWebsocketManager {
                 CommunicationManager.OnVideoVolume(this.classPacket(message) + message.volume)
                 break;
             case "play_model":
-                CommunicationManager.OnModelPlay(this.classPacket(message))
+                CommunicationManager.OnModelPlay(this.classContentPacket(message))
                 break;
             case "pause_model":
                 CommunicationManager.OnModelPause(this.classPacket(message))
@@ -125,6 +123,9 @@ export class ReferenceServerWebsocketManager {
                 break;
             case "content_unit_student_send":
                 CommunicationManager.OnContentUnitStudentSend(this.studentDataPacket(message))
+                break;
+            case "share_classroom_config":
+                CommunicationManager.OnShareClassroomConfig(this.classShareConfig(message))
                 break;
             case "sync":
                 console.log(message)
@@ -191,6 +192,18 @@ export class ReferenceServerWebsocketManager {
         }
     }
 
+    classContentPacket(message): ClassContentPacket{
+        return{
+            id: message.data.id,
+            name: message.data.name,
+            description: message.data.description,
+            unit: message.data.unit,
+            image: message.data.image || "",
+            video: message.data.video || "",
+            model: message.data.model || ""
+        }
+    }
+
     contentPacket(message): ContentUnitPacket{
         return {
             id: message.data.id,
@@ -217,6 +230,14 @@ export class ReferenceServerWebsocketManager {
             studentID: message.data.studentID,
             studentName: message.data.studentName,
             data: message.data.data
+        }
+    }
+
+
+    classShareConfig(message): ClassroomSharePacket{
+        return {
+            config: message.data.config,
+            content: message.data.content
         }
     }
 }

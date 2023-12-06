@@ -3,7 +3,8 @@ import { Quaternion, Vector3 } from "@dcl/sdk/math"
 
 export type BaseContentConfig = {
     src: string
-    caption?: string
+    caption?: string,
+    showing?: boolean
 }
 
 export type ScreenContentConfig = BaseContentConfig & {
@@ -26,6 +27,7 @@ export type ModelContentConfig = BaseContentConfig & {
     scale?: Vector3
     spin?: boolean
     replace?: boolean
+    playing?: boolean
 }
 
 export type MediaContentConfig = ImageContentConfig | VideoContentConfig | ModelContentConfig

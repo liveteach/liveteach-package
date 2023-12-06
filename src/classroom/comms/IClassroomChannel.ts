@@ -1,4 +1,4 @@
-import { ClassContentPacket, ContentUnitPacket, ClassPacket, Classroom, StudentCommInfo, DataPacket, StudentDataPacket } from "../types/classroomTypes";
+import { ClassContentPacket, ContentUnitPacket, ClassPacket, StudentCommInfo, DataPacket, StudentDataPacket, ClassroomSharePacket } from "../types/classroomTypes";
 
 export interface IClassroomChannel {
     emitClassActivation(_info: ClassPacket): void;
@@ -7,7 +7,7 @@ export interface IClassroomChannel {
     emitClassEnd(_info: ClassPacket): void;
     emitClassJoin(_info: StudentCommInfo): void;
     emitClassExit(_info: StudentCommInfo): void;
-    emitClassroomConfig(_info: Classroom): void;
+    emitClassroomConfig(_info: ClassroomSharePacket): void;
     emitImageDisplay(_info: ClassContentPacket): void;
     emitVideoPlay(_info: ClassContentPacket): void;
     emitVideoPause(_info: ClassContentPacket): void;

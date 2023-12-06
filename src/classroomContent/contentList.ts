@@ -4,6 +4,7 @@ import { ModelContentConfig } from "./types/mediaContentConfigs"
 
 export class ContentList {
     content: MediaContent[] = []
+    overlapStack: MediaContent[] = []
     index: number = 0
 
     constructor(_content: MediaContent[]) {
@@ -24,7 +25,11 @@ export class ContentList {
         if (this.content[_nextIndex].getContentType() == MediaContentType.model) {
             const modelConfig = this.content[_nextIndex].configuration as ModelContentConfig
             if (modelConfig.replace === undefined || modelConfig.replace === null || modelConfig.replace) {
+                this.overlapStack.splice(0)
                 this.stop()
+            }
+            else {
+                this.overlapStack.push(this.getContent())
             }
         }
         else {

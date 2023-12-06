@@ -14,11 +14,13 @@ export abstract class MediaContent implements IMediaContent {
     play(): void {
         this.isShowing = true
         this.isPaused = false
+        this.configuration.showing = true
     }
 
     stop(): void {
         this.isShowing = false
         this.isPaused = false
+        this.configuration.showing = false
     }
 
     resume(): void {

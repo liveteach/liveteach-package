@@ -10,10 +10,10 @@ import { UserType } from "../enums";
 import { IClassroomChannel } from "./comms/IClassroomChannel";
 import { Entity, Transform, engine } from "@dcl/sdk/ecs";
 import { Quaternion, Vector3 } from "@dcl/sdk/math";
-import { ImageContentConfig, ScreenManager, VideoContentConfig, ModelContentConfig, VideoContent } from "../classroomContent";
+import { ImageContentConfig, ScreenManager, VideoContentConfig, ModelContentConfig } from "../classroomContent";
 import { ContentUnitManager } from "../contentUnits/contentUnitManager";
 import { IContentUnit } from "../contentUnits/IContentUnit"
-import * as utils from '@dcl-sdk/utils'
+import { MediaContentType } from "../classroomContent/enums";
 
 export abstract class ClassroomManager {
     static screenManager: ScreenManager
@@ -21,12 +21,17 @@ export abstract class ClassroomManager {
     static activeClassroom: Classroom = null
     static activeContent: ClassContent = null
     static requestingJoinClass: boolean = false
-    static classroomConfig: any
     static originEntity: Entity
     static testMode: boolean = false
+    static classroomConfigs: any[] = []
 
-    static Initialise(_classroomConfig: any, _channel: IClassroomChannel, _testMode: boolean = false): void {
-        ClassroomManager.classroomConfig = _classroomConfig
+    /**
+     * Initialises the ClassroomManager.
+     *
+     * @param _channel the classroom channel used for communication.
+     * @param _testMode optional parameter to enable test mode.
+     */
+    static Initialise(_channel: IClassroomChannel, _testMode: boolean = false): void {
         ClassroomManager.testMode = _testMode
 
         SmartContractManager.Initialise()
@@ -35,45 +40,102 @@ export abstract class ClassroomManager {
 
         ClassroomManager.originEntity = engine.addEntity()
         Transform.create(ClassroomManager.originEntity, {
-            position: ClassroomManager.classroomConfig.classroom.origin
+            position: Vector3.Zero()
         })
     }
 
-    static AddScreen(_position: Vector3, _rotation: Quaternion, _scale: Vector3, _parent?: Entity) {
+    /**
+     * Registers a classroom.
+     *
+     * @param _classroomConfig the classroom config json.
+     */
+    static RegisterClassroom(_classroomConfig: any): void {
+        ClassroomManager.classroomConfigs.push(_classroomConfig)
+    }
+
+    /**
+     * Gets the classroom config based on the user's position. If no config matches, null is returned.
+     */
+    static GetClassroomConfig(): any | null {
+        const userPosition = Transform.get(engine.PlayerEntity).position
+
+        for (let config of ClassroomManager.classroomConfigs) {
+            const origin = config.classroom.origin
+            const volume = config.classroom.volume
+            if ((userPosition.x > origin.x - (0.5 * volume.x)) && (userPosition.x < origin.x + (0.5 * volume.x))
+                && (userPosition.y > origin.y - (0.5 * volume.y)) && (userPosition.y < origin.y + (0.5 * volume.y))
+                && (userPosition.z > origin.z - (0.5 * volume.z)) && (userPosition.z < origin.z + (0.5 * volume.z))) {
+                return config
+            }
+        }
+        return null
+    }
+
+    /**
+     * Adds a screen for image/video display.
+     *
+     * @param _position the screen position.
+     * @param _rotation the screen rotation.
+     * @param _scale the screen scale.
+     * @param _parent the screen's parent entity (optional parameter).
+     */
+    static AddScreen(_position: Vector3, _rotation: Quaternion, _scale: Vector3, _parent?: Entity): void {
         ClassroomManager.screenManager.addScreen(_position, _rotation, _scale, _parent)
     }
 
-    static SetClassController(type: UserType): void {
-        if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && type === UserType.teacher) return
-        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && type === UserType.student) return
+    /**
+     * Sets the user's class controller.
+     *
+     * @param _type the user type, i.e teacher or student.
+     */
+    static SetClassController(_type: UserType): void {
+        if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && _type === UserType.teacher) return
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && _type === UserType.student) return
 
-        if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && type === UserType.student) {
+        if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && _type === UserType.student) {
             ClassroomManager.DeactivateClassroom()
         }
 
-        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && type === UserType.teacher) {
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && _type === UserType.teacher) {
             ClassroomManager.classController.exitClass()
         }
 
-        ClassroomManager.classController = ClassControllerFactory.Create(type)
+        ClassroomManager.classController = ClassControllerFactory.Create(_type)
     }
 
+    /**
+     * Fetches and sets the teacher's class content.
+     *
+     * @param _id the id of the class/course.
+     */
     static async SetTeacherClassContent(_id: string): Promise<void> {
         SmartContractManager.FetchClassContent(_id)
             .then(function (classContent) {
-                ClassroomManager.activeContent = classContent
-                ClassroomManager.activeClassroom = ClassroomFactory.CreateTeacherClassroom(JSON.stringify(ClassroomManager.classroomConfig.classroom), ClassroomManager.activeContent.name, ClassroomManager.activeContent.description)
+                const config = ClassroomManager.GetClassroomConfig()
 
-                ClassroomManager.screenManager.loadContent()
+                if (config) {
+                    ClassroomManager.activeContent = classContent
+                    ClassroomManager.activeClassroom = ClassroomFactory.CreateTeacherClassroom(JSON.stringify(config.classroom), ClassroomManager.activeContent.name, ClassroomManager.activeContent.description)
 
-                CommunicationManager.EmitClassActivation({
-                    id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
-                    name: ClassroomManager.activeContent.name,
-                    description: ClassroomManager.activeContent.description
-                })
+                    let originEntityTransform = Transform.getMutableOrNull(ClassroomManager.originEntity)
+                    if (originEntityTransform) {
+                        originEntityTransform.position = config.classroom.origin
+                    }
+
+                    ClassroomManager.screenManager.loadContent()
+
+                    CommunicationManager.EmitClassActivation({
+                        id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
+                        name: ClassroomManager.activeContent.name,
+                        description: ClassroomManager.activeContent.description
+                    })
+                }
             })
     }
 
+    /**
+     * Deactivates a classroom. Called by the teacher.
+     */
     static async DeactivateClassroom(): Promise<void> {
         return SmartContractManager.DectivateClassroom()
             .then(function () {
@@ -88,6 +150,9 @@ export abstract class ClassroomManager {
             })
     }
 
+    /**
+     * Starts a class. Called by the teacher.
+     */
     static async StartClass(): Promise<void> {
         return SmartContractManager.StartClass()
             .then(function () {
@@ -99,6 +164,9 @@ export abstract class ClassroomManager {
             })
     }
 
+    /**
+     * Ends a class. Called by the teacher.
+     */
     static async EndClass(): Promise<void> {
         return SmartContractManager.EndClass()
             .then(function () {
@@ -110,7 +178,11 @@ export abstract class ClassroomManager {
             })
     }
 
-    static JoinClass(_guid: string): void {
+    /**
+     * Joins the currently selected class. Called by students.
+     * If autojoin is enabled in the classroom config, it joins the class that's been started by the teacher.
+     */
+    static JoinClass(): void {
         ClassroomManager.requestingJoinClass = true
 
         CommunicationManager.EmitClassJoin({
@@ -122,6 +194,9 @@ export abstract class ClassroomManager {
         })
     }
 
+    /**
+     * Exits the class we're currently in. Called by students.
+     */
     static ExitClass(): void {
         if (ClassroomManager.activeClassroom) {
             CommunicationManager.EmitClassExit({
@@ -135,6 +210,11 @@ export abstract class ClassroomManager {
         }
     }
 
+    /**
+     * Displays an Image to the students. Called by the teacher.
+     *
+     * @param _image the content config of the image.
+     */
     static DisplayImage(_image: ImageContentConfig): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
@@ -150,6 +230,11 @@ export abstract class ClassroomManager {
         }
     }
 
+    /**
+     * Displays a video to the students. Called by the teacher.
+     *
+     * @param _video the content config of the video.
+     */
     static PlayVideo(_video: VideoContentConfig): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
@@ -172,6 +257,9 @@ export abstract class ClassroomManager {
         }
     }
 
+    /**
+     * Pauses the currently displayed video for students. Called by the teacher.
+     */
     static PauseVideo(): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
@@ -185,6 +273,9 @@ export abstract class ClassroomManager {
         }
     }
 
+    /**
+     * Resumes the currently displayed video for students. Called by the teacher.
+     */
     static ResumeVideo(): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
@@ -198,6 +289,11 @@ export abstract class ClassroomManager {
         }
     }
 
+    /**
+     * Sets the volume for the  students' currently displayed video. Called by the teacher.
+     *
+     * @param _volume the target volume for the video.
+     */
     static SetVideoVolume(_volume: number): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
@@ -212,6 +308,11 @@ export abstract class ClassroomManager {
         }
     }
 
+    /**
+     * Displays a model to the students. Called by the teacher.
+     *
+     * @param _model the content config of the model.
+     */
     static PlayModel(_model: ModelContentConfig): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
@@ -226,6 +327,10 @@ export abstract class ClassroomManager {
         }
     }
 
+    /**
+     * Pauses the currently displayed model for students. Called by the teacher.
+     * It pauses the model's animation if it has one. Otherwise it stops the model from spinning in its place.
+     */
     static PauseModel(): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
@@ -238,6 +343,10 @@ export abstract class ClassroomManager {
         }
     }
 
+    /**
+     * Resumes the currently displayed model for students. Called by the teacher.
+     * It resumes the model's animation if it has one. Otherwise it resumes spinning.
+     */
     static ResumeModel(): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
@@ -250,6 +359,9 @@ export abstract class ClassroomManager {
         }
     }
 
+    /**
+     * Deactivates all student screens. Called by the teacher.
+     */
     static DeactivateScreens(): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
@@ -262,6 +374,9 @@ export abstract class ClassroomManager {
         }
     }
 
+    /**
+     * Deactivates all student models. Called by the teacher.
+     */
     static DeactivateModels(): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
@@ -275,10 +390,22 @@ export abstract class ClassroomManager {
         }
     }
 
+    /**
+     * Registers a content unit. Called by both teachers and students.
+     *
+     * @param _key the content unit key.
+     * @param _unit the content unit instance.
+     */
     static RegisterContentUnit(_key: string, _unit: IContentUnit): void {
         ContentUnitManager.register(_key, _unit)
     }
 
+    /**
+     * Starts a content unit for students. Called by the teacher.
+     *
+     * @param _key the content unit key.
+     * @param _data any data associated with starting the content unit.
+     */
     static StartContentUnit(_key: string, _data: any): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
@@ -296,6 +423,9 @@ export abstract class ClassroomManager {
         }
     }
 
+    /**
+     * Ends the currently displayed content unit for students. Called by the teacher.
+     */
     static EndContentUnit(): void {
         if (!ClassroomManager.classController?.isTeacher()) return
 
@@ -309,6 +439,11 @@ export abstract class ClassroomManager {
         }
     }
 
+    /**
+     * Sends data associated with a content unit. Can be called by either teachers or students for two-way communication.
+     *
+     * @param _data any data associated with the content unit for sending updates.
+     */
     static SendContentUnitData(_data: any): void {
         if (!ClassroomManager.activeClassroom) return
 
@@ -332,66 +467,125 @@ export abstract class ClassroomManager {
         }
     }
 
+    /**
+     * Updates all properties in the active content before sending it to the students. Called by the teacher when a student requests to join.
+     */
     static UpdateClassroom(): void {
+        // image
+        if (ClassroomManager.activeContent.images) {
+            ClassroomManager.activeContent.images.forEach(image => {
+                for (let imageContent of ClassroomManager.screenManager.imageContent.content) {
+                    if (imageContent.configuration.src == image.src) {
+                        // found
+                        image.showing = imageContent.configuration.showing
+                        break
+                    }
+                }
+            });
+        }
         // video
-        if (ClassroomManager.screenManager.videoContent && ClassroomManager.screenManager.videoContent.content.length > 0) {
-            const content = ClassroomManager.screenManager.videoContent.getContent() as VideoContent
-            ClassroomManager.activeClassroom.displayedVideo.position = content.offset + VideoContent.SYNC_OFFSET
-            ClassroomManager.activeClassroom.displayedVideo.playing = content.isPaused ? false : true
-            ClassroomManager.activeClassroom.displayedVideo.volume = ClassroomManager.screenManager.muted ? 0 : 1
+        if (ClassroomManager.activeContent.videos) {
+            ClassroomManager.activeContent.videos.forEach(video => {
+                for (let videoContent of ClassroomManager.screenManager.videoContent.content) {
+                    if (videoContent.configuration.src == video.src) {
+                        // found
+                        const config = videoContent.configuration as VideoContentConfig
+                        video.playing = config.playing
+                        video.volume = config.volume
+                        video.position = config.position
+                        video.showing = config.showing
+                        break
+                    }
+                }
+            });
         }
         // model
+        if (ClassroomManager.activeContent.models) {
+            ClassroomManager.activeContent.models.forEach(model => {
+                for (let modelContent of ClassroomManager.screenManager.modelContent.content) {
+                    if (modelContent.configuration.src == model.src) {
+                        // found
+                        const config = modelContent.configuration as ModelContentConfig
+                        model.showing = config.showing
+                        model.playing = !modelContent.isPaused
+                        break
+                    }
+                }
+            });
+        }
     }
 
-    static SyncClassroom(): void {
+    /**
+     * Syncs/updates the student's active content and loads the content via the ScreenManager. Called by students upon joining a classroom.
+     */
+    static SyncClassroom(_activeContentType: MediaContentType): void {
         // sync seating
         if (ClassroomManager.activeClassroom.seatingEnabled) {
 
         }
 
+        ClassroomManager.screenManager.loadContent()
+
         // sync image
-        if (ClassroomManager.activeClassroom.displayedImage) {
-            CommunicationManager.OnImageDisplay({
-                id: ClassroomManager.activeClassroom.guid,
-                name: ClassroomManager.activeClassroom.className,
-                description: ClassroomManager.activeClassroom.classDescription,
-                image: ClassroomManager.activeClassroom.displayedImage
-            })
-        }
+        ClassroomManager.screenManager.imageContent.content.forEach(content => {
+            if (content.configuration.showing) {
+                CommunicationManager.OnImageDisplay({
+                    id: ClassroomManager.activeClassroom.guid,
+                    name: ClassroomManager.activeClassroom.className,
+                    description: ClassroomManager.activeClassroom.classDescription,
+                    image: content.configuration
+                })
+            }
+        });
 
         // sync video
-        if (ClassroomManager.activeClassroom.displayedVideo) {
-            CommunicationManager.OnVideoPlay({
-                id: ClassroomManager.activeClassroom.guid,
-                name: ClassroomManager.activeClassroom.className,
-                description: ClassroomManager.activeClassroom.classDescription,
-                video: ClassroomManager.activeClassroom.displayedVideo
-            })
-            if (!ClassroomManager.activeClassroom.displayedVideo.playing) {
-                utils.timers.setTimeout(() => {
+        ClassroomManager.screenManager.videoContent.content.forEach(content => {
+            if (content.configuration.showing) {
+                CommunicationManager.OnVideoPlay({
+                    id: ClassroomManager.activeClassroom.guid,
+                    name: ClassroomManager.activeClassroom.className,
+                    description: ClassroomManager.activeClassroom.classDescription,
+                    video: content.configuration
+                })
+                if (!content.configuration.playing) {
                     CommunicationManager.OnVideoPause({
                         id: ClassroomManager.activeClassroom.guid,
                         name: ClassroomManager.activeClassroom.className,
                         description: ClassroomManager.activeClassroom.classDescription
                     })
-                }, 1000)
+                }
             }
-            CommunicationManager.OnVideoVolume({
-                id: ClassroomManager.activeClassroom.guid,
-                name: ClassroomManager.activeClassroom.className,
-                description: ClassroomManager.activeClassroom.classDescription,
-                volume: ClassroomManager.activeClassroom.displayedVideo.volume ?? 1
-            })
-        }
+        });
 
         // sync model
-        if (ClassroomManager.activeClassroom.displayedModel) {
-            CommunicationManager.OnModelPlay({
-                id: ClassroomManager.activeClassroom.guid,
-                name: ClassroomManager.activeClassroom.className,
-                description: ClassroomManager.activeClassroom.classDescription,
-                model: ClassroomManager.activeClassroom.displayedModel
-            })
+        ClassroomManager.screenManager.modelContent.content.forEach(content => {
+            if (content.configuration.showing) {
+                CommunicationManager.OnModelPlay({
+                    id: ClassroomManager.activeClassroom.guid,
+                    name: ClassroomManager.activeClassroom.className,
+                    description: ClassroomManager.activeClassroom.classDescription,
+                    model: content.configuration
+                })
+                if (!content.configuration.playing) {
+                    CommunicationManager.OnModelPause({
+                        id: ClassroomManager.activeClassroom.guid,
+                        name: ClassroomManager.activeClassroom.className,
+                        description: ClassroomManager.activeClassroom.classDescription
+                    })
+                }
+            }
+        });
+
+        if (_activeContentType) {
+            if (_activeContentType == MediaContentType.image) {
+                ClassroomManager.screenManager.currentContent = ClassroomManager.screenManager.imageContent
+            }
+            else if (_activeContentType == MediaContentType.video) {
+                ClassroomManager.screenManager.currentContent = ClassroomManager.screenManager.videoContent
+            }
+            else if (_activeContentType == MediaContentType.model) {
+                ClassroomManager.screenManager.currentContent = ClassroomManager.screenManager.modelContent
+            }
         }
     }
 }

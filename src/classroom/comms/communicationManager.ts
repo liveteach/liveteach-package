@@ -1,13 +1,13 @@
-// @ts-nocheck
 import { MessageBus } from "@dcl/sdk/message-bus"
 import { ClassroomManager } from "../classroomManager"
 import { DebugPanel } from "../ui/debugPanel"
 import { Color4 } from "@dcl/sdk/math"
 import { IClassroomChannel } from "./IClassroomChannel"
 import { UserDataHelper } from "../userDataHelper"
-import { ClassContentPacket, ClassPacket, Classroom, StudentCommInfo, ContentUnitPacket, DataPacket, StudentDataPacket } from "../types/classroomTypes"
+import { ClassContentPacket, ClassPacket, Classroom, StudentCommInfo, ContentUnitPacket, DataPacket, StudentDataPacket, ClassContent, ClassroomSharePacket } from "../types/classroomTypes"
 import { ContentUnitManager } from "../../contentUnits/contentUnitManager"
-import { engine } from "@dcl/sdk/ecs"
+import { Transform, engine } from "@dcl/sdk/ecs"
+import { MediaContentType } from "../../classroomContent/enums";
 
 export class CommunicationManager {
     static readonly CLASS_EMIT_PERIOD: number = 10
@@ -50,14 +50,13 @@ export class CommunicationManager {
             })
 
             engine.addSystem((dt: number) => {
-                if (!ClassroomManager.classController?.isTeacher()) return
+                if (!ClassroomManager.classController?.isTeacher() || !ClassroomManager.activeClassroom) return
 
                 CommunicationManager.elapsed += dt
                 if (CommunicationManager.elapsed > CommunicationManager.CLASS_EMIT_PERIOD) {
                     CommunicationManager.elapsed = 0
 
-                    ClassroomManager.UpdateClassroom()
-                    CommunicationManager.EmitClassStart({
+                    CommunicationManager.channel.emitClassStart({
                         id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
                         name: ClassroomManager.activeContent.name,
                         description: ClassroomManager.activeContent.description
@@ -102,79 +101,106 @@ export class CommunicationManager {
         CommunicationManager.EmitLog(_info.studentName + " left class " + _info.name, _info.id, true, true)
     }
 
-    static EmitClassroomConfig(_info: Classroom): void {
-        CommunicationManager.channel.emitClassroomConfig(_info)
-        CommunicationManager.EmitLog(_info.teacherName + " is sharing classroom config for class " + _info.className, _info.guid, false, false)
+    static EmitClassroomConfig(_config: Classroom, _content: ClassContent, _activeContentType: MediaContentType): void {
+        CommunicationManager.channel.emitClassroomConfig({
+            config: _config,
+            content: _content,
+            activeContentType: _activeContentType
+        })
+
+        if (ContentUnitManager.activeUnit) {
+            CommunicationManager.EmitContentUnitStart({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription,
+                unit: {
+                    key: ContentUnitManager.activeUnitKey,
+                    data: ContentUnitManager.activeUnitData
+                }
+            })
+        }
+        CommunicationManager.EmitLog(_config.teacherName + " is sharing classroom config for class " + _config.className, _config.guid, false, false)
     }
 
     static EmitImageDisplay(_info: ClassContentPacket): void {
         CommunicationManager.channel.emitImageDisplay(_info)
-        //TODO: Add log
+        CommunicationManager.EmitLog("You displayed image: " + _info.image?.src, _info.id, false, false)
+        CommunicationManager.EmitLog("Teacher displayed image: " + _info.image?.src, _info.id, true, false)
     }
 
     static EmitVideoPlay(_info: ClassContentPacket): void {
         CommunicationManager.channel.emitVideoPlay(_info)
-        //TODO: Add log
+        CommunicationManager.EmitLog("You displayed video: " + _info.video?.src, _info.id, false, false)
+        CommunicationManager.EmitLog("Teacher displayed video: " + _info.video?.src, _info.id, true, false)
     }
 
     static EmitVideoPause(_info: ClassPacket): void {
         CommunicationManager.channel.emitVideoPause(_info)
-        //TODO: Add log
+        CommunicationManager.EmitLog("You paused the video", _info.id, false, false)
+        CommunicationManager.EmitLog("Teacher paused video", _info.id, true, false)
     }
 
     static EmitVideoResume(_info: ClassPacket): void {
         CommunicationManager.channel.emitVideoResume(_info)
-        //TODO: Add log
+        CommunicationManager.EmitLog("You resumed the video", _info.id, false, false)
+        CommunicationManager.EmitLog("Teacher resumed video", _info.id, true, false)
     }
 
     static EmitVideoVolume(_info: ClassPacket & { volume: number }): void {
         CommunicationManager.channel.emitVideoVolume(_info)
-        //TODO: Add log
+        const muteStr = _info.volume == 0 ? "muted" : "unmuted"
+        CommunicationManager.EmitLog("You " + muteStr + " the video", _info.id, false, false)
+        CommunicationManager.EmitLog("Teacher " + muteStr + " video", _info.id, true, false)
     }
 
     static EmitModelPlay(_info: ClassContentPacket): void {
         CommunicationManager.channel.emitModelPlay(_info)
-        //TODO: Add log
+        CommunicationManager.EmitLog("You displayed model: " + _info.model?.src, _info.id, false, false)
+        CommunicationManager.EmitLog("Teacher displayed model: " + _info.model?.src, _info.id, true, false)
     }
 
     static EmitModelPause(_info: ClassPacket): void {
         CommunicationManager.channel.emitModelPause(_info)
-        //TODO: Add log
+        CommunicationManager.EmitLog("You paused the model", _info.id, false, false)
+        CommunicationManager.EmitLog("Teacher paused model", _info.id, true, false)
     }
 
     static EmitModelResume(_info: ClassPacket): void {
         CommunicationManager.channel.emitModelResume(_info)
-        //TODO: Add log
+        CommunicationManager.EmitLog("You resumed the model", _info.id, false, false)
+        CommunicationManager.EmitLog("Teacher resumed model", _info.id, true, false)
     }
 
     static EmitScreenDeactivation(_info: ClassPacket): void {
         CommunicationManager.channel.emitScreenDeactivation(_info)
-        //TODO: Add log
+        CommunicationManager.EmitLog("You deactivated the screen", _info.id, false, false)
+        CommunicationManager.EmitLog("Teacher deactivated screen", _info.id, true, false)
     }
 
     static EmitModelDeactivation(_info: ClassPacket): void {
         CommunicationManager.channel.emitModelDeactivation(_info)
-        //TODO: Add log
+        CommunicationManager.EmitLog("You deactivated the model", _info.id, false, false)
+        CommunicationManager.EmitLog("Teacher deactivated model", _info.id, true, false)
     }
 
     static EmitContentUnitStart(_info: ContentUnitPacket): void {
         CommunicationManager.channel.emitContentUnitStart(_info)
-        //TODO: Add log
+        CommunicationManager.EmitLog("You started a content unit: " + _info.unit.key, _info.id, false, false)
+        CommunicationManager.EmitLog("Teacher started a content unit: " + _info.unit.key, _info.id, true, false)
     }
 
     static EmitContentUnitEnd(_info: ClassPacket): void {
         CommunicationManager.channel.emitContentUnitEnd(_info)
-        //TODO: Add log
+        CommunicationManager.EmitLog("You ended the content unit", _info.id, false, false)
+        CommunicationManager.EmitLog("Teacher ended content unit", _info.id, true, false)
     }
 
     static EmitContentUnitTeacherSend(_info: DataPacket): void {
         CommunicationManager.channel.emitContentUnitTeacherSend(_info)
-        //TODO: Add log
     }
 
     static EmitContentUnitStudentSend(_info: StudentDataPacket): void {
         CommunicationManager.channel.emitContentUnitStudentSend(_info)
-        //TODO: Add log
     }
 
     static EmitLog(_message: string, _classroomGuid: string, _studentEvent: boolean, _highPriority: boolean, _global: boolean = false): void {
@@ -217,9 +243,12 @@ export class CommunicationManager {
                 })
             }
 
-            //autojoin
-            if (ClassroomManager.activeClassroom?.guid != _info.id && ClassroomManager.classroomConfig.classroom.autojoin) {
-                ClassroomManager.JoinClass(_info.id)
+            const config = ClassroomManager.GetClassroomConfig()
+            if (config) {
+                //autojoin
+                if (ClassroomManager.activeClassroom?.guid != _info.id && config.classroom.autojoin) {
+                    ClassroomManager.JoinClass()
+                }
             }
         }
     }
@@ -250,7 +279,8 @@ export class CommunicationManager {
                 studentID: _info.studentID,
                 studentName: _info.studentName
             })
-            CommunicationManager.EmitClassroomConfig(ClassroomManager.activeClassroom)
+            ClassroomManager.UpdateClassroom()
+            CommunicationManager.EmitClassroomConfig(ClassroomManager.activeClassroom, ClassroomManager.activeContent, ClassroomManager.screenManager.currentContent?.getContent()?.getContentType())
             CommunicationManager.EmitLog(_info.studentName + " joined class " + ClassroomManager.activeClassroom.className, _info.id, false, true)
         }
     }
@@ -267,42 +297,61 @@ export class CommunicationManager {
         }
     }
 
-    static OnShareClassroomConfig(_info: Classroom) {
-        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.requestingJoinClass && ClassroomManager.classController.classList[ClassroomManager.classController.selectedClassIndex].id == _info.guid) {
+    static OnShareClassroomConfig(_info: ClassroomSharePacket) {
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.requestingJoinClass && ClassroomManager.classController.classList[ClassroomManager.classController.selectedClassIndex].id == _info.config.guid) {
             ClassroomManager.requestingJoinClass = false
-            ClassroomManager.activeClassroom = _info
-            ClassroomManager.SyncClassroom()
-            CommunicationManager.EmitLog(UserDataHelper.GetDisplayName() + " joined class " + _info.className, _info.guid, true, false)
+            ClassroomManager.activeClassroom = _info.config
+            ClassroomManager.activeContent = _info.content
+            ClassroomManager.SyncClassroom(_info.activeContentType)
+            let originEntityTransform = Transform.getMutableOrNull(ClassroomManager.originEntity)
+            if (originEntityTransform) {
+                originEntityTransform.position = ClassroomManager.activeClassroom.origin
+            }
+            CommunicationManager.EmitLog(UserDataHelper.GetDisplayName() + " joined class " + _info.config.className, _info.config.guid, true, false)
         }
     }
 
     static OnImageDisplay(_info: ClassContentPacket) {
-        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id && _info.image) {
 
-            ClassroomManager.screenManager.addStudentContent(_info.image, _info.video, _info.model)
+            ClassroomManager.screenManager.imageContent?.stop()
+            ClassroomManager.screenManager.videoContent?.stop()
+            ClassroomManager.screenManager.currentContent = ClassroomManager.screenManager.imageContent
+            for (let i = 0; i < ClassroomManager.screenManager.imageContent.content.length; i++) {
+                if (ClassroomManager.screenManager.imageContent.content[i].configuration.src == _info.image.src) {
+                    ClassroomManager.screenManager.imageContent.index = i
+                    break
+                }
+            }
+
             if (!ClassroomManager.screenManager.poweredOn) {
                 ClassroomManager.screenManager.powerToggle(true)
             }
 
             ClassroomManager.screenManager.unHideContent()
             ClassroomManager.screenManager.playContent()
-
-            //TODO: Add log
         }
     }
 
     static OnVideoPlay(_info: ClassContentPacket) {
-        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id && _info.video) {
 
-            ClassroomManager.screenManager.addStudentContent(_info.image, _info.video, _info.model)
+            ClassroomManager.screenManager.imageContent?.stop()
+            ClassroomManager.screenManager.videoContent?.stop()
+            ClassroomManager.screenManager.currentContent = ClassroomManager.screenManager.videoContent
+            for (let i = 0; i < ClassroomManager.screenManager.videoContent.content.length; i++) {
+                if (ClassroomManager.screenManager.videoContent.content[i].configuration.src == _info.video.src) {
+                    ClassroomManager.screenManager.videoContent.index = i
+                    break
+                }
+            }
+
             if (!ClassroomManager.screenManager.poweredOn) {
                 ClassroomManager.screenManager.powerToggle(true)
             }
 
             ClassroomManager.screenManager.unHideContent()
             ClassroomManager.screenManager.playContent()
-
-            //TODO: Add log
         }
     }
 
@@ -314,8 +363,6 @@ export class CommunicationManager {
             }
 
             ClassroomManager.screenManager.playPause()
-
-            //TODO: Add log
         }
     }
 
@@ -327,8 +374,6 @@ export class CommunicationManager {
             }
 
             ClassroomManager.screenManager.playPause()
-
-            //TODO: Add log
         }
     }
 
@@ -340,22 +385,35 @@ export class CommunicationManager {
             }
 
             ClassroomManager.screenManager.setVolume(_info.volume)
-
-            //TODO: Add log
         }
     }
 
     static OnModelPlay(_info: ClassContentPacket) {
-        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
+        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id && _info.model) {
 
-            ClassroomManager.screenManager.addStudentContent(_info.image, _info.video, _info.model)
+            let shouldStopPrevContent: boolean = true
+
+            if (_info.model.replace !== undefined && _info.model.replace !== null && !_info.model.replace) {
+                shouldStopPrevContent = ClassroomManager.screenManager.currentContent.getContent().getContentType() != MediaContentType.model
+            }
+            if (ClassroomManager.screenManager.currentContent && ClassroomManager.screenManager.currentContent.getContent().getContentType() == MediaContentType.model) {
+                if (shouldStopPrevContent) {
+                    ClassroomManager.screenManager.currentContent.stop()
+                }
+            }
+            ClassroomManager.screenManager.currentContent = ClassroomManager.screenManager.modelContent
+            for (let i = 0; i < ClassroomManager.screenManager.modelContent.content.length; i++) {
+                if (ClassroomManager.screenManager.modelContent.content[i].configuration.src == _info.model.src) {
+                    ClassroomManager.screenManager.modelContent.index = i
+                    break
+                }
+            }
+
             if (!ClassroomManager.screenManager.poweredOn) {
                 ClassroomManager.screenManager.powerToggle(true)
             }
 
             ClassroomManager.screenManager.playContent()
-
-            //TODO: Add log
         }
     }
 
@@ -367,8 +425,6 @@ export class CommunicationManager {
             }
 
             ClassroomManager.screenManager.playPause()
-
-            //TODO: Add log
         }
     }
 
@@ -380,8 +436,6 @@ export class CommunicationManager {
             }
 
             ClassroomManager.screenManager.playPause()
-
-            //TODO: Add log
         }
     }
 
@@ -392,8 +446,6 @@ export class CommunicationManager {
                 ClassroomManager.screenManager.videoContent?.stop()
                 ClassroomManager.screenManager.hideContent()
             }
-
-            //TODO: Add log
         }
     }
 
@@ -403,8 +455,6 @@ export class CommunicationManager {
             if (ClassroomManager.screenManager.poweredOn) {
                 ClassroomManager.screenManager.modelContent?.stop()
             }
-
-            //TODO: Add log
         }
     }
 
@@ -412,8 +462,6 @@ export class CommunicationManager {
         if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
 
             ContentUnitManager.start(_info.unit.key, _info.unit.data)
-
-            //TODO: Add log
         }
     }
 
@@ -421,8 +469,6 @@ export class CommunicationManager {
         if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
 
             ContentUnitManager.end()
-
-            //TODO: Add log
         }
     }
 
@@ -430,8 +476,6 @@ export class CommunicationManager {
         if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
 
             ContentUnitManager.update(_info.data)
-
-            //TODO: Add log
         }
     }
 
@@ -439,8 +483,6 @@ export class CommunicationManager {
         if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
 
             ContentUnitManager.update(_info.data)
-
-            //TODO: Add log
         }
     }
 }
