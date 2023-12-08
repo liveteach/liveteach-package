@@ -15,9 +15,9 @@ export class SmartContractManager {
     private static currentUserParcel: [number, number] = [0, 0]
     static blockchain: BlockChain
 
-    static Initialise(): void {
+    static Initialise(liveTeachContractAddress?:string, teachersContractAddress?:string): void {
         if (SmartContractManager.blockchain === undefined || SmartContractManager.blockchain === null) {
-            SmartContractManager.blockchain = new BlockChain()
+            SmartContractManager.blockchain = new BlockChain(liveTeachContractAddress, teachersContractAddress)
         }
         engine.addSystem(SmartContractManager.update)
     }

@@ -1,12 +1,12 @@
-import { GetUserDataResponse, UserData, getUserData } from "~system/UserIdentity"
-import { RequestManager, ContractFactory } from 'eth-connect'
-import { createEthereumProvider } from '@dcl/sdk/ethereum-provider'
 import { executeTask } from '@dcl/sdk/ecs'
-import { InfoUI } from "./ui/infoUI"
+import { createEthereumProvider } from '@dcl/sdk/ethereum-provider'
+import { ContractFactory, RequestManager } from 'eth-connect'
 import { GetSceneResponse, getSceneInfo } from '~system/Scene'
+import { GetUserDataResponse, UserData, getUserData } from "~system/UserIdentity"
 import teachAbi from "./contracts/TeachContractAbi.json"
 import teacherAbi from "./contracts/TeacherContractAbi.json"
 import { ClassPacket } from "./types/classroomTypes"
+import { InfoUI } from "./ui/infoUI"
 
 class ClassContentData {
     public id: number;
@@ -24,13 +24,28 @@ class ClassContentData {
 }
 
 export class BlockChain {
-    public readonly UAT_SMART_CONTRACT_ADDRESS: string = "0x31Cd6F96EFf5256aFBe1F66E846D04016A35C615";
-
+    private readonly mainnetLiveTeachContractAddress: string = "0xb73829d24b6C26E9D94D3EF7A93bdAf22D5C8aF3";
+    private readonly mainnetTeachersContractAddress: string = "0x49F6eB033953Ff757a9111D5E5E0D212ed84a37C";
+    private liveTeachContractAddress: string;
+    private teachersContractAddress: string;
     userData: UserData | undefined = undefined
     sceneBaseX: number = 1000
     sceneBaseZ: number = 1000
 
-    constructor() {
+        // Optional parameters `liveTeachContractAddress` and `teachersContractAddress`.
+        // Allows passing in a custom LiveTeach contract address.
+        // Intended to be used for testnet contracts.
+        // These values ignored unless you pass in both.
+        // Defaults to mainnet.
+        constructor(liveTeachContractAddress?:string, teachersContractAddress?:string) {
+        if(liveTeachContractAddress && teachersContractAddress) {
+            this.liveTeachContractAddress = liveTeachContractAddress; 
+            this.teachersContractAddress = teachersContractAddress; 
+        }
+        else {
+            this.liveTeachContractAddress = this.mainnetLiveTeachContractAddress;
+            this.teachersContractAddress = this.mainnetTeachersContractAddress;
+        }
         this.getUserData()
         this.getSceneData()
         //this.getGasPrice()
@@ -136,7 +151,7 @@ export class BlockChain {
                 const factory = new ContractFactory(requestManager, teachAbi)
                 // Use the factory object to instance a `contract` object, referencing a specific contract
                 const contract = (await factory.at(
-                    "0x3185cafec6fc18267ac92f83ffc8f08658519097"
+                    this.liveTeachContractAddress
                 )) as any
 
                 const res = await contract.getClassroomGuid(
@@ -166,7 +181,7 @@ export class BlockChain {
                 const requestManager = new RequestManager(provider)
                 const factory = new ContractFactory(requestManager, teacherAbi)
                 const contract = (await factory.at(
-                    "0x67499D72f32606606E7A57a59986Ca8025e25e39" // teachers contract, dev version.
+                    this.teachersContractAddress
                 )) as any
 
                 // get all ClassContent objects associated with this teacher
@@ -203,7 +218,7 @@ export class BlockChain {
                 const requestManager = new RequestManager(provider)
                 const factory = new ContractFactory(requestManager, teacherAbi)
                 const contract = (await factory.at(
-                    "0x67499D72f32606606E7A57a59986Ca8025e25e39" // teachers contract, dev version.
+                    this.teachersContractAddress
                 )) as any
 
                 // get the ClassContent object associated with this teacher and this id
