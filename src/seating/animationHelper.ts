@@ -7,17 +7,16 @@ export class AnimationHelper {
 
     }
 
-    static sit(){
-        triggerSceneEmote({ src: 'animations/sit_emote.glb', loop: true })
+    static sit(_animationFilePath = 'animations/sit_emote.glb'){
+        triggerSceneEmote({ src: _animationFilePath, loop: true })
     }
 
-    static handUp(){
-        triggerSceneEmote({ src: 'animations/handup_emote.glb', loop: true })
+    static handUp(_animationFilePath = 'animations/handup_emote.glb'){
+        triggerSceneEmote({ src: _animationFilePath, loop: true })
         Toaster.popToast(UserDataHelper.GetDisplayName() + " put their hand up") 
     }
 
-    clap(){
-        // Not implemented
-
+    static clap(_animationFilePath = 'animations/clap_emote.glb'){
+        triggerSceneEmote({ src: _animationFilePath, loop: true })
     }
 }
