@@ -31,10 +31,10 @@ export abstract class ClassroomManager {
      * @param _channel the classroom channel used for communication.
      * @param _testMode optional parameter to enable test mode.
      */
-    static Initialise(_channel: IClassroomChannel, _testMode: boolean = false): void {
+    static Initialise(_channel: IClassroomChannel, liveTeachContractAddress?:string, teachersContractAddress?:string, _testMode: boolean = false): void {
         ClassroomManager.testMode = _testMode
 
-        SmartContractManager.Initialise()
+        SmartContractManager.Initialise(liveTeachContractAddress, teachersContractAddress)
         CommunicationManager.Initialise(_channel)
         ClassroomManager.screenManager = new ScreenManager()
 
