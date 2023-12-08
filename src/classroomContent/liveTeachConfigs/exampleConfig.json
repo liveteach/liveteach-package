@@ -213,6 +213,17 @@
                         }
                     ]
                 }
+            },
+            {
+                "name": "Wearable",
+                "key": "wearable",
+                "data": {
+                    "wearableName": "",
+                    "group": "",
+                    "campaignID": "",
+                    "campaignKey": "",
+                    "urn": ""
+                }
             }
         ]
     }
