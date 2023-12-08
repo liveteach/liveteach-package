@@ -128,5 +128,10 @@ export class SmartContractManager {
                 ClassroomManager.SetClassController(UserType.student)
             }
         }
+        else {
+            if (ClassroomManager.classController?.isStudent()) return
+
+            ClassroomManager.SetClassController(UserType.student)
+        }
     }
 }
