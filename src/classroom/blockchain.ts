@@ -32,15 +32,15 @@ export class BlockChain {
     sceneBaseX: number = 1000
     sceneBaseZ: number = 1000
 
-        // Optional parameters `liveTeachContractAddress` and `teachersContractAddress`.
-        // Allows passing in a custom LiveTeach contract address.
-        // Intended to be used for testnet contracts.
-        // These values ignored unless you pass in both.
-        // Defaults to mainnet.
-        constructor(liveTeachContractAddress?:string, teachersContractAddress?:string) {
-        if(liveTeachContractAddress && teachersContractAddress) {
-            this.liveTeachContractAddress = liveTeachContractAddress; 
-            this.teachersContractAddress = teachersContractAddress; 
+    // Optional parameters `liveTeachContractAddress` and `teachersContractAddress`.
+    // Allows passing in a custom LiveTeach contract address.
+    // Intended to be used for testnet contracts.
+    // These values ignored unless you pass in both.
+    // Defaults to mainnet.
+    constructor(liveTeachContractAddress?: string, teachersContractAddress?: string) {
+        if (liveTeachContractAddress && teachersContractAddress) {
+            this.liveTeachContractAddress = liveTeachContractAddress;
+            this.teachersContractAddress = teachersContractAddress;
         }
         else {
             this.liveTeachContractAddress = this.mainnetLiveTeachContractAddress;
@@ -129,6 +129,10 @@ export class BlockChain {
                 data: "Test"
             })
         })
+    }
+
+    getBaseParcel(): [number, number] {
+        return [this.sceneBaseX, this.sceneBaseZ]
     }
 
     getUserParcel(_x: number, _z: number): [number, number] {

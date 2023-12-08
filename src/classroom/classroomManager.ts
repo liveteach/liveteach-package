@@ -31,17 +31,29 @@ export abstract class ClassroomManager {
      * @param _channel the classroom channel used for communication.
      * @param _testMode optional parameter to enable test mode.
      */
-    static Initialise(_channel: IClassroomChannel, liveTeachContractAddress?:string, teachersContractAddress?:string, _testMode: boolean = false): void {
+    static Initialise(_channel: IClassroomChannel, liveTeachContractAddress?: string, teachersContractAddress?: string, _testMode: boolean = false): void {
         ClassroomManager.testMode = _testMode
 
         SmartContractManager.Initialise(liveTeachContractAddress, teachersContractAddress)
         CommunicationManager.Initialise(_channel)
         ClassroomManager.screenManager = new ScreenManager()
 
+        // Set the user as student by default
+        ClassroomManager.SetClassController(UserType.student)
+
         ClassroomManager.originEntity = engine.addEntity()
         Transform.create(ClassroomManager.originEntity, {
             position: Vector3.Zero()
         })
+    }
+
+    /**
+     * Adds a wallet address to the test teacher addresses
+     *
+     * @param _address user wallet address.
+     */
+    static AddTestTeacherAddress(_address: string): void {
+        SmartContractManager.AddTestTeacherAddress(_address)
     }
 
     /**
@@ -137,45 +149,36 @@ export abstract class ClassroomManager {
      * Deactivates a classroom. Called by the teacher.
      */
     static async DeactivateClassroom(): Promise<void> {
-        return SmartContractManager.DectivateClassroom()
-            .then(function () {
-                if (ClassroomManager.activeContent) {
-                    CommunicationManager.EmitClassDeactivation({
-                        id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
-                        name: ClassroomManager.activeContent.name,
-                        description: ClassroomManager.activeContent.description
-                    })
-                    ClassroomManager.activeClassroom = null
-                }
+        if (ClassroomManager.activeContent) {
+            CommunicationManager.EmitClassDeactivation({
+                id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
+                name: ClassroomManager.activeContent.name,
+                description: ClassroomManager.activeContent.description
             })
+            ClassroomManager.activeClassroom = null
+        }
     }
 
     /**
      * Starts a class. Called by the teacher.
      */
     static async StartClass(): Promise<void> {
-        return SmartContractManager.StartClass()
-            .then(function () {
-                CommunicationManager.EmitClassStart({
-                    id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
-                    name: ClassroomManager.activeContent.name,
-                    description: ClassroomManager.activeContent.description
-                })
-            })
+        CommunicationManager.EmitClassStart({
+            id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
+            name: ClassroomManager.activeContent.name,
+            description: ClassroomManager.activeContent.description
+        })
     }
 
     /**
      * Ends a class. Called by the teacher.
      */
     static async EndClass(): Promise<void> {
-        return SmartContractManager.EndClass()
-            .then(function () {
-                CommunicationManager.EmitClassEnd({
-                    id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
-                    name: ClassroomManager.activeContent.name,
-                    description: ClassroomManager.activeContent.description
-                })
-            })
+        CommunicationManager.EmitClassEnd({
+            id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
+            name: ClassroomManager.activeContent.name,
+            description: ClassroomManager.activeContent.description
+        })
     }
 
     /**
