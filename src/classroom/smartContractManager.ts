@@ -7,6 +7,7 @@ import { UserType } from "../enums"
 import * as exampleConfig from "../classroomContent/liveTeachConfigs/exampleConfig.json"
 
 export class SmartContractManager {
+    private static TEST_CONTRACT_GUID: string = "382c74c3-721d-4f34-80e5-57657b6cbc27"
     private static TEST_TEACHER_ADDRESSES: string[] = [
         "0xe5cf1BB88a59F9fC609689C681D1d14bfE7Ce73A",
         "0xbEA7Ad6cdb932fD81EB386cc9BD21E426b99cB37"
@@ -25,6 +26,10 @@ export class SmartContractManager {
         engine.addSystem(SmartContractManager.update)
     }
 
+    static SetTestContractGuid(_guid: string): void {
+        SmartContractManager.TEST_CONTRACT_GUID = _guid
+    }
+
     static AddTestTeacherAddress(_address: string): void {
         SmartContractManager.TEST_TEACHER_ADDRESSES.push(_address)
     }
@@ -40,7 +45,7 @@ export class SmartContractManager {
                     break
                 }
             }
-            return authorized ? "382c74c3-721d-4f34-80e5-57657b6cbc27" : ""
+            return authorized ? SmartContractManager.TEST_CONTRACT_GUID : ""
         }
         else {
             return SmartContractManager.blockchain.getClassroomGuid(SmartContractManager.blockchain.getBaseParcel())
@@ -127,6 +132,11 @@ export class SmartContractManager {
 
                 ClassroomManager.SetClassController(UserType.student)
             }
+        }
+        else {
+            if (ClassroomManager.classController?.isStudent()) return
+
+            ClassroomManager.SetClassController(UserType.student)
         }
     }
 }

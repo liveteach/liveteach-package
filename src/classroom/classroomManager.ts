@@ -48,6 +48,15 @@ export abstract class ClassroomManager {
     }
 
     /**
+     * Sets the contract guid used for testing.
+     *
+     * @param _guid the test contract guid.
+     */
+    static SetTestContractGuid(_guid: string): void {
+        SmartContractManager.SetTestContractGuid(_guid)
+    }
+
+    /**
      * Adds a wallet address to the test teacher addresses
      *
      * @param _address user wallet address.
