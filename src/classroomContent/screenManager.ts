@@ -277,8 +277,9 @@ export class ScreenManager {
         if(!this.screenDisplays.has(_guid)) {
             this.screenDisplays.set(_guid, [])
         }
-        this.screenDisplays.get(_guid).push(new ScreenDisplay(_position, _rotation, _scale, _parent))
-        this.hideContent()
+        const display = new ScreenDisplay(_position, _rotation, _scale, _parent)
+        this.screenDisplays.get(_guid).push(display)
+        display.hideContent()
     }
 
     loadContent(): void {

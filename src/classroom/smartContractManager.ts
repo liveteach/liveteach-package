@@ -159,11 +159,14 @@ export class SmartContractManager {
             }
         }
         else {
-            ClassroomManager.SetClassController(UserType.student)
-            
-            // If they were joined in a class, leave it
-            if (ClassroomManager.activeClassroom) {
-                ClassroomManager.ExitClass()
+            if (ClassroomManager.classController.isTeacher()) {
+                ClassroomManager.SetClassController(UserType.student)
+            }
+            else {
+                // If they were joined in a class, leave it
+                if (ClassroomManager.activeClassroom && ClassroomManager.classController.inSession) {
+                    ClassroomManager.ExitClass()
+                }
             }
         }
     }
