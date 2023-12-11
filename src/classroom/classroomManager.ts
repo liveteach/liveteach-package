@@ -18,7 +18,7 @@ import { MediaContentType } from "../classroomContent/enums";
 export abstract class ClassroomManager {
     static screenManager: ScreenManager
     static classController: ClassController
-    static activeClassroom: Classroom = null
+    static activeClassroom: Classroom | null = null
     static activeContent: ClassContent = null
     static requestingJoinClass: boolean = false
     static originEntity: Entity
