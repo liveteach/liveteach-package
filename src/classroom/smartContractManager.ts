@@ -136,7 +136,7 @@ export class SmartContractManager {
                 // If the student is already in a class, do nothing else
                 if (ClassroomManager.activeClassroom) return
 
-                // Update the student's list of joinable classrooms
+                // Update the student's list of joinable classrooms. Note that the student can only be in 1 classroom volume at a time, i.e. only 1 class can be on that list at any time
                 let studentClassController = ClassroomManager.classController as StudentClassController
                 studentClassController.classList.splice(0)
 
@@ -144,6 +144,7 @@ export class SmartContractManager {
                 for (let i = 0; i < studentClassController.sceneClassList.length; i++) {
                     if (studentClassController.sceneClassList[i].id == config.classroom.guid) {
                         studentClassController.classList.push(studentClassController.sceneClassList[i])
+                        break
                     }
                 }
 
@@ -161,6 +162,11 @@ export class SmartContractManager {
             if (ClassroomManager.classController.isStudent()) return
 
             ClassroomManager.SetClassController(UserType.student)
+            
+            // If they were joined in a class, leave it
+            if (ClassroomManager.activeClassroom) {
+                ClassroomManager.ExitClass()
+            }
         }
     }
 }

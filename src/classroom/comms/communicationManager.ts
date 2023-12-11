@@ -23,8 +23,6 @@ export class CommunicationManager {
         if (CommunicationManager.messageBus === undefined || CommunicationManager.messageBus === null) {
             CommunicationManager.messageBus = new MessageBus()
 
-            CommunicationManager.messageBus.on('activate_class', CommunicationManager.OnActivateClass)
-            CommunicationManager.messageBus.on('deactivate_class', CommunicationManager.OnDeactivateClass)
             CommunicationManager.messageBus.on('start_class', CommunicationManager.OnStartClass)
             CommunicationManager.messageBus.on('end_class', CommunicationManager.OnEndClass)
             CommunicationManager.messageBus.on('join_class', CommunicationManager.OnJoinClass)
@@ -68,18 +66,6 @@ export class CommunicationManager {
     }
 
     ////////////// SEND //////////////
-
-    static EmitClassActivation(_info: ClassPacket): void {
-        CommunicationManager.channel.emitClassActivation(_info)
-        CommunicationManager.EmitLog(UserDataHelper.GetDisplayName() + " activated class " + _info.name, _info.id, false, false)
-        CommunicationManager.EmitLog("New class available: " + _info.name, _info.id, true, false, true)
-    }
-
-    static EmitClassDeactivation(_info: ClassPacket): void {
-        CommunicationManager.channel.emitClassDeactivation(_info)
-        CommunicationManager.EmitLog(UserDataHelper.GetDisplayName() + " deactivated class " + _info.name, _info.id, false, false)
-        CommunicationManager.EmitLog("Class no longer available: " + _info.name, _info.id, true, false, true)
-    }
 
     static EmitClassStart(_info: ClassPacket): void {
         CommunicationManager.channel.emitClassStart(_info)
@@ -215,14 +201,6 @@ export class CommunicationManager {
     }
 
     ////////////// RECEIVE //////////////
-
-    static OnActivateClass(_info: ClassPacket): void {
-
-    }
-
-    static OnDeactivateClass(_info: ClassPacket): void {
-
-    }
 
     static OnStartClass(_info: ClassPacket): void {
         if (ClassroomManager.classController && ClassroomManager.classController.isStudent()) {
