@@ -210,7 +210,7 @@ export abstract class ClassroomManager {
             }
 
             if (ClassroomManager.classController) {
-                ClassroomManager.classController.inSession = true
+                ClassroomManager.classController.inSession = false
             }
 
             ClassroomManager.activeClassroom = null
