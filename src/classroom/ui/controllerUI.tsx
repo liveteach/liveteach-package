@@ -12,7 +12,7 @@ export class ControllerUI {
                 height: "180px",
                 width: "380px",
                 positionType: 'absolute',
-                display: ControllerUI.visibility && (ClassroomManager.classController?.isTeacher() || (ClassroomManager.classController?.isStudent() && ClassroomManager.GetClassroomConfig()?.classroom.autojoin == false)) ? 'flex' : 'none'
+                display: ControllerUI.visibility && (ClassroomManager.classController?.isTeacher() || (ClassroomManager.classController?.isStudent() && ClassroomManager.classController?.classList.length > 0 && ClassroomManager.GetClassroomConfig()?.classroom.autojoin == false)) ? 'flex' : 'none'
             }}
             uiBackground={{ color: Color4.create(0, 0, 0, 0.8) }}
         >

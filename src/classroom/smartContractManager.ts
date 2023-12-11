@@ -159,8 +159,6 @@ export class SmartContractManager {
             }
         }
         else {
-            if (ClassroomManager.classController.isStudent()) return
-
             ClassroomManager.SetClassController(UserType.student)
             
             // If they were joined in a class, leave it

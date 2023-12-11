@@ -100,8 +100,8 @@ export abstract class ClassroomManager {
      * @param _scale the screen scale.
      * @param _parent the screen's parent entity (optional parameter).
      */
-    static AddScreen(_position: Vector3, _rotation: Quaternion, _scale: Vector3, _parent?: Entity): void {
-        ClassroomManager.screenManager.addScreen(_position, _rotation, _scale, _parent)
+    static AddScreen(_guid: string, _position: Vector3, _rotation: Quaternion, _scale: Vector3, _parent?: Entity): void {
+        ClassroomManager.screenManager.addScreen(_guid, _position, _rotation, _scale, _parent)
     }
 
     /**
@@ -113,11 +113,11 @@ export abstract class ClassroomManager {
         if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && _type === UserType.teacher) return
         if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && _type === UserType.student) return
 
-        if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && _type === UserType.student) {
+        if (ClassroomManager.classController && ClassroomManager.classController.inSession && ClassroomManager.classController.isTeacher() && _type === UserType.student) {
             ClassroomManager.EndClass()
         }
 
-        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && _type === UserType.teacher) {
+        if (ClassroomManager.classController && ClassroomManager.classController.inSession && ClassroomManager.classController.isStudent() && _type === UserType.teacher) {
             ClassroomManager.classController.exitClass()
         }
 
@@ -168,6 +168,11 @@ export abstract class ClassroomManager {
             name: ClassroomManager.activeContent.name,
             description: ClassroomManager.activeContent.description
         })
+
+        if (ClassroomManager.screenManager.poweredOn) {
+            ClassroomManager.screenManager.videoContent?.stop()
+            ClassroomManager.screenManager.hideContent()
+        }
     }
 
     /**
@@ -199,6 +204,11 @@ export abstract class ClassroomManager {
                 studentName: UserDataHelper.GetDisplayName()
             })
             ClassroomManager.activeClassroom = null
+
+            if (ClassroomManager.screenManager.poweredOn) {
+                ClassroomManager.screenManager.videoContent?.stop()
+                ClassroomManager.screenManager.hideContent()
+            }
         }
     }
 

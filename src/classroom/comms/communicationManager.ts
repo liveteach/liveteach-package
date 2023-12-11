@@ -49,7 +49,7 @@ export class CommunicationManager {
             })
 
             engine.addSystem((dt: number) => {
-                if (!ClassroomManager.classController?.isTeacher() || !ClassroomManager.activeClassroom) return
+                if (!ClassroomManager.classController || !ClassroomManager.classController.isTeacher() || !ClassroomManager.classController.inSession || !ClassroomManager.activeClassroom) return
 
                 CommunicationManager.elapsed += dt
                 if (CommunicationManager.elapsed > CommunicationManager.CLASS_EMIT_PERIOD) {
@@ -240,6 +240,11 @@ export class CommunicationManager {
                     studentClassController.sceneClassList.splice(i, 1)
                     break
                 }
+            }
+
+            if (ClassroomManager.screenManager.poweredOn) {
+                ClassroomManager.screenManager.videoContent?.stop()
+                ClassroomManager.screenManager.hideContent()
             }
         }
     }
