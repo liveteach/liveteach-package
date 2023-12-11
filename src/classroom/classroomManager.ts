@@ -100,8 +100,8 @@ export abstract class ClassroomManager {
      * @param _scale the screen scale.
      * @param _parent the screen's parent entity (optional parameter).
      */
-    static AddScreen(_position: Vector3, _rotation: Quaternion, _scale: Vector3, _parent?: Entity): void {
-        ClassroomManager.screenManager.addScreen(_position, _rotation, _scale, _parent)
+    static AddScreen(_guid: string, _position: Vector3, _rotation: Quaternion, _scale: Vector3, _parent?: Entity): void {
+        ClassroomManager.screenManager.addScreen(_guid, _position, _rotation, _scale, _parent)
     }
 
     /**
