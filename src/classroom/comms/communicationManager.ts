@@ -69,14 +69,14 @@ export class CommunicationManager {
 
     static EmitClassStart(_info: ClassPacket): void {
         CommunicationManager.channel.emitClassStart(_info)
-        CommunicationManager.EmitLog(UserDataHelper.GetDisplayName() + " started class " + _info.name, _info.id, false, true)
-        CommunicationManager.EmitLog(UserDataHelper.GetDisplayName() + " started teaching " + _info.name, _info.id, true, true)
+        CommunicationManager.EmitLog("You started teaching class " + _info.name, _info.id, false, true)
+        CommunicationManager.EmitLog(UserDataHelper.GetDisplayName() + " started teaching " + _info.name, _info.id, true, true, true)
     }
 
     static EmitClassEnd(_info: ClassPacket): void {
         CommunicationManager.channel.emitClassEnd(_info)
-        CommunicationManager.EmitLog(UserDataHelper.GetDisplayName() + " ended class " + _info.name, _info.id, false, true)
-        CommunicationManager.EmitLog(UserDataHelper.GetDisplayName() + " stopped teaching " + _info.name, _info.id, true, true)
+        CommunicationManager.EmitLog("You ended class " + _info.name, _info.id, false, true)
+        CommunicationManager.EmitLog(UserDataHelper.GetDisplayName() + " stopped teaching " + _info.name, _info.id, true, true, true)
     }
 
     static EmitClassJoin(_info: StudentCommInfo): void {
@@ -229,6 +229,11 @@ export class CommunicationManager {
 
     static OnEndClass(_info: ClassPacket): void {
         if (ClassroomManager.classController && ClassroomManager.classController.isStudent()) {
+            if (ClassroomManager.screenManager.poweredOn) {
+                ClassroomManager.screenManager.videoContent?.stop()
+                ClassroomManager.screenManager.hideContent()
+            }
+
             if (ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
                 ClassroomManager.activeClassroom = null
             }
@@ -240,11 +245,6 @@ export class CommunicationManager {
                     studentClassController.sceneClassList.splice(i, 1)
                     break
                 }
-            }
-
-            if (ClassroomManager.screenManager.poweredOn) {
-                ClassroomManager.screenManager.videoContent?.stop()
-                ClassroomManager.screenManager.hideContent()
             }
         }
     }

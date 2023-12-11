@@ -203,12 +203,17 @@ export abstract class ClassroomManager {
                 studentID: UserDataHelper.GetUserId(),
                 studentName: UserDataHelper.GetDisplayName()
             })
-            ClassroomManager.activeClassroom = null
 
             if (ClassroomManager.screenManager.poweredOn) {
                 ClassroomManager.screenManager.videoContent?.stop()
                 ClassroomManager.screenManager.hideContent()
             }
+
+            if (ClassroomManager.classController) {
+                ClassroomManager.classController.inSession = true
+            }
+
+            ClassroomManager.activeClassroom = null
         }
     }
 
