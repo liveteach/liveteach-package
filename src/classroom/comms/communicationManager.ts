@@ -8,6 +8,7 @@ import { ClassContentPacket, ClassPacket, Classroom, StudentCommInfo, ContentUni
 import { ContentUnitManager } from "../../contentUnits/contentUnitManager"
 import { Transform, engine } from "@dcl/sdk/ecs"
 import { MediaContentType } from "../../classroomContent/enums";
+import { StudentClassController } from "../classroomControllers/studentClassController"
 
 export class CommunicationManager {
     static readonly CLASS_EMIT_PERIOD: number = 10
@@ -108,7 +109,7 @@ export class CommunicationManager {
             activeContentType: _activeContentType
         })
 
-        if (ContentUnitManager.activeUnit) {
+        if (ClassroomManager.activeClassroom && ContentUnitManager.activeUnit) {
             CommunicationManager.EmitContentUnitStart({
                 id: ClassroomManager.activeClassroom.guid,
                 name: ClassroomManager.activeClassroom.className,
@@ -226,29 +227,24 @@ export class CommunicationManager {
     static OnStartClass(_info: ClassPacket): void {
         if (ClassroomManager.classController && ClassroomManager.classController.isStudent()) {
 
+            let studentClassController = ClassroomManager.classController as StudentClassController
+
             let classFound: boolean = false
-            for (let i = 0; i < ClassroomManager.classController.classList.length; i++) {
-                if (ClassroomManager.classController.classList[i].id == _info.id) {
-                    ClassroomManager.classController.classList[i].name = _info.name
-                    ClassroomManager.classController.classList[i].description = _info.description
+            for (let i = 0; i < studentClassController.sceneClassList.length; i++) {
+                if (studentClassController.sceneClassList[i].id == _info.id) {
+                    studentClassController.sceneClassList[i].name = _info.name
+                    studentClassController.sceneClassList[i].description = _info.description
                     classFound = true
                     break
                 }
             }
+
             if (!classFound) {
-                ClassroomManager.classController.classList.push({
+                studentClassController.sceneClassList.push({
                     id: _info.id,
                     name: _info.name,
                     description: _info.description,
                 })
-            }
-
-            const config = ClassroomManager.GetClassroomConfig()
-            if (config) {
-                //autojoin
-                if (ClassroomManager.activeClassroom?.guid != _info.id && config.classroom.autojoin) {
-                    ClassroomManager.JoinClass()
-                }
             }
         }
     }
@@ -256,18 +252,15 @@ export class CommunicationManager {
     static OnEndClass(_info: ClassPacket): void {
         if (ClassroomManager.classController && ClassroomManager.classController.isStudent()) {
             if (ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
-                ClassroomManager.ExitClass()
+                ClassroomManager.activeClassroom = null
             }
 
-            if (ClassroomManager.classController && ClassroomManager.classController.isStudent()) {
-                for (let i = 0; i < ClassroomManager.classController.classList.length; i++) {
-                    if (ClassroomManager.classController.classList[i].id == _info.id) {
-                        ClassroomManager.classController.classList.splice(i, 1)
-                        if (ClassroomManager.classController.selectedClassIndex == i) {
-                            ClassroomManager.classController.selectedClassIndex = Math.max(0, i - 1)
-                        }
-                        break
-                    }
+            let studentClassController = ClassroomManager.classController as StudentClassController
+
+            for (let i = 0; i < studentClassController.sceneClassList.length; i++) {
+                if (studentClassController.sceneClassList[i].id == _info.id) {
+                    studentClassController.sceneClassList.splice(i, 1)
+                    break
                 }
             }
         }

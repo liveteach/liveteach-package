@@ -1,7 +1,9 @@
 import { ClassroomManager } from "../classroomManager";
+import { ClassPacket } from "../types/classroomTypes";
 import { ClassController } from "./classController";
 
 export class StudentClassController extends ClassController {
+    sceneClassList: ClassPacket[] = []
 
     constructor() {
         super()

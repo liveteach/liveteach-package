@@ -5,6 +5,7 @@ import { ClassroomManager } from "./classroomManager"
 import { engine, executeTask } from "@dcl/sdk/ecs"
 import { UserType } from "../enums"
 import * as exampleConfig from "../classroomContent/liveTeachConfigs/exampleConfig.json"
+import { StudentClassController } from "./classroomControllers/studentClassController"
 
 export class SmartContractManager {
     private static TEST_CONTRACT_GUID: string = "382c74c3-721d-4f34-80e5-57657b6cbc27"
@@ -102,17 +103,17 @@ export class SmartContractManager {
             }
         }
 
-        if (SmartContractManager.contractGuid.length < 1) return
+        // Check if we have a class controller set up
+        if (!ClassroomManager.classController) return
 
-        // At this point, we have a valid contract guid
         // Try to get a classroom config
         const config = ClassroomManager.GetClassroomConfig()
 
         // If we were able to fetch a config, it means we're inside a classroom (inside its defined volume)
         if (config) {
             // Should be a teacher
-            if (config.classroom.guid === SmartContractManager.contractGuid) {
-                if (ClassroomManager.classController?.isTeacher()) return
+            if (SmartContractManager.contractGuid.length > 0 && config.classroom.guid === SmartContractManager.contractGuid) {
+                if (ClassroomManager.classController.isTeacher()) return
 
                 ClassroomManager.SetClassController(UserType.teacher)
                 SmartContractManager.FetchClassList().then(
@@ -128,13 +129,36 @@ export class SmartContractManager {
             }
             // Should be a student
             else {
-                if (ClassroomManager.classController?.isStudent()) return
+                if (!ClassroomManager.classController.isStudent()) {
+                    ClassroomManager.SetClassController(UserType.student)
+                }
 
-                ClassroomManager.SetClassController(UserType.student)
+                // If the student is already in a class, do nothing else
+                if (ClassroomManager.activeClassroom) return
+
+                // Update the student's list of joinable classrooms
+                let studentClassController = ClassroomManager.classController as StudentClassController
+                studentClassController.classList.splice(0)
+
+                studentClassController.selectedClassIndex = 0
+                for (let i = 0; i < studentClassController.sceneClassList.length; i++) {
+                    if (studentClassController.sceneClassList[i].id == config.classroom.guid) {
+                        studentClassController.classList.push(studentClassController.sceneClassList[i])
+                    }
+                }
+
+                if (studentClassController.classList.length > 0) {
+                    // At this point, it means we're a student in a classroom volume, and that class is currently being taught
+
+                    //autojoin
+                    if (config.classroom.autojoin) {
+                        ClassroomManager.JoinClass()
+                    }
+                }
             }
         }
         else {
-            if (ClassroomManager.classController?.isStudent()) return
+            if (ClassroomManager.classController.isStudent()) return
 
             ClassroomManager.SetClassController(UserType.student)
         }
