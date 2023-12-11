@@ -235,6 +235,7 @@ export class CommunicationManager {
             }
 
             if (ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
+                ClassroomManager.classController.inSession = false
                 ClassroomManager.activeClassroom = null
             }
 
@@ -283,6 +284,7 @@ export class CommunicationManager {
             if (originEntityTransform) {
                 originEntityTransform.position = ClassroomManager.activeClassroom.origin
             }
+            ClassroomManager.classController.inSession = true
             CommunicationManager.EmitLog(UserDataHelper.GetDisplayName() + " joined class " + _info.config.className, _info.config.guid, true, false)
         }
     }
