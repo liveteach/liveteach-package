@@ -67,12 +67,6 @@ export class ReferenceServerWebsocketManager {
                 this.showMessage(message)
                 this.subscribeToTopic(message.data) // this will error with the java implementation best to comment out
                 break;
-            case "activate_class":
-                CommunicationManager.OnActivateClass(this.classPacket(message))
-                break;
-            case "deactivate_class":
-                CommunicationManager.OnDeactivateClass(this.classPacket(message))
-                break;
             case "start_class":
                 CommunicationManager.OnStartClass(this.classPacket(message))
                 break;

@@ -114,7 +114,7 @@ export abstract class ClassroomManager {
         if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && _type === UserType.student) return
 
         if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && _type === UserType.student) {
-            ClassroomManager.DeactivateClassroom()
+            ClassroomManager.EndClass()
         }
 
         if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && _type === UserType.teacher) {
@@ -144,28 +144,8 @@ export abstract class ClassroomManager {
                     }
 
                     ClassroomManager.screenManager.loadContent()
-
-                    CommunicationManager.EmitClassActivation({
-                        id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
-                        name: ClassroomManager.activeContent.name,
-                        description: ClassroomManager.activeContent.description
-                    })
                 }
             })
-    }
-
-    /**
-     * Deactivates a classroom. Called by the teacher.
-     */
-    static async DeactivateClassroom(): Promise<void> {
-        if (ClassroomManager.activeContent) {
-            CommunicationManager.EmitClassDeactivation({
-                id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
-                name: ClassroomManager.activeContent.name,
-                description: ClassroomManager.activeContent.description
-            })
-            ClassroomManager.activeClassroom = null
-        }
     }
 
     /**

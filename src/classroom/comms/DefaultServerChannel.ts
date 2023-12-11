@@ -7,13 +7,7 @@ export class DefaultServerChannel implements IServerChannel {
     private static referenceServer: ReferenceServerWebsocketManager
     private static role: string
     private static serverUrl: string
-
-    emitClassActivation(_info: ClassPacket) {
-        DefaultServerChannel.referenceServer.sendCommand("message", "student", "activate_class", _info, "teacher")
-    }
-    emitClassDeactivation(_info: ClassPacket) {
-        DefaultServerChannel.referenceServer.sendCommand("message", "student", "deactivate_class", _info, "teacher")
-    }
+    
     emitClassStart(_info: ClassPacket) {
         DefaultServerChannel.referenceServer.sendCommand("message", "student", "start_class", _info, "teacher")
     }
