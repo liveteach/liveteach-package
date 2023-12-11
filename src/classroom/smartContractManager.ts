@@ -11,7 +11,8 @@ export class SmartContractManager {
     private static TEST_CONTRACT_GUID: string = "382c74c3-721d-4f34-80e5-57657b6cbc27"
     private static TEST_TEACHER_ADDRESSES: string[] = [
         "0xe5cf1BB88a59F9fC609689C681D1d14bfE7Ce73A",
-        "0xbEA7Ad6cdb932fD81EB386cc9BD21E426b99cB37"
+        "0xbEA7Ad6cdb932fD81EB386cc9BD21E426b99cB37",
+        "0x5c71B8C74aD58Ce25bD5BD771dFCE14c54ef1738"
     ]
 
     private static contractGuidFetched: boolean = false
