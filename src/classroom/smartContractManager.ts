@@ -69,22 +69,21 @@ export class SmartContractManager {
         }
     }
 
-    static async FetchClassContent(_id: string): Promise<ClassContent> {
-        let contentJson: string = ""
+    static async FetchClassContent(_contentUrl: string): Promise<ClassContent> {
         if (ClassroomManager.testMode) {
-            switch (_id) {
-                case exampleConfig.content.id: contentJson = JSON.stringify(exampleConfig.content)
-                    break
-            }
-        }
-        else {
-            contentJson = await SmartContractManager.blockchain.getClassContent(Number(_id))
+            return ClassContentFactory.Create(JSON.stringify(exampleConfig.content))
         }
 
-        if (contentJson && contentJson.length > 0) {
-            return ClassContentFactory.Create(contentJson)
-        }
-        return new ClassContent()
+        return SmartContractManager.blockchain.getClassContent(_contentUrl).then(
+            function (contentJson: any) {
+                if (contentJson) {
+                    return ClassContentFactory.Create(JSON.stringify(contentJson.content))
+                }
+                else {
+                    return new ClassContent()
+                }
+            }
+        )
     }
 
     private static update(): void {
