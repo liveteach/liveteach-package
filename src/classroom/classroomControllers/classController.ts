@@ -33,16 +33,39 @@ export abstract class ClassController {
     /**
     * Used for knowing if the user is in an active class.
     *
-    * @returns true if the user is in an active class.
+    * @returns true if the user is in an active class that's in session.
     */
     isInClass(): boolean {
         return this.inSession
     }
 
+    /**
+    * Sets the selected classroom and teacher content.
+    */
     setClassroom(): void { }
+
+    /**
+    * Fetches classroom content.
+    */
     fetchClassroomContent(): void { }
+
+    /**
+    * Starts a class.
+    */
     startClass(): void { }
+
+    /**
+    * Ends a class.
+    */
     endClass(): void { }
+
+    /**
+    * Joins a class.
+    */
     joinClass(): void { }
+
+    /**
+    * Exits a class.
+    */
     exitClass(): void { }
 }

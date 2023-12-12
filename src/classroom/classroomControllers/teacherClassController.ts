@@ -9,22 +9,34 @@ export class TeacherClassController extends ClassController {
         super()
     }
 
+    /**
+    * Used for knowing if the user is a teacher.
+    *
+    * @returns true.
+    */
     override isTeacher(): boolean {
         return true
     }
 
+    /**
+    * Used for knowing if the user is a student.
+    *
+    * @returns false.
+    */
     override isStudent(): boolean {
         return false
     }
 
-    override isInClass(): boolean {
-        return this.inSession
-    }
-
+    /**
+    * Sets the selected classroom and teacher content.
+    */
     override setClassroom(): void {
         ClassroomManager.SetTeacherClassContent(this.classList[this.selectedClassIndex].contentUrl ?? "")
     }
 
+    /**
+    * Starts a class.
+    */
     override startClass(): void {
         const self = this
         ClassroomManager.StartClass()
@@ -36,6 +48,9 @@ export class TeacherClassController extends ClassController {
             })
     }
 
+    /**
+    * Ends a class.
+    */
     override endClass(): void {
         const self = this
         ClassroomManager.EndClass()
