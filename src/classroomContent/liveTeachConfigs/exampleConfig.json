@@ -224,6 +224,11 @@
                     "campaignKey": "2eNeid48SBCp0goOHA8JSImfYUCNxUAFpcoTcz3KHik=.POW1rzyTm7xGYJIqZeLM3OpIDX9jMqEFqKz8EvxnsDg=",
                     "urn": "urn:decentraland:matic:collections-v2:XXX:0"
                 }
+            },
+            {
+                "name": "Bakery Class",
+                "key": "bakery",
+                "data": {}
             }
         ]
     }
