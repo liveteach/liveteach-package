@@ -15,6 +15,9 @@ import { ContentUnitManager } from "../contentUnits/contentUnitManager";
 import { IContentUnit } from "../contentUnits/IContentUnit"
 import { MediaContentType } from "../classroomContent/enums";
 
+/**
+ * Manages all classroom interactions.
+ */
 export abstract class ClassroomManager {
     static screenManager: ScreenManager
     static classController: ClassController

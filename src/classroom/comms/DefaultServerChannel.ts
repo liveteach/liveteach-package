@@ -7,7 +7,7 @@ export class DefaultServerChannel implements IServerChannel {
     private static referenceServer: ReferenceServerWebsocketManager
     private static role: string
     private static serverUrl: string
-    
+
     emitClassStart(_info: ClassPacket) {
         DefaultServerChannel.referenceServer.sendCommand("message", "student", "start_class", _info, "teacher")
     }
@@ -21,10 +21,10 @@ export class DefaultServerChannel implements IServerChannel {
         DefaultServerChannel.referenceServer.sendCommand("message", "teacher", "exit_class", _info, "student")
     }
     emitClassroomConfig(_info: ClassroomSharePacket) {
-        DefaultServerChannel.referenceServer.sendCommand("message","student","share_classroom_config",_info,"teacher")
+        DefaultServerChannel.referenceServer.sendCommand("message", "student", "share_classroom_config", _info, "teacher")
     }
     emitImageDisplay(_info: ClassContentPacket) {
-        DefaultServerChannel.referenceServer.sendCommand("message","student","display_image" ,_info, "teacher")
+        DefaultServerChannel.referenceServer.sendCommand("message", "student", "display_image", _info, "teacher")
     }
     emitVideoPlay(_info: ClassContentPacket) {
         DefaultServerChannel.referenceServer.sendCommand("message", "student", "play_video", _info, "teacher")
