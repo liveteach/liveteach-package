@@ -22,7 +22,7 @@ export class TeacherClassController extends ClassController {
     }
 
     override setClassroom(): void {
-        ClassroomManager.SetTeacherClassContent(this.classList[this.selectedClassIndex].id)
+        ClassroomManager.SetTeacherClassContent(this.classList[this.selectedClassIndex].contentUrl ?? "")
     }
 
     override startClass(): void {

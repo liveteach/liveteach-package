@@ -201,7 +201,8 @@ export class BlockChain {
                     classContentsList.push({
                         id: content.id.toString(),
                         name: content.classReference,
-                        description: ""
+                        description: "",
+                        contentUrl: content.contentUrl
                     })
                 }
                 return classContentsList
@@ -215,45 +216,17 @@ export class BlockChain {
         }
     }
 
-    public async getClassContent(_id: number): Promise<string> {
+    public async getClassContent(_contentUrl: string): Promise<string> {
         try {
-            if (this.userData && this.userData.hasConnectedWeb3) {
-                const provider = createEthereumProvider()
-                const requestManager = new RequestManager(provider)
-                const factory = new ContractFactory(requestManager, teacherAbi)
-                const contract = (await factory.at(
-                    this.teachersContractAddress
-                )) as any
-
-                // get all ClassContent objects associated with this teacher
-                const classContents: [ClassContentData] = await contract.getClassConfigs(
-                    {
-                        from: this.userData.publicKey,
+            console.log("content url: " + _contentUrl)
+            return await fetch(_contentUrl)
+                .then(response => response.json())
+                .then(json => {
+                    if (json != null && json != undefined) {
+                        console.log(json)
+                        return json
                     }
-                )
-
-                //console.log("CLASS CONTENT OBJECT BY ID \n",
-                //    "id: " + classContent.id + "\n" +
-                //    "teacher: " + classContent.teacher + "\n" +
-                //    "classReference: " + classContent.classReference + "\n" +
-                //    "contentUrl: " + classContent.contentUrl
-                //);
-
-                // Fetch json from url
-                // Example contentUrl: "https://gateway.pinata.cloud/ipfs/QmW8sQ5drvmLeQwbYXi9tWfYR4TbdM4HTkQMwMS3v62m5N"
-                
-                await fetch(classContents[0].contentUrl)
-                    .then(response => response.json())
-                    .then(json => {
-                        if (json != null && json != undefined) {
-                            return json
-                        }
-                    })
-                return ""
-            } else {
-                console.log("Player is not connected with Web3")
-                return ""
-            }
+                })
         } catch (error) {
             console.error(error)
             return ""
