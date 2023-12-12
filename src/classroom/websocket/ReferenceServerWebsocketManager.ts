@@ -11,16 +11,14 @@ export class ReferenceServerWebsocketManager {
 
     private serverUrl: string
     private static realm: GetCurrentRealmResponse | null = null
-    private user: UserData
     private wallet: string
     public webSocket: WebSocket
     public announcement = ui.createComponent(ui.Announcement, { value: "", duration: 2 })
     public static guid
 
-    constructor(_userData: UserData, role:string,serverUrl: string) {
+    constructor(role:string,serverUrl: string) {
 
         this.serverUrl = serverUrl
-        this.user = _userData
         this.wallet = this.user.publicKey || "GUEST_" + this.user.userId
 
         this.webSocket = new WebSocket(this.serverUrl)
@@ -68,12 +66,6 @@ export class ReferenceServerWebsocketManager {
                 ReferenceServerWebsocketManager.guid = message.data
                 this.showMessage(message)
                 this.subscribeToTopic(message.data) // this will error with the java implementation best to comment out
-                break;
-            case "activate_class":
-                CommunicationManager.OnActivateClass(this.classPacket(message))
-                break;
-            case "deactivate_class":
-                CommunicationManager.OnDeactivateClass(this.classPacket(message))
                 break;
             case "start_class":
                 CommunicationManager.OnStartClass(this.classPacket(message))

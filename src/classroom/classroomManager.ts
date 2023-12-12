@@ -13,48 +13,98 @@ import { Quaternion, Vector3 } from "@dcl/sdk/math";
 import { ImageContentConfig, ScreenManager, VideoContentConfig, ModelContentConfig } from "../classroomContent";
 import { ContentUnitManager } from "../contentUnits/contentUnitManager";
 import { IContentUnit } from "../contentUnits/IContentUnit"
+import { MediaContentType } from "../classroomContent/enums";
 
 export abstract class ClassroomManager {
     static screenManager: ScreenManager
     static classController: ClassController
-    static activeClassroom: Classroom = null
+    static activeClassroom: Classroom | null = null
     static activeContent: ClassContent = null
     static requestingJoinClass: boolean = false
-    static classroomConfig: any
     static originEntity: Entity
     static testMode: boolean = false
+    static classroomConfigs: any[] = []
 
     /**
      * Initialises the ClassroomManager.
      *
-     * @param _classroomConfig the classroom config json.
      * @param _channel the classroom channel used for communication.
+     * @param _liveTeachContractAddress the liveteach contract address. Can be undefined.
+     * @param _teachersContractAddress the teacher contract address. Can be undefined.
      * @param _testMode optional parameter to enable test mode.
      */
-    static Initialise(_classroomConfig: any, _channel: IClassroomChannel, _testMode: boolean = false): void {
-        ClassroomManager.classroomConfig = _classroomConfig
+    static Initialise(_channel: IClassroomChannel, _liveTeachContractAddress?: string, _teachersContractAddress?: string, _testMode: boolean = false): void {
         ClassroomManager.testMode = _testMode
 
-        SmartContractManager.Initialise()
+        SmartContractManager.Initialise(_liveTeachContractAddress, _teachersContractAddress)
         CommunicationManager.Initialise(_channel)
         ClassroomManager.screenManager = new ScreenManager()
 
+        // Set the user as student by default
+        ClassroomManager.SetClassController(UserType.student)
+
         ClassroomManager.originEntity = engine.addEntity()
         Transform.create(ClassroomManager.originEntity, {
-            position: ClassroomManager.classroomConfig.classroom.origin
+            position: Vector3.Zero()
         })
+    }
+
+    /**
+     * Sets the contract guid used for testing.
+     *
+     * @param _guid the test contract guid.
+     */
+    static SetTestContractGuid(_guid: string): void {
+        SmartContractManager.SetTestContractGuid(_guid)
+    }
+
+    /**
+     * Adds a wallet address to the test teacher addresses
+     *
+     * @param _address user wallet address.
+     */
+    static AddTestTeacherAddress(_address: string): void {
+        SmartContractManager.AddTestTeacherAddress(_address)
+    }
+
+    /**
+     * Registers a classroom.
+     *
+     * @param _classroomConfig the classroom config json.
+     */
+    static RegisterClassroom(_classroomConfig: any): void {
+        ClassroomManager.classroomConfigs.push(_classroomConfig)
+    }
+
+    /**
+     * Gets the classroom config based on the user's position. If no config matches, null is returned.
+     */
+    static GetClassroomConfig(): any | null {
+        const userPosition = Transform.get(engine.PlayerEntity).position
+
+        for (let config of ClassroomManager.classroomConfigs) {
+            const origin = config.classroom.origin
+            const volume = config.classroom.volume
+            if ((userPosition.x > origin.x - (0.5 * volume.x)) && (userPosition.x < origin.x + (0.5 * volume.x))
+                && (userPosition.y > origin.y - (0.5 * volume.y)) && (userPosition.y < origin.y + (0.5 * volume.y))
+                && (userPosition.z > origin.z - (0.5 * volume.z)) && (userPosition.z < origin.z + (0.5 * volume.z))) {
+                return config
+            }
+        }
+        return null
     }
 
     /**
      * Adds a screen for image/video display.
      *
+     * @param _guid the guid for the classroom this screen belongs to.
      * @param _position the screen position.
      * @param _rotation the screen rotation.
      * @param _scale the screen scale.
      * @param _parent the screen's parent entity (optional parameter).
      */
-    static AddScreen(_position: Vector3, _rotation: Quaternion, _scale: Vector3, _parent?: Entity): void {
-        ClassroomManager.screenManager.addScreen(_position, _rotation, _scale, _parent)
+    static AddScreen(_guid: string, _position: Vector3, _rotation: Quaternion, _scale: Vector3, _parent?: Entity): void {
+        ClassroomManager.screenManager.addScreen(_guid, _position, _rotation, _scale, _parent)
     }
 
     /**
@@ -66,11 +116,11 @@ export abstract class ClassroomManager {
         if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && _type === UserType.teacher) return
         if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && _type === UserType.student) return
 
-        if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && _type === UserType.student) {
-            ClassroomManager.DeactivateClassroom()
+        if (ClassroomManager.classController && ClassroomManager.classController.inSession && ClassroomManager.classController.isTeacher() && _type === UserType.student) {
+            ClassroomManager.EndClass()
         }
 
-        if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && _type === UserType.teacher) {
+        if (ClassroomManager.classController && ClassroomManager.classController.inSession && ClassroomManager.classController.isStudent() && _type === UserType.teacher) {
             ClassroomManager.classController.exitClass()
         }
 
@@ -85,32 +135,18 @@ export abstract class ClassroomManager {
     static async SetTeacherClassContent(_id: string): Promise<void> {
         SmartContractManager.FetchClassContent(_id)
             .then(function (classContent) {
-                ClassroomManager.activeContent = classContent
-                ClassroomManager.activeClassroom = ClassroomFactory.CreateTeacherClassroom(JSON.stringify(ClassroomManager.classroomConfig.classroom), ClassroomManager.activeContent.name, ClassroomManager.activeContent.description)
+                const config = ClassroomManager.GetClassroomConfig()
 
-                ClassroomManager.screenManager.loadContent()
+                if (config) {
+                    ClassroomManager.activeContent = classContent
+                    ClassroomManager.activeClassroom = ClassroomFactory.CreateTeacherClassroom(JSON.stringify(config.classroom), ClassroomManager.activeContent.name, ClassroomManager.activeContent.description)
 
-                CommunicationManager.EmitClassActivation({
-                    id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
-                    name: ClassroomManager.activeContent.name,
-                    description: ClassroomManager.activeContent.description
-                })
-            })
-    }
+                    let originEntityTransform = Transform.getMutableOrNull(ClassroomManager.originEntity)
+                    if (originEntityTransform) {
+                        originEntityTransform.position = config.classroom.origin
+                    }
 
-    /**
-     * Deactivates a classroom. Called by the teacher.
-     */
-    static async DeactivateClassroom(): Promise<void> {
-        return SmartContractManager.DectivateClassroom()
-            .then(function () {
-                if (ClassroomManager.activeContent) {
-                    CommunicationManager.EmitClassDeactivation({
-                        id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
-                        name: ClassroomManager.activeContent.name,
-                        description: ClassroomManager.activeContent.description
-                    })
-                    ClassroomManager.activeClassroom = null
+                    ClassroomManager.screenManager.loadContent()
                 }
             })
     }
@@ -119,28 +155,26 @@ export abstract class ClassroomManager {
      * Starts a class. Called by the teacher.
      */
     static async StartClass(): Promise<void> {
-        return SmartContractManager.StartClass()
-            .then(function () {
-                CommunicationManager.EmitClassStart({
-                    id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
-                    name: ClassroomManager.activeContent.name,
-                    description: ClassroomManager.activeContent.description
-                })
-            })
+        CommunicationManager.EmitClassStart({
+            id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
+            name: ClassroomManager.activeContent.name,
+            description: ClassroomManager.activeContent.description
+        })
     }
 
     /**
      * Ends a class. Called by the teacher.
      */
     static async EndClass(): Promise<void> {
-        return SmartContractManager.EndClass()
-            .then(function () {
-                CommunicationManager.EmitClassEnd({
-                    id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
-                    name: ClassroomManager.activeContent.name,
-                    description: ClassroomManager.activeContent.description
-                })
-            })
+        CommunicationManager.EmitClassEnd({
+            id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
+            name: ClassroomManager.activeContent.name,
+            description: ClassroomManager.activeContent.description
+        })
+
+        if (ClassroomManager.screenManager.poweredOn) {
+            ClassroomManager.screenManager.powerToggle()
+        }
     }
 
     /**
@@ -171,6 +205,15 @@ export abstract class ClassroomManager {
                 studentID: UserDataHelper.GetUserId(),
                 studentName: UserDataHelper.GetDisplayName()
             })
+
+            if (ClassroomManager.screenManager.poweredOn) {
+                ClassroomManager.screenManager.powerToggle()
+            }
+
+            if (ClassroomManager.classController) {
+                ClassroomManager.classController.inSession = false
+            }
+
             ClassroomManager.activeClassroom = null
         }
     }
@@ -483,7 +526,7 @@ export abstract class ClassroomManager {
     /**
      * Syncs/updates the student's active content and loads the content via the ScreenManager. Called by students upon joining a classroom.
      */
-    static SyncClassroom(): void {
+    static SyncClassroom(_activeContentType: MediaContentType): void {
         // sync seating
         if (ClassroomManager.activeClassroom.seatingEnabled) {
 
@@ -540,5 +583,17 @@ export abstract class ClassroomManager {
                 }
             }
         });
+
+        if (_activeContentType) {
+            if (_activeContentType == MediaContentType.image) {
+                ClassroomManager.screenManager.currentContent = ClassroomManager.screenManager.imageContent
+            }
+            else if (_activeContentType == MediaContentType.video) {
+                ClassroomManager.screenManager.currentContent = ClassroomManager.screenManager.videoContent
+            }
+            else if (_activeContentType == MediaContentType.model) {
+                ClassroomManager.screenManager.currentContent = ClassroomManager.screenManager.modelContent
+            }
+        }
     }
 }

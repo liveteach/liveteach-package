@@ -5,6 +5,7 @@ import { MediaContent } from "./mediaContent";
 import { MediaContentType } from "./enums";
 import { ScreenContentConfig } from "./types/mediaContentConfigs";
 import { VideoContent } from "./videoContent";
+import { ClassroomManager } from "../classroom";
 
 export class ScreenDisplay {
 
@@ -81,12 +82,14 @@ export class ScreenDisplay {
     }
 
     private setImageMaterial(): void {
+        const guid = ClassroomManager.activeClassroom?.guid ?? ""
+        const path = "content/" + guid + "/" + ScreenDisplay.currentContent.configuration.src
         Material.setPbrMaterial(this.entity, {
             texture: Material.Texture.Common({
-                src: ScreenDisplay.currentContent.configuration.src
+                src: path
             }),
             emissiveTexture: Material.Texture.Common({
-                src: ScreenDisplay.currentContent.configuration.src
+                src: path
             }),
             emissiveColor: Color3.White(),
             emissiveIntensity: 1,

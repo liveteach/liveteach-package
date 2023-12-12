@@ -1,8 +1,8 @@
 // @ts-nocheck
 import { Vector3 } from "@dcl/sdk/math"
 import { ImageContentConfig, ModelContentConfig, VideoContentConfig } from "../../classroomContent"
-import { UserData } from "~system/UserIdentity";
 import { ContentUnitConfig } from "../../contentUnits"
+import { MediaContentType } from "../../classroomContent/enums";
 
 export type StudentInfo = {
     studentID: string
@@ -61,10 +61,10 @@ export class ClassContent {
 export type ClassroomSharePacket = {
     config: Classroom,
     content: ClassContent
+    activeContentType: MediaContentType
 }
 
 export class ServerParams {
     serverUrl: string
     role: string
-    _userData: UserData
 }

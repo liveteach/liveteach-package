@@ -80,7 +80,7 @@ export const StudentUI = () => (
       uiBackground={{
         color: Color4.create(0.5,0,0,1)
       }}
-      onMouseDown={AnimationHelper.sit}
+      onMouseDown={()=>{AnimationHelper.sit(SeatManager.mySeat.sitAnimationPath)}}
     >
       <Label
         key="sitLabel"
@@ -101,7 +101,7 @@ export const StudentUI = () => (
       uiBackground={{
         color: Color4.create(0.5,0,0,1)
       }}
-      onMouseDown={AnimationHelper.handUp}
+      onMouseDown={()=>{AnimationHelper.handUp(SeatManager.mySeat.handupAnimationPath)}}
     >
       <Label
         key="handUpLabel"

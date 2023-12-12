@@ -78,7 +78,7 @@ export class DebugPanel {
                         uiBackground={{
                             textureMode: 'stretch',
                             texture: {
-                                src: "images/button-up.png"
+                                src: "images/ui/button-up.png"
                             }
                         }}
                         onMouseDown={() => { DebugPanel.MoveUp() }}
@@ -95,7 +95,7 @@ export class DebugPanel {
                         uiBackground={{
                             textureMode: 'stretch',
                             texture: {
-                                src: "images/button-down.png"
+                                src: "images/ui/button-down.png"
                             }
                         }}
                         onMouseDown={() => { DebugPanel.MoveDown() }}

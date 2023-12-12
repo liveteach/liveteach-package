@@ -1,21 +1,13 @@
 import { ClassContentPacket, ClassPacket, ContentUnitPacket, DataPacket, ServerParams, StudentCommInfo, StudentDataPacket, ClassroomSharePacket } from "../types/classroomTypes";
 import { ReferenceServerWebsocketManager } from "../websocket/ReferenceServerWebsocketManager";
-import { UserData } from "~system/UserIdentity";
 import { IServerChannel } from "./IServerChannel";
 
 export class DefaultServerChannel implements IServerChannel {
 
     private static referenceServer: ReferenceServerWebsocketManager
-    private static _userData: UserData
     private static role: string
     private static serverUrl: string
-
-    emitClassActivation(_info: ClassPacket) {
-        DefaultServerChannel.referenceServer.sendCommand("message", "student", "activate_class", _info, "teacher")
-    }
-    emitClassDeactivation(_info: ClassPacket) {
-        DefaultServerChannel.referenceServer.sendCommand("message", "student", "deactivate_class", _info, "teacher")
-    }
+    
     emitClassStart(_info: ClassPacket) {
         DefaultServerChannel.referenceServer.sendCommand("message", "student", "start_class", _info, "teacher")
     }
@@ -77,9 +69,7 @@ export class DefaultServerChannel implements IServerChannel {
     serverConfig(params: ServerParams): void {
         DefaultServerChannel.serverUrl = params.serverUrl
         DefaultServerChannel.role = params.role
-        DefaultServerChannel._userData = params._userData
         DefaultServerChannel.referenceServer = new ReferenceServerWebsocketManager(
-            DefaultServerChannel._userData,
             DefaultServerChannel.role,
             DefaultServerChannel.serverUrl);
     }

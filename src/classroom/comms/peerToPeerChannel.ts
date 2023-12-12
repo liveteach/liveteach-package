@@ -3,12 +3,6 @@ import { IClassroomChannel } from "./IClassroomChannel";
 import { CommunicationManager } from "./communicationManager";
 
 export class PeerToPeerChannel implements IClassroomChannel{
-    emitClassActivation(_info: ClassPacket) {
-        CommunicationManager.messageBus.emit('activate_class', _info)
-    }
-    emitClassDeactivation(_info: ClassPacket) {
-        CommunicationManager.messageBus.emit('deactivate_class', _info)
-    }
     emitClassStart(_info: ClassPacket) {
         CommunicationManager.messageBus.emit('start_class', _info)
     }

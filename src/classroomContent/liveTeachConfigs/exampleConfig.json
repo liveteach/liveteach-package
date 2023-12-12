@@ -87,6 +87,7 @@
         ],
         "contentUnits": [
             {
+                "name": "Movie Poll",
                 "key": "poll",
                 "data": {
                     "title": "What would you like to watch?",
@@ -97,6 +98,137 @@
                         "Terminator"
                     ]
                 }
+            },
+            {
+                "name": "Biology Quiz",
+                "key": "quiz",
+                "data": {
+                    "question": "Which of these is the\npowerhouse of a cell?",
+                    "options": [
+                        "Nucleus",
+                        "Mitochondria",
+                        "Lysosome",
+                        "Golgi Complex"
+                    ],
+                    "answer": 2
+                }
+            },
+            {
+                "name": "Cell Model",
+                "key": "interactive_model",
+                "data": {
+                    "parent": {
+                        "src": "contentUnits/InteractiveModel/models/cell.glb",
+                        "position": {
+                            "x": 2,
+                            "y": 1,
+                            "z": 0
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "scale": {
+                            "x": 0.3,
+                            "y": 0.3,
+                            "z": 0.3
+                        }
+                    },
+                    "parts": [
+                        {
+                            "src": "contentUnits/InteractiveModel/models/nucleus.glb",
+                            "srcSelected": "contentUnits/InteractiveModel/models/nucleus_selected.glb",
+                            "caption": "Nucleus",
+                            "title": "Nucleus",
+                            "text": "The nucleus contains all\nthe genetic material of\nthe cell. It is circular\nin shape and dark in\ncolor having a double membrane.",
+                            "trigger": {
+                                "position": {
+                                    "x": 0.4,
+                                    "y": 0.2,
+                                    "z": -0.5
+                                },
+                                "radius": 0.75
+                            }
+                        },
+                        {
+                            "src": "contentUnits/InteractiveModel/models/mitochondria.glb",
+                            "srcSelected": "contentUnits/InteractiveModel/models/mitochondria_selected.glb",
+                            "caption": "Mitochondria",
+                            "title": "Mitochondria",
+                            "text": "Mitochondria are known as\nthe powerhouse of the cell.\nIt is a double membrane\nstructure present in all\neukaryotic cells.",
+                            "trigger": {
+                                "position": {
+                                    "x": 0.4,
+                                    "y": 0,
+                                    "z": 3.2
+                                },
+                                "radius": 0.75
+                            }
+                        },
+                        {
+                            "src": "contentUnits/InteractiveModel/models/microtubules.glb",
+                            "srcSelected": "contentUnits/InteractiveModel/models/microtubules_selected.glb",
+                            "caption": "Microtubules",
+                            "title": "Microtubules",
+                            "text": "Microtubules are major\ncomponentsof the cytoskeleton.\nThey are found in all eukaryotic\ncells, and they are involved\nin mitosis, cell motility,\nintracellular transport, and\nmaintenance of cell shape.",
+                            "trigger": {
+                                "position": {
+                                    "x": 1,
+                                    "y": 0,
+                                    "z": 2.3
+                                },
+                                "radius": 0.85
+                            }
+                        },
+                        {
+                            "src": "contentUnits/InteractiveModel/models/lysosome.glb",
+                            "srcSelected": "contentUnits/InteractiveModel/models/lysosome_selected.glb",
+                            "caption": "Lysosome",
+                            "title": "Lysosome",
+                            "text": "A lysosome is a membrane-\nbound cell organelle that\ncontains digestive enzymes.\nLysosomes are involved\nwith various cell processes.",
+                            "trigger": {
+                                "position": {
+                                    "x": 2.25,
+                                    "y": -0.1,
+                                    "z": 1.8
+                                },
+                                "radius": 0.4
+                            }
+                        },
+                        {
+                            "src": "contentUnits/InteractiveModel/models/golgiComplex.glb",
+                            "srcSelected": "contentUnits/InteractiveModel/models/golgiComplex_selected.glb",
+                            "caption": "Golgi Complex",
+                            "title": "Golgi Complex",
+                            "text": "Golgi apparatus helps in\ntransporting the cargo,\nmodifications, targeting, and\npackaging of proteins and\nlipids to the target site.",
+                            "trigger": {
+                                "position": {
+                                    "x": -1,
+                                    "y": -0.4,
+                                    "z": 1.7
+                                },
+                                "radius": 1.5
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "name": "Wearable",
+                "key": "wearable",
+                "data": {
+                    "wearableName": "FreeTop",
+                    "group": "FreeTop",
+                    "campaignID": "899f6140-8dc5-4005-a5ca-13733dca1e29",
+                    "campaignKey": "2eNeid48SBCp0goOHA8JSImfYUCNxUAFpcoTcz3KHik=.POW1rzyTm7xGYJIqZeLM3OpIDX9jMqEFqKz8EvxnsDg=",
+                    "urn": "urn:decentraland:matic:collections-v2:XXX:0"
+                }
+            },
+            {
+                "name": "Bakery Class",
+                "key": "bakery",
+                "data": {}
             }
         ]
     }

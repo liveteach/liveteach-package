@@ -12,7 +12,7 @@ export class ControllerUI {
                 height: "180px",
                 width: "380px",
                 positionType: 'absolute',
-                display: ControllerUI.visibility && (ClassroomManager.classController?.isTeacher() || (ClassroomManager.classController?.isStudent() && !ClassroomManager.classroomConfig?.classroom.autojoin)) ? 'flex' : 'none'
+                display: ControllerUI.visibility && (ClassroomManager.classController?.isTeacher() || (ClassroomManager.classController?.isStudent() && ClassroomManager.classController?.classList.length > 0 && ClassroomManager.GetClassroomConfig()?.classroom.autojoin == false)) ? 'flex' : 'none'
             }}
             uiBackground={{ color: Color4.create(0, 0, 0, 0.8) }}
         >
@@ -34,13 +34,13 @@ export class ControllerUI {
                     textAlign="top-left"
                 />
             </UiEntity>
-            <UiEntity // CLASS SELECTION
+            <UiEntity // CLASS SELECTION - TEACHER ONLY
                 uiTransform={{
                     position: { left: "10px", top: "60px" },
                     height: "200px",
                     width: "500px",
                     positionType: 'absolute',
-                    display: ClassroomManager.classController?.classList?.length > 0 ? "flex" : "none"
+                    display: ClassroomManager.classController?.isTeacher() && ClassroomManager.classController?.classList?.length > 0 ? "flex" : "none"
                 }}
             >
                 <Button
@@ -65,6 +65,23 @@ export class ControllerUI {
                     variant={ControllerUI.CanNextClass() ? 'primary' : 'secondary'}
                     uiTransform={{ width: 40, height: 40, margin: 4 }}
                     onMouseDown={() => { ControllerUI.NextClass() }}
+                />
+            </UiEntity>
+            <UiEntity // CLASS DISPLAY - STUDENT ONLY
+                uiTransform={{
+                    position: { left: "105px", top: "60px" },
+                    height: "200px",
+                    width: "500px",
+                    positionType: 'absolute',
+                    display: ClassroomManager.classController?.isStudent() && ClassroomManager.classController?.classList?.length > 0 ? "flex" : "none"
+                }}
+            >
+                <Label
+                    value={"Available class: " + ControllerUI.GetSelectedClass()}
+                    fontSize={16}
+                    color={Color4.Green()}
+                    uiTransform={{ width: 40, height: 40, margin: 4 }}
+                    onMouseDown={() => { ControllerUI.PrevClass() }}
                 />
             </UiEntity>
             <UiEntity // START CLASS / JOIN CLASS

@@ -12,7 +12,7 @@ import { ModelContent } from "./modelContent";
 
 export class ScreenManager {
 
-    screenDisplays: ScreenDisplay[] = []
+    screenDisplays: Map<string, ScreenDisplay[]> = new Map<string, ScreenDisplay[]>
     currentContent: ContentList
 
     imageContent: ContentList
@@ -142,6 +142,9 @@ export class ScreenManager {
             ClassroomManager.DeactivateModels()
             return
         }
+        else if (this.currentContent != undefined && this.currentContent.getContent().getContentType() == MediaContentType.image) {
+            this.currentContent.stop()
+        }
         this.currentContent = this.modelContent
         this.playContent()
     }
@@ -270,9 +273,13 @@ export class ScreenManager {
         }
     }
 
-    addScreen(_position: Vector3, _rotation: Quaternion, _scale: Vector3, _parent?: Entity): void {
-        this.screenDisplays.push(new ScreenDisplay(_position, _rotation, _scale, _parent))
-        this.hideContent()
+    addScreen(_guid: string, _position: Vector3, _rotation: Quaternion, _scale: Vector3, _parent?: Entity): void {
+        if(!this.screenDisplays.has(_guid)) {
+            this.screenDisplays.set(_guid, [])
+        }
+        const display = new ScreenDisplay(_position, _rotation, _scale, _parent)
+        this.screenDisplays.get(_guid).push(display)
+        display.hideContent()
     }
 
     loadContent(): void {
@@ -340,9 +347,11 @@ export class ScreenManager {
             });
         }
         else {
-            this.screenDisplays.forEach(display => {
-                display.startContent(content)
-            });
+            if(this.screenDisplays.has(ClassroomManager.activeClassroom?.guid)) {
+                this.screenDisplays.get(ClassroomManager.activeClassroom?.guid).forEach(display => {
+                    display.startContent(content)
+                });
+            }
         }
 
         if (content.getContentType() == MediaContentType.video) {
@@ -408,15 +417,19 @@ export class ScreenManager {
     }
 
     hideContent(): void {
-        this.screenDisplays.forEach(display => {
-            display.hideContent()
-        });
+        if(this.screenDisplays.has(ClassroomManager.activeClassroom?.guid)) {
+            this.screenDisplays.get(ClassroomManager.activeClassroom?.guid).forEach(display => {
+                display.hideContent()
+            });
+        }
     }
 
     unHideContent(): void {
-        this.screenDisplays.forEach(display => {
-            display.unHideContent()
-        });
+        if(this.screenDisplays.has(ClassroomManager.activeClassroom?.guid)) {
+            this.screenDisplays.get(ClassroomManager.activeClassroom?.guid).forEach(display => {
+                display.unHideContent()
+            });
+        }
     }
 
     private update(_dt: number): void {

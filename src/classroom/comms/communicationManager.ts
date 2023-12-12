@@ -6,8 +6,9 @@ import { IClassroomChannel } from "./IClassroomChannel"
 import { UserDataHelper } from "../userDataHelper"
 import { ClassContentPacket, ClassPacket, Classroom, StudentCommInfo, ContentUnitPacket, DataPacket, StudentDataPacket, ClassContent, ClassroomSharePacket } from "../types/classroomTypes"
 import { ContentUnitManager } from "../../contentUnits/contentUnitManager"
-import { engine } from "@dcl/sdk/ecs"
+import { Transform, engine } from "@dcl/sdk/ecs"
 import { MediaContentType } from "../../classroomContent/enums";
+import { StudentClassController } from "../classroomControllers/studentClassController"
 
 export class CommunicationManager {
     static readonly CLASS_EMIT_PERIOD: number = 10
@@ -22,8 +23,6 @@ export class CommunicationManager {
         if (CommunicationManager.messageBus === undefined || CommunicationManager.messageBus === null) {
             CommunicationManager.messageBus = new MessageBus()
 
-            CommunicationManager.messageBus.on('activate_class', CommunicationManager.OnActivateClass)
-            CommunicationManager.messageBus.on('deactivate_class', CommunicationManager.OnDeactivateClass)
             CommunicationManager.messageBus.on('start_class', CommunicationManager.OnStartClass)
             CommunicationManager.messageBus.on('end_class', CommunicationManager.OnEndClass)
             CommunicationManager.messageBus.on('join_class', CommunicationManager.OnJoinClass)
@@ -50,13 +49,12 @@ export class CommunicationManager {
             })
 
             engine.addSystem((dt: number) => {
-                if (!ClassroomManager.classController?.isTeacher() || !ClassroomManager.activeClassroom) return
+                if (!ClassroomManager.classController || !ClassroomManager.classController.isTeacher() || !ClassroomManager.classController.inSession || !ClassroomManager.activeClassroom) return
 
                 CommunicationManager.elapsed += dt
                 if (CommunicationManager.elapsed > CommunicationManager.CLASS_EMIT_PERIOD) {
                     CommunicationManager.elapsed = 0
 
-                    ClassroomManager.UpdateClassroom()
                     CommunicationManager.channel.emitClassStart({
                         id: ClassroomManager.activeClassroom.guid, //use the class guid for students instead of the active content id
                         name: ClassroomManager.activeContent.name,
@@ -69,28 +67,16 @@ export class CommunicationManager {
 
     ////////////// SEND //////////////
 
-    static EmitClassActivation(_info: ClassPacket): void {
-        CommunicationManager.channel.emitClassActivation(_info)
-        CommunicationManager.EmitLog(UserDataHelper.GetDisplayName() + " activated class " + _info.name, _info.id, false, false)
-        CommunicationManager.EmitLog("New class available: " + _info.name, _info.id, true, false, true)
-    }
-
-    static EmitClassDeactivation(_info: ClassPacket): void {
-        CommunicationManager.channel.emitClassDeactivation(_info)
-        CommunicationManager.EmitLog(UserDataHelper.GetDisplayName() + " deactivated class " + _info.name, _info.id, false, false)
-        CommunicationManager.EmitLog("Class no longer available: " + _info.name, _info.id, true, false, true)
-    }
-
     static EmitClassStart(_info: ClassPacket): void {
         CommunicationManager.channel.emitClassStart(_info)
-        CommunicationManager.EmitLog(UserDataHelper.GetDisplayName() + " started class " + _info.name, _info.id, false, true)
-        CommunicationManager.EmitLog(UserDataHelper.GetDisplayName() + " started teaching " + _info.name, _info.id, true, true)
+        CommunicationManager.EmitLog("You started teaching class " + _info.name, _info.id, false, true)
+        CommunicationManager.EmitLog(UserDataHelper.GetDisplayName() + " started teaching " + _info.name, _info.id, true, true, true)
     }
 
     static EmitClassEnd(_info: ClassPacket): void {
         CommunicationManager.channel.emitClassEnd(_info)
-        CommunicationManager.EmitLog(UserDataHelper.GetDisplayName() + " ended class " + _info.name, _info.id, false, true)
-        CommunicationManager.EmitLog(UserDataHelper.GetDisplayName() + " stopped teaching " + _info.name, _info.id, true, true)
+        CommunicationManager.EmitLog("You ended class " + _info.name, _info.id, false, true)
+        CommunicationManager.EmitLog(UserDataHelper.GetDisplayName() + " stopped teaching " + _info.name, _info.id, true, true, true)
     }
 
     static EmitClassJoin(_info: StudentCommInfo): void {
@@ -102,82 +88,106 @@ export class CommunicationManager {
         CommunicationManager.EmitLog(_info.studentName + " left class " + _info.name, _info.id, true, true)
     }
 
-    static EmitClassroomConfig(_config: Classroom, _content: ClassContent): void {
+    static EmitClassroomConfig(_config: Classroom, _content: ClassContent, _activeContentType: MediaContentType): void {
         CommunicationManager.channel.emitClassroomConfig({
             config: _config,
-            content: _content
+            content: _content,
+            activeContentType: _activeContentType
         })
+
+        if (ClassroomManager.activeClassroom && ContentUnitManager.activeUnit) {
+            CommunicationManager.EmitContentUnitStart({
+                id: ClassroomManager.activeClassroom.guid,
+                name: ClassroomManager.activeClassroom.className,
+                description: ClassroomManager.activeClassroom.classDescription,
+                unit: {
+                    key: ContentUnitManager.activeUnitKey,
+                    data: ContentUnitManager.activeUnitData
+                }
+            })
+        }
         CommunicationManager.EmitLog(_config.teacherName + " is sharing classroom config for class " + _config.className, _config.guid, false, false)
     }
 
     static EmitImageDisplay(_info: ClassContentPacket): void {
         CommunicationManager.channel.emitImageDisplay(_info)
-        //TODO: Add log
+        CommunicationManager.EmitLog("You displayed image: " + _info.image?.src, _info.id, false, false)
+        CommunicationManager.EmitLog("Teacher displayed image: " + _info.image?.src, _info.id, true, false)
     }
 
     static EmitVideoPlay(_info: ClassContentPacket): void {
         CommunicationManager.channel.emitVideoPlay(_info)
-        //TODO: Add log
+        CommunicationManager.EmitLog("You displayed video: " + _info.video?.src, _info.id, false, false)
+        CommunicationManager.EmitLog("Teacher displayed video: " + _info.video?.src, _info.id, true, false)
     }
 
     static EmitVideoPause(_info: ClassPacket): void {
         CommunicationManager.channel.emitVideoPause(_info)
-        //TODO: Add log
+        CommunicationManager.EmitLog("You paused the video", _info.id, false, false)
+        CommunicationManager.EmitLog("Teacher paused video", _info.id, true, false)
     }
 
     static EmitVideoResume(_info: ClassPacket): void {
         CommunicationManager.channel.emitVideoResume(_info)
-        //TODO: Add log
+        CommunicationManager.EmitLog("You resumed the video", _info.id, false, false)
+        CommunicationManager.EmitLog("Teacher resumed video", _info.id, true, false)
     }
 
     static EmitVideoVolume(_info: ClassPacket & { volume: number }): void {
         CommunicationManager.channel.emitVideoVolume(_info)
-        //TODO: Add log
+        const muteStr = _info.volume == 0 ? "muted" : "unmuted"
+        CommunicationManager.EmitLog("You " + muteStr + " the video", _info.id, false, false)
+        CommunicationManager.EmitLog("Teacher " + muteStr + " video", _info.id, true, false)
     }
 
     static EmitModelPlay(_info: ClassContentPacket): void {
         CommunicationManager.channel.emitModelPlay(_info)
-        //TODO: Add log
+        CommunicationManager.EmitLog("You displayed model: " + _info.model?.src, _info.id, false, false)
+        CommunicationManager.EmitLog("Teacher displayed model: " + _info.model?.src, _info.id, true, false)
     }
 
     static EmitModelPause(_info: ClassPacket): void {
         CommunicationManager.channel.emitModelPause(_info)
-        //TODO: Add log
+        CommunicationManager.EmitLog("You paused the model", _info.id, false, false)
+        CommunicationManager.EmitLog("Teacher paused model", _info.id, true, false)
     }
 
     static EmitModelResume(_info: ClassPacket): void {
         CommunicationManager.channel.emitModelResume(_info)
-        //TODO: Add log
+        CommunicationManager.EmitLog("You resumed the model", _info.id, false, false)
+        CommunicationManager.EmitLog("Teacher resumed model", _info.id, true, false)
     }
 
     static EmitScreenDeactivation(_info: ClassPacket): void {
         CommunicationManager.channel.emitScreenDeactivation(_info)
-        //TODO: Add log
+        CommunicationManager.EmitLog("You deactivated the screen", _info.id, false, false)
+        CommunicationManager.EmitLog("Teacher deactivated screen", _info.id, true, false)
     }
 
     static EmitModelDeactivation(_info: ClassPacket): void {
         CommunicationManager.channel.emitModelDeactivation(_info)
-        //TODO: Add log
+        CommunicationManager.EmitLog("You deactivated the model", _info.id, false, false)
+        CommunicationManager.EmitLog("Teacher deactivated model", _info.id, true, false)
     }
 
     static EmitContentUnitStart(_info: ContentUnitPacket): void {
         CommunicationManager.channel.emitContentUnitStart(_info)
-        //TODO: Add log
+        CommunicationManager.EmitLog("You started a content unit: " + _info.unit.key, _info.id, false, false)
+        CommunicationManager.EmitLog("Teacher started a content unit: " + _info.unit.key, _info.id, true, false)
     }
 
     static EmitContentUnitEnd(_info: ClassPacket): void {
         CommunicationManager.channel.emitContentUnitEnd(_info)
-        //TODO: Add log
+        CommunicationManager.EmitLog("You ended the content unit", _info.id, false, false)
+        CommunicationManager.EmitLog("Teacher ended content unit", _info.id, true, false)
     }
 
     static EmitContentUnitTeacherSend(_info: DataPacket): void {
         CommunicationManager.channel.emitContentUnitTeacherSend(_info)
-        //TODO: Add log
     }
 
     static EmitContentUnitStudentSend(_info: StudentDataPacket): void {
         CommunicationManager.channel.emitContentUnitStudentSend(_info)
-        //TODO: Add log
     }
 
     static EmitLog(_message: string, _classroomGuid: string, _studentEvent: boolean, _highPriority: boolean, _global: boolean = false): void {
@@ -192,56 +202,48 @@ export class CommunicationManager {
 
     ////////////// RECEIVE //////////////
 
-    static OnActivateClass(_info: ClassPacket): void {
-
-    }
-
-    static OnDeactivateClass(_info: ClassPacket): void {
-
-    }
-
     static OnStartClass(_info: ClassPacket): void {
         if (ClassroomManager.classController && ClassroomManager.classController.isStudent()) {
 
+            let studentClassController = ClassroomManager.classController as StudentClassController
+
             let classFound: boolean = false
-            for (let i = 0; i < ClassroomManager.classController.classList.length; i++) {
-                if (ClassroomManager.classController.classList[i].id == _info.id) {
-                    ClassroomManager.classController.classList[i].name = _info.name
-                    ClassroomManager.classController.classList[i].description = _info.description
+            for (let i = 0; i < studentClassController.sceneClassList.length; i++) {
+                if (studentClassController.sceneClassList[i].id == _info.id) {
+                    studentClassController.sceneClassList[i].name = _info.name
+                    studentClassController.sceneClassList[i].description = _info.description
                     classFound = true
                     break
                 }
             }
+
             if (!classFound) {
-                ClassroomManager.classController.classList.push({
+                studentClassController.sceneClassList.push({
                     id: _info.id,
                     name: _info.name,
                     description: _info.description,
                 })
-            }
-
-            //autojoin
-            if (ClassroomManager.activeClassroom?.guid != _info.id && ClassroomManager.classroomConfig.classroom.autojoin) {
-                ClassroomManager.JoinClass()
             }
         }
     }
 
     static OnEndClass(_info: ClassPacket): void {
         if (ClassroomManager.classController && ClassroomManager.classController.isStudent()) {
-            if (ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
-                ClassroomManager.ExitClass()
+            if (ClassroomManager.screenManager.poweredOn) {
+                ClassroomManager.screenManager.powerToggle()
             }
 
-            if (ClassroomManager.classController && ClassroomManager.classController.isStudent()) {
-                for (let i = 0; i < ClassroomManager.classController.classList.length; i++) {
-                    if (ClassroomManager.classController.classList[i].id == _info.id) {
-                        ClassroomManager.classController.classList.splice(i, 1)
-                        if (ClassroomManager.classController.selectedClassIndex == i) {
-                            ClassroomManager.classController.selectedClassIndex = Math.max(0, i - 1)
-                        }
-                        break
-                    }
+            if (ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
+                ClassroomManager.classController.inSession = false
+                ClassroomManager.activeClassroom = null
+            }
+
+            let studentClassController = ClassroomManager.classController as StudentClassController
+
+            for (let i = 0; i < studentClassController.sceneClassList.length; i++) {
+                if (studentClassController.sceneClassList[i].id == _info.id) {
+                    studentClassController.sceneClassList.splice(i, 1)
+                    break
                 }
             }
         }
@@ -253,7 +255,8 @@ export class CommunicationManager {
                 studentID: _info.studentID,
                 studentName: _info.studentName
             })
-            CommunicationManager.EmitClassroomConfig(ClassroomManager.activeClassroom, ClassroomManager.activeContent)
+            ClassroomManager.UpdateClassroom()
+            CommunicationManager.EmitClassroomConfig(ClassroomManager.activeClassroom, ClassroomManager.activeContent, ClassroomManager.screenManager.currentContent?.getContent()?.getContentType())
             CommunicationManager.EmitLog(_info.studentName + " joined class " + ClassroomManager.activeClassroom.className, _info.id, false, true)
         }
     }
@@ -275,7 +278,12 @@ export class CommunicationManager {
             ClassroomManager.requestingJoinClass = false
             ClassroomManager.activeClassroom = _info.config
             ClassroomManager.activeContent = _info.content
-            ClassroomManager.SyncClassroom()
+            ClassroomManager.SyncClassroom(_info.activeContentType)
+            let originEntityTransform = Transform.getMutableOrNull(ClassroomManager.originEntity)
+            if (originEntityTransform) {
+                originEntityTransform.position = ClassroomManager.activeClassroom.origin
+            }
+            ClassroomManager.classController.inSession = true
             CommunicationManager.EmitLog(UserDataHelper.GetDisplayName() + " joined class " + _info.config.className, _info.config.guid, true, false)
         }
     }
@@ -299,8 +307,6 @@ export class CommunicationManager {
 
             ClassroomManager.screenManager.unHideContent()
             ClassroomManager.screenManager.playContent()
-
-            //TODO: Add log
         }
     }
 
@@ -323,8 +329,6 @@ export class CommunicationManager {
 
             ClassroomManager.screenManager.unHideContent()
             ClassroomManager.screenManager.playContent()
-
-            //TODO: Add log
         }
     }
 
@@ -336,8 +340,6 @@ export class CommunicationManager {
             }
 
             ClassroomManager.screenManager.playPause()
-
-            //TODO: Add log
         }
     }
 
@@ -349,8 +351,6 @@ export class CommunicationManager {
             }
 
             ClassroomManager.screenManager.playPause()
-
-            //TODO: Add log
         }
     }
 
@@ -362,8 +362,6 @@ export class CommunicationManager {
             }
 
             ClassroomManager.screenManager.setVolume(_info.volume)
-
-            //TODO: Add log
         }
     }
 
@@ -393,8 +391,6 @@ export class CommunicationManager {
             }
 
             ClassroomManager.screenManager.playContent()
-
-            //TODO: Add log
         }
     }
 
@@ -406,8 +402,6 @@ export class CommunicationManager {
             }
 
             ClassroomManager.screenManager.playPause()
-
-            //TODO: Add log
         }
     }
 
@@ -419,8 +413,6 @@ export class CommunicationManager {
             }
 
             ClassroomManager.screenManager.playPause()
-
-            //TODO: Add log
         }
     }
 
@@ -431,8 +423,6 @@ export class CommunicationManager {
                 ClassroomManager.screenManager.videoContent?.stop()
                 ClassroomManager.screenManager.hideContent()
             }
-
-            //TODO: Add log
         }
     }
 
@@ -442,8 +432,6 @@ export class CommunicationManager {
             if (ClassroomManager.screenManager.poweredOn) {
                 ClassroomManager.screenManager.modelContent?.stop()
             }
-
-            //TODO: Add log
         }
     }
 
@@ -451,8 +439,6 @@ export class CommunicationManager {
         if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
 
             ContentUnitManager.start(_info.unit.key, _info.unit.data)
-
-            //TODO: Add log
         }
     }
 
@@ -460,8 +446,6 @@ export class CommunicationManager {
         if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
 
             ContentUnitManager.end()
-
-            //TODO: Add log
         }
     }
 
@@ -469,8 +453,6 @@ export class CommunicationManager {
         if (ClassroomManager.classController && ClassroomManager.classController.isStudent() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
 
             ContentUnitManager.update(_info.data)
-
-            //TODO: Add log
         }
     }
 
@@ -478,8 +460,6 @@ export class CommunicationManager {
         if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
 
             ContentUnitManager.update(_info.data)
-
-            //TODO: Add log
         }
     }
 }
