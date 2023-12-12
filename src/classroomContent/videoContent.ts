@@ -2,6 +2,7 @@ import { Entity, Material, TextureUnion, VideoPlayer, engine } from "@dcl/sdk/ec
 import { MediaContentType } from "./enums";
 import { MediaContent } from "./mediaContent";
 import { VideoContentConfig } from "./types/mediaContentConfigs";
+import { ClassroomManager } from "../classroom";
 
 export class VideoContent extends MediaContent {
     videoEntity: Entity
@@ -13,8 +14,9 @@ export class VideoContent extends MediaContent {
 
         this.videoEntity = engine.addEntity()
 
+        const guid = ClassroomManager.activeClassroom?.guid ?? ""
         VideoPlayer.createOrReplace(this.videoEntity, {
-            src: _screenConfig.src,
+            src: _screenConfig.src.startsWith("http") ? _screenConfig.src : ("content/" + guid + "/" + _screenConfig.src),
             playing: false,
             position: _screenConfig.position,
             volume: _screenConfig.volume
