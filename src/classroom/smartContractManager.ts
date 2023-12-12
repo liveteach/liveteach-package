@@ -19,9 +19,9 @@ export class SmartContractManager {
     static contractGuid: string = ""
     static blockchain: BlockChain
 
-    static Initialise(liveTeachContractAddress?: string, teachersContractAddress?: string): void {
+    static Initialise(_liveTeachContractAddress?: string, _teachersContractAddress?: string): void {
         if (SmartContractManager.blockchain === undefined || SmartContractManager.blockchain === null) {
-            SmartContractManager.blockchain = new BlockChain(liveTeachContractAddress, teachersContractAddress)
+            SmartContractManager.blockchain = new BlockChain(_liveTeachContractAddress, _teachersContractAddress)
         }
 
         SmartContractManager.GetClassroomGuid()

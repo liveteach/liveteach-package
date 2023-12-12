@@ -1,6 +1,9 @@
 import { ClassController } from "./classController";
 import { ClassroomManager } from "../classroomManager";
 
+/**
+ * Class controller for teachers. Extends {@link ClassController | `ClassController`}.
+ */
 export class TeacherClassController extends ClassController {
     constructor() {
         super()
