@@ -69,22 +69,21 @@ export class SmartContractManager {
         }
     }
 
-    static async FetchClassContent(_id: string): Promise<ClassContent> {
-        let contentJson: string = ""
+    static async FetchClassContent(_contentUrl: string): Promise<ClassContent> {
         if (ClassroomManager.testMode) {
-            switch (_id) {
-                case exampleConfig.content.id: contentJson = JSON.stringify(exampleConfig.content)
-                    break
-            }
-        }
-        else {
-            contentJson = await SmartContractManager.blockchain.getClassContent(Number(_id))
+            return ClassContentFactory.Create(JSON.stringify(exampleConfig.content))
         }
 
-        if (contentJson && contentJson.length > 0) {
-            return ClassContentFactory.Create(contentJson)
-        }
-        return new ClassContent()
+        return SmartContractManager.blockchain.getClassContent(_contentUrl).then(
+            function (contentJson: any) {
+                if (contentJson) {
+                    return ClassContentFactory.Create(JSON.stringify(contentJson.content))
+                }
+                else {
+                    return new ClassContent()
+                }
+            }
+        )
     }
 
     private static update(): void {
@@ -116,9 +115,11 @@ export class SmartContractManager {
             if (SmartContractManager.contractGuid.length > 0 && config.classroom.guid === SmartContractManager.contractGuid) {
                 if (ClassroomManager.classController.isTeacher()) return
 
+                console.log("user set as teacher")
                 ClassroomManager.SetClassController(UserType.teacher)
                 SmartContractManager.FetchClassList().then(
                     function (classList) {
+                        console.log("Fetched list of classrooms")
                         if (ClassroomManager.classController) {
                             ClassroomManager.classController.classList = classList as ClassPacket[]
                             ClassroomManager.classController.setClassroom()

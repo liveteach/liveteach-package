@@ -132,8 +132,8 @@ export abstract class ClassroomManager {
      *
      * @param _id the id of the class/course.
      */
-    static async SetTeacherClassContent(_id: string): Promise<void> {
-        SmartContractManager.FetchClassContent(_id)
+    static async SetTeacherClassContent(_contentUrl: string): Promise<void> {
+        SmartContractManager.FetchClassContent(_contentUrl)
             .then(function (classContent) {
                 const config = ClassroomManager.GetClassroomConfig()
 

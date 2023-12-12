@@ -12,7 +12,8 @@ export type StudentInfo = {
 export type ClassPacket = {
     id: string,
     name: string,
-    description: string
+    description: string,
+    contentUrl?: string
 }
 
 export type ClassContentPacket = ClassPacket & {
