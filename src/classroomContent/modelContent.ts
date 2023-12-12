@@ -3,6 +3,7 @@ import { MediaContentType } from "./enums";
 import { MediaContent } from "./mediaContent";
 import { ModelContentConfig } from "./types/mediaContentConfigs";
 import { Quaternion, Vector3 } from "@dcl/sdk/math";
+import { ClassroomManager } from "../classroom";
 
 export class ModelContent extends MediaContent {
     entity: Entity
@@ -20,8 +21,9 @@ export class ModelContent extends MediaContent {
             scale: Vector3.Zero()
         })
 
+        const guid = ClassroomManager.activeClassroom?.guid ?? ""
         GltfContainer.create(this.entity, {
-            src: _config.src
+            src: "content/" + guid + "/" + _config.src
         })
 
         const animator = Animator.create(this.entity, {
