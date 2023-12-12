@@ -218,11 +218,11 @@
                 "name": "Wearable",
                 "key": "wearable",
                 "data": {
-                    "wearableName": "",
-                    "group": "",
-                    "campaignID": "",
-                    "campaignKey": "",
-                    "urn": ""
+                    "wearableName": "FreeTop",
+                    "group": "FreeTop",
+                    "campaignID": "899f6140-8dc5-4005-a5ca-13733dca1e29",
+                    "campaignKey": "2eNeid48SBCp0goOHA8JSImfYUCNxUAFpcoTcz3KHik=.POW1rzyTm7xGYJIqZeLM3OpIDX9jMqEFqKz8EvxnsDg=",
+                    "urn": "urn:decentraland:matic:collections-v2:XXX:0"
                 }
             }
         ]
