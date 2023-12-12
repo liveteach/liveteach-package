@@ -170,8 +170,7 @@ export abstract class ClassroomManager {
         })
 
         if (ClassroomManager.screenManager.poweredOn) {
-            ClassroomManager.screenManager.videoContent?.stop()
-            ClassroomManager.screenManager.hideContent()
+            ClassroomManager.screenManager.powerToggle()
         }
     }
 
@@ -205,8 +204,7 @@ export abstract class ClassroomManager {
             })
 
             if (ClassroomManager.screenManager.poweredOn) {
-                ClassroomManager.screenManager.videoContent?.stop()
-                ClassroomManager.screenManager.hideContent()
+                ClassroomManager.screenManager.powerToggle()
             }
 
             if (ClassroomManager.classController) {
