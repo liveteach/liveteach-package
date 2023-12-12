@@ -116,9 +116,11 @@ export class SmartContractManager {
             if (SmartContractManager.contractGuid.length > 0 && config.classroom.guid === SmartContractManager.contractGuid) {
                 if (ClassroomManager.classController.isTeacher()) return
 
+                console.log("user set as teacher")
                 ClassroomManager.SetClassController(UserType.teacher)
                 SmartContractManager.FetchClassList().then(
                     function (classList) {
+                        console.log("Fetched list of classrooms")
                         if (ClassroomManager.classController) {
                             ClassroomManager.classController.classList = classList as ClassPacket[]
                             ClassroomManager.classController.setClassroom()

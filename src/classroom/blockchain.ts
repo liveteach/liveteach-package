@@ -225,23 +225,24 @@ export class BlockChain {
                     this.teachersContractAddress
                 )) as any
 
-                // get the ClassContent object associated with this teacher and this id
-                const classContent: ClassContentData = await contract.getClassConfig(
-                    _id,
+                // get all ClassContent objects associated with this teacher
+                const classContents: [ClassContentData] = await contract.getClassConfigs(
                     {
                         from: this.userData.publicKey,
                     }
                 )
-                console.log("CLASS CONTENT OBJECT BY ID \n",
-                    "id: " + classContent.id + "\n" +
-                    "teacher: " + classContent.teacher + "\n" +
-                    "classReference: " + classContent.classReference + "\n" +
-                    "contentUrl: " + classContent.contentUrl
-                );
+
+                //console.log("CLASS CONTENT OBJECT BY ID \n",
+                //    "id: " + classContent.id + "\n" +
+                //    "teacher: " + classContent.teacher + "\n" +
+                //    "classReference: " + classContent.classReference + "\n" +
+                //    "contentUrl: " + classContent.contentUrl
+                //);
 
                 // Fetch json from url
                 // Example contentUrl: "https://gateway.pinata.cloud/ipfs/QmW8sQ5drvmLeQwbYXi9tWfYR4TbdM4HTkQMwMS3v62m5N"
-                await fetch(classContent.contentUrl)
+                
+                await fetch(classContents[0].contentUrl)
                     .then(response => response.json())
                     .then(json => {
                         if (json != null && json != undefined) {
