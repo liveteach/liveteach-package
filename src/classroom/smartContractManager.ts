@@ -19,9 +19,9 @@ export class SmartContractManager {
     static contractGuid: string = ""
     static blockchain: BlockChain
 
-    static Initialise(liveTeachContractAddress?: string, teachersContractAddress?: string): void {
+    static Initialise(_liveTeachContractAddress?: string, _teachersContractAddress?: string): void {
         if (SmartContractManager.blockchain === undefined || SmartContractManager.blockchain === null) {
-            SmartContractManager.blockchain = new BlockChain(liveTeachContractAddress, teachersContractAddress)
+            SmartContractManager.blockchain = new BlockChain(_liveTeachContractAddress, _teachersContractAddress)
         }
 
         SmartContractManager.GetClassroomGuid()
@@ -116,9 +116,11 @@ export class SmartContractManager {
             if (SmartContractManager.contractGuid.length > 0 && config.classroom.guid === SmartContractManager.contractGuid) {
                 if (ClassroomManager.classController.isTeacher()) return
 
+                console.log("user set as teacher")
                 ClassroomManager.SetClassController(UserType.teacher)
                 SmartContractManager.FetchClassList().then(
                     function (classList) {
+                        console.log("Fetched list of classrooms")
                         if (ClassroomManager.classController) {
                             ClassroomManager.classController.classList = classList as ClassPacket[]
                             ClassroomManager.classController.setClassroom()

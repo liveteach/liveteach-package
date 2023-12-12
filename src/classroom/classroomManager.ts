@@ -29,12 +29,14 @@ export abstract class ClassroomManager {
      * Initialises the ClassroomManager.
      *
      * @param _channel the classroom channel used for communication.
+     * @param _liveTeachContractAddress the liveteach contract address. Can be undefined.
+     * @param _teachersContractAddress the teacher contract address. Can be undefined.
      * @param _testMode optional parameter to enable test mode.
      */
-    static Initialise(_channel: IClassroomChannel, liveTeachContractAddress?: string, teachersContractAddress?: string, _testMode: boolean = false): void {
+    static Initialise(_channel: IClassroomChannel, _liveTeachContractAddress?: string, _teachersContractAddress?: string, _testMode: boolean = false): void {
         ClassroomManager.testMode = _testMode
 
-        SmartContractManager.Initialise(liveTeachContractAddress, teachersContractAddress)
+        SmartContractManager.Initialise(_liveTeachContractAddress, _teachersContractAddress)
         CommunicationManager.Initialise(_channel)
         ClassroomManager.screenManager = new ScreenManager()
 
@@ -95,6 +97,7 @@ export abstract class ClassroomManager {
     /**
      * Adds a screen for image/video display.
      *
+     * @param _guid the guid for the classroom this screen belongs to.
      * @param _position the screen position.
      * @param _rotation the screen rotation.
      * @param _scale the screen scale.
