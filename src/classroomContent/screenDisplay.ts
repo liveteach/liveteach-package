@@ -83,7 +83,7 @@ export class ScreenDisplay {
 
     private setImageMaterial(): void {
         const guid = ClassroomManager.activeClassroom?.guid ?? ""
-        const path = "content/" + guid + "/" + ScreenDisplay.currentContent.configuration.src
+        const path = ScreenDisplay.currentContent.configuration.src.startsWith("http") ? ScreenDisplay.currentContent.configuration.src : ("content/" + guid + "/" + ScreenDisplay.currentContent.configuration.src)
         Material.setPbrMaterial(this.entity, {
             texture: Material.Texture.Common({
                 src: path
@@ -92,7 +92,7 @@ export class ScreenDisplay {
                 src: path
             }),
             emissiveColor: Color3.White(),
-            emissiveIntensity: 1,
+            emissiveIntensity: 0.7,
             metallic: 0,
             roughness: 1
         })
