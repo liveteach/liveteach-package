@@ -14,6 +14,7 @@ import { ImageContentConfig, ScreenManager, VideoContentConfig, ModelContentConf
 import { ContentUnitManager } from "../contentUnits/contentUnitManager";
 import { IContentUnit } from "../contentUnits/IContentUnit"
 import { MediaContentType } from "../classroomContent/enums";
+import { LinkUnit } from "../contentUnits/linkUnit";
 
 /**
  * Manages all classroom interactions.
@@ -50,6 +51,8 @@ export abstract class ClassroomManager {
         Transform.create(ClassroomManager.originEntity, {
             position: Vector3.Zero()
         })
+        
+        ContentUnitManager.register("link", new LinkUnit())
     }
 
     /**
