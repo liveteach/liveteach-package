@@ -34,6 +34,11 @@ export type DataPacket = ClassPacket & {
 
 export type StudentDataPacket = StudentCommInfo & DataPacket
 
+export type TeacherLink = {
+    src: string
+    caption: string
+}
+
 export class Classroom {
     guid: string
     teacherID: string
@@ -57,6 +62,7 @@ export class ClassContent {
     videos: VideoContentConfig[]
     models: ModelContentConfig[]
     contentUnits: ContentUnitConfig[]
+    links: TeacherLink[]
 }
 
 export type ClassroomSharePacket = {

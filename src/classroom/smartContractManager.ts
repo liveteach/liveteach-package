@@ -58,7 +58,7 @@ export class SmartContractManager {
         if (ClassroomManager.testMode) {
             let classList: ClassPacket[] = []
             classList.push({
-                id: exampleConfig.content.id,
+                id: exampleConfig.content.id.toString(),
                 name: exampleConfig.content.name,
                 description: exampleConfig.content.description
             })

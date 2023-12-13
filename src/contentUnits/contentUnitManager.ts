@@ -10,6 +10,12 @@ export class ContentUnitManager {
         ContentUnitManager.units.set(_key, _unit)
     }
 
+    static deregister(_key: string): void {
+        if(ContentUnitManager.units.has(_key)) {
+            ContentUnitManager.units.delete(_key)
+        }
+    }
+
     static start(_key: string, _data: any): void {
         // Check if a content unit is already active
         if (ContentUnitManager.activeUnit) return
