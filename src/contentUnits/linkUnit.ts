@@ -37,7 +37,6 @@ export class LinkUnit implements IContentUnit {
             }
         })
 
-        //Title
         this.linkPrompt.addText({
             value: this.caption,
             xPosition: 0,
@@ -46,7 +45,6 @@ export class LinkUnit implements IContentUnit {
             size: 20,
         })
 
-        //Submit
         this.linkPrompt.addButton({
             style: ui.ButtonStyles.RED,
             text: 'Visit',
