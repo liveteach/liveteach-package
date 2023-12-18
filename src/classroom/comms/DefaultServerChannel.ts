@@ -7,6 +7,7 @@ export class DefaultServerChannel implements IServerChannel {
     private static referenceServer: ReferenceServerWebsocketManager
     private static role: string
     private static serverUrl: string
+    private static wallet: string
 
     emitClassStart(_info: ClassPacket) {
         DefaultServerChannel.referenceServer.sendCommand("message", "student", "start_class", _info, "teacher")
@@ -69,8 +70,10 @@ export class DefaultServerChannel implements IServerChannel {
     serverConfig(params: ServerParams): void {
         DefaultServerChannel.serverUrl = params.serverUrl
         DefaultServerChannel.role = params.role
+        DefaultServerChannel.wallet = params.wallet
         DefaultServerChannel.referenceServer = new ReferenceServerWebsocketManager(
             DefaultServerChannel.role,
-            DefaultServerChannel.serverUrl);
+            DefaultServerChannel.serverUrl,
+            DefaultServerChannel.wallet );
     }
 }

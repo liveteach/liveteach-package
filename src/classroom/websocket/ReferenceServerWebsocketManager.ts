@@ -16,10 +16,10 @@ export class ReferenceServerWebsocketManager {
     public announcement = ui.createComponent(ui.Announcement, { value: "", duration: 2 })
     public static guid
 
-    constructor(role:string,serverUrl: string) {
+    constructor(role:string,serverUrl: string, wallet: string) {
 
         this.serverUrl = serverUrl
-        this.wallet = this.user.publicKey || "GUEST_" + this.user.userId
+        this.wallet = wallet
 
         this.webSocket = new WebSocket(this.serverUrl)
 
