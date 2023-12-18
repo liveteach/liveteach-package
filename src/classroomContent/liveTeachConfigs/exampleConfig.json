@@ -52,7 +52,7 @@
                 "src": "models/LessonModels/space.glb",
                 "position": {
                     "x": -16,
-                    "y": -1,
+                    "y": -5,
                     "z": 16
                 },
                 "scale": {
@@ -67,7 +67,7 @@
                 "src": "models/LessonModels/space-devil-add.glb",
                 "position": {
                     "x": -16,
-                    "y": -1,
+                    "y": -5,
                     "z": 16
                 },
                 "scale": {
