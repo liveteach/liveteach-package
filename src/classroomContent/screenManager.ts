@@ -317,18 +317,20 @@ export class ScreenManager {
 
         if (ClassroomManager.activeContent.models) {
             ClassroomManager.activeContent.models.forEach(model => {
-                modelContentList.push(new ModelContent({
-                    src: model.src,
-                    caption: model.caption,
-                    showing: model.showing ?? false,
-                    position: model.position ?? Vector3.Zero(),
-                    scale: model.scale ?? Vector3.One(),
-                    parent: ClassroomManager.originEntity,
-                    animations: model.animations,
-                    spin: model.spin,
-                    replace: model.replace,
-                    playing: model.playing ?? true
-                }))
+                if(model.src.length>0){ // Don't load models with no file path
+                    modelContentList.push(new ModelContent({
+                        src: model.src,
+                        caption: model.caption,
+                        showing: model.showing ?? false,
+                        position: model.position ?? Vector3.Zero(),
+                        scale: model.scale ?? Vector3.One(),
+                        parent: ClassroomManager.originEntity,
+                        animations: model.animations,
+                        spin: model.spin,
+                        replace: model.replace,
+                        playing: model.playing ?? true
+                    }))
+                }
             });
         }
 
