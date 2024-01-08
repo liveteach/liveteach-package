@@ -384,6 +384,9 @@ export class CommunicationManager {
     */
     static OnJoinClass(_info: StudentCommInfo) {
         if (ClassroomManager.classController && ClassroomManager.classController.isTeacher() && ClassroomManager.activeClassroom && ClassroomManager.activeClassroom.guid == _info.id) {
+            if ((ClassroomManager.activeClassroom as Classroom).students === undefined || (ClassroomManager.activeClassroom as Classroom).students === null || (ClassroomManager.activeClassroom as Classroom).students.length < 1) {
+                (ClassroomManager.activeClassroom as Classroom).students = []
+            }
             (ClassroomManager.activeClassroom as Classroom).students.push({
                 studentID: _info.studentID,
                 studentName: _info.studentName
