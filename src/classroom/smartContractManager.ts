@@ -21,9 +21,9 @@ export class SmartContractManager {
     static contractGuid: string = ""
     static blockchain: BlockChain
 
-    static Initialise(_liveTeachContractAddress?: string, _teachersContractAddress?: string): void {
+    static Initialise(_liveTeachContractAddress?: string, _teachersContractAddress?: string, _useDclWorlds?: boolean): void {
         if (SmartContractManager.blockchain === undefined || SmartContractManager.blockchain === null) {
-            SmartContractManager.blockchain = new BlockChain(_liveTeachContractAddress, _teachersContractAddress)
+            SmartContractManager.blockchain = new BlockChain(_liveTeachContractAddress, _teachersContractAddress, _useDclWorlds)
         }
 
         SmartContractManager.GetClassroomGuid()
@@ -40,6 +40,11 @@ export class SmartContractManager {
 
     static async GetClassroomGuid(): Promise<string> {
         if (!SmartContractManager.blockchain.userData || !SmartContractManager.blockchain.userData.userId) return ""
+
+        if(SmartContractManager.blockchain.useDclWorlds) {
+            let worldName = await SmartContractManager.blockchain.getUserWorld();
+            return SmartContractManager.blockchain.getClassroomGuid(worldName);
+        }
 
         if (ClassroomManager.testMode) {
             let authorized: boolean = false

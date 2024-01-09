@@ -21,10 +21,12 @@ export class ModelContent extends MediaContent {
             scale: Vector3.Zero()
         })
 
-        const guid = ClassroomManager.activeClassroom?.guid ?? ""
-        GltfContainer.create(this.entity, {
-            src: "content/" + guid + "/" + _config.src
-        })
+        if(_config.src.length>0){
+            const guid = ClassroomManager.activeClassroom?.guid ?? ""
+            GltfContainer.create(this.entity, {
+                src: "content/" + guid + "/" + _config.src
+            })
+        }
 
         const animator = Animator.create(this.entity, {
             states: []
