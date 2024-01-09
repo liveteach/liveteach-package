@@ -201,12 +201,6 @@ export class SeatManager {
                     SeatManager.mySeat = seat
                     seat.sitDown()
                     SeatManager.sceneMessageBus.emit("ClaimedSeat", { id: SeatManager.mySeatID, address: SeatManager.myAddress })
-                } else {
-                    announcement.value = "Seat already taken"
-                    // announcement.show()
-                    // utils.timers.setTimeout(() => {
-                    //     announcement.hide()
-                    // }, 1000)
                 }
             }
         })
