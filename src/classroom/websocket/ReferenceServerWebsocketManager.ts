@@ -15,6 +15,7 @@ export class ReferenceServerWebsocketManager {
     public webSocket: WebSocket
     public announcement = ui.createComponent(ui.Announcement, { value: "", duration: 2 })
     public static guid
+    public static open: boolean = false
 
     constructor(role:string,serverUrl: string, wallet: string) {
 
@@ -24,7 +25,7 @@ export class ReferenceServerWebsocketManager {
         this.webSocket = new WebSocket(this.serverUrl)
 
         this.webSocket.onopen = (event) => {
-
+            ReferenceServerWebsocketManager.open = true
             this.webSocket.send(JSON.stringify({
                 "header": {
                     "type": "SUBSCRIBE",
@@ -49,6 +50,7 @@ export class ReferenceServerWebsocketManager {
 
         this.webSocket.onclose = (event) => {
             console.log('web-socket connection closed.');
+            ReferenceServerWebsocketManager.open = false
         };
     }
 

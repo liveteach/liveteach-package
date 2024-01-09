@@ -6,6 +6,8 @@ import { engine, executeTask } from "@dcl/sdk/ecs"
 import { UserType } from "../enums"
 import * as exampleConfig from "../classroomContent/liveTeachConfigs/exampleConfig.json"
 import { StudentClassController } from "./classroomControllers/studentClassController"
+import { DefaultServerChannel } from "./comms/DefaultServerChannel"
+import { ReferenceServerWebsocketManager } from "./websocket/ReferenceServerWebsocketManager"
 
 export class SmartContractManager {
     private static TEST_CONTRACT_GUID: string = "382c74c3-721d-4f34-80e5-57657b6cbc27"
@@ -122,6 +124,12 @@ export class SmartContractManager {
 
                 console.log("user set as teacher")
                 ClassroomManager.SetClassController(UserType.teacher)
+
+                //connect teacher websocket if user server channel
+                if(DefaultServerChannel.websocket){
+                    SmartContractManager.handleSocket("student","teacher")
+                }
+
                 SmartContractManager.FetchClassList().then(
                     function (classList) {
                         console.log("Fetched list of classrooms")
@@ -140,6 +148,11 @@ export class SmartContractManager {
                     ClassroomManager.SetClassController(UserType.student)
                 }
 
+                //connect student websocket if user server channel
+                if(DefaultServerChannel.websocket){
+                    SmartContractManager.handleSocket("teacher","student")
+                }
+                
                 // If the student is already in a class, do nothing else
                 if (ClassroomManager.activeClassroom) return
 
@@ -176,5 +189,19 @@ export class SmartContractManager {
                 }
             }
         }
+    }
+
+    
+    static handleSocket(closeRole:string, openRole:string){
+        if(DefaultServerChannel.role === closeRole){
+            DefaultServerChannel.referenceServer.webSocket.close()
+        }
+        if(!ReferenceServerWebsocketManager.open){
+            DefaultServerChannel.referenceServer = new ReferenceServerWebsocketManager(
+                openRole,
+                DefaultServerChannel.serverUrl,
+                DefaultServerChannel.wallet )
+        }
+        
     }
 }

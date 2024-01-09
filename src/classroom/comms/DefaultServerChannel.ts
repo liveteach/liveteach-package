@@ -4,10 +4,11 @@ import { IServerChannel } from "./IServerChannel";
 
 export class DefaultServerChannel implements IServerChannel {
 
-    private static referenceServer: ReferenceServerWebsocketManager
-    private static role: string
-    private static serverUrl: string
-    private static wallet: string
+    public static referenceServer: ReferenceServerWebsocketManager
+    public static role: string
+    public static serverUrl: string
+    public static wallet: string
+    public static websocket: boolean = false
 
     emitClassStart(_info: ClassPacket) {
         DefaultServerChannel.referenceServer.sendCommand("message", "student", "start_class", _info, "teacher")
@@ -69,11 +70,7 @@ export class DefaultServerChannel implements IServerChannel {
 
     serverConfig(params: ServerParams): void {
         DefaultServerChannel.serverUrl = params.serverUrl
-        DefaultServerChannel.role = params.role
         DefaultServerChannel.wallet = params.wallet
-        DefaultServerChannel.referenceServer = new ReferenceServerWebsocketManager(
-            DefaultServerChannel.role,
-            DefaultServerChannel.serverUrl,
-            DefaultServerChannel.wallet );
+        DefaultServerChannel.websocket = true
     }
 }
