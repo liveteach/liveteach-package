@@ -5,6 +5,9 @@ import { GetSceneResponse, getSceneInfo } from '~system/Scene'
 import { GetUserDataResponse, UserData, getUserData } from "~system/UserIdentity"
 import teachAbi from "./contracts/TeachContractAbi.json"
 import teacherAbi from "./contracts/TeacherContractAbi.json"
+import worldsAbi from "./contracts/WorldsTeachContract.json"
+import { getRealm } from '~system/Runtime'
+
 import { ClassPacket } from "./types/classroomTypes"
 import { InfoUI } from "./ui/infoUI"
 
@@ -26,8 +29,12 @@ class ClassContentData {
 export class BlockChain {
     private readonly mainnetLiveTeachContractAddress: string = "0xb73829d24b6C26E9D94D3EF7A93bdAf22D5C8aF3";
     private readonly mainnetTeachersContractAddress: string = "0x49F6eB033953Ff757a9111D5E5E0D212ed84a37C";
+    private readonly mainnetDclWorldsContractAddress: string = "<TO BE ADDED WHEN DEPLOYED>";
+
     private liveTeachContractAddress: string;
     private teachersContractAddress: string;
+
+    public useDclWorlds: boolean = false;
     userData: UserData | undefined = undefined
     sceneBaseX: number = 1000
     sceneBaseZ: number = 1000
@@ -37,15 +44,26 @@ export class BlockChain {
     // Intended to be used for testnet contracts.
     // These values ignored unless you pass in both.
     // Defaults to mainnet.
-    constructor(liveTeachContractAddress?: string, teachersContractAddress?: string) {
+    constructor(liveTeachContractAddress?: string, teachersContractAddress?: string, _useDclWorlds?: boolean) {
+        if (_useDclWorlds) {
+            this.useDclWorlds = _useDclWorlds;
+        }
+
         if (liveTeachContractAddress && teachersContractAddress) {
             this.liveTeachContractAddress = liveTeachContractAddress;
             this.teachersContractAddress = teachersContractAddress;
         }
         else {
-            this.liveTeachContractAddress = this.mainnetLiveTeachContractAddress;
+            if (this.useDclWorlds) {
+                this.liveTeachContractAddress = this.mainnetDclWorldsContractAddress;
+            }
+            else {
+                this.liveTeachContractAddress = this.mainnetLiveTeachContractAddress;
+            }
             this.teachersContractAddress = this.mainnetTeachersContractAddress;
         }
+
+
         this.getUserData()
         this.getSceneData()
         //this.getGasPrice()
@@ -143,7 +161,59 @@ export class BlockChain {
         return [worldPositionX, worldPositionZ]
     }
 
-    public async getClassroomGuid(_parcel: [number, number]): Promise<string> {
+    public async getUserWorld(): Promise<string> {
+        const realm = await getRealm({})
+
+        if(realm.realmInfo && realm.realmInfo.realmName) {
+            let realmName = realm.realmInfo.realmName;
+            return realmName.split(".")[0];
+        }
+        else {
+            throw new Error("Unable to determine player realm");
+        }
+    }
+
+    public async getClassroomGuid(input: [number, number] | string): Promise<string> {
+        if (this.useDclWorlds) {
+            return this.getDclWorldsClassroomGuid(input as string);
+        }
+        else {
+            return this._getClassroomGuid(input as [number, number]);
+        }
+    }
+
+    private async getDclWorldsClassroomGuid(worldName: string): Promise<string> {
+        console.log("Getting worlds classroom guid", '"'+worldName+'"');
+        try {
+            if (this.userData && this.userData.hasConnectedWeb3) {
+                const provider = createEthereumProvider()
+                const requestManager = new RequestManager(provider)
+                const factory = new ContractFactory(requestManager, worldsAbi)
+                const contract = (await factory.at(
+                    this.liveTeachContractAddress
+                )) as any
+
+                const res = await contract.getClassroomGuid(
+                    worldName,
+                    {
+                        from: this.userData.publicKey,
+                    }
+                )
+                // Log response
+                console.log("Classroom Guid", res)
+
+                return res as string
+            } else {
+                console.log("Player is not connected with Web3")
+                return ""
+            }
+        } catch (error) {
+            console.error(error)
+            return ""
+        }
+    }
+
+    private async _getClassroomGuid(_parcel: [number, number]): Promise<string> {
         try {
             if (this.userData && this.userData.hasConnectedWeb3) {
                 console.log("wallet address", this.userData.publicKey)
